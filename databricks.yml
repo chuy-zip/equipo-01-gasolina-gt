@@ -42,6 +42,12 @@ variables:
   ubicacion_gold:
     description: External location del bucket de oro
     default: xloc-au
+  ubicacion_fotos:
+    description: External location donde el catedrático deja las fotos. Es de solo lectura
+    default: xloc-raw
+  carpeta_fotos:
+    description: Carpeta de las fotos dentro de esa ubicación. Vacía es la raíz. Pendiente de confirmar si las fotos nuevas llegan a fotos/AAAA-MM-DD/
+    default: ""
   prefijo_equipo:
     description: Carpeta del equipo dentro de cada bucket, según el enunciado
     default: equipo-01
