@@ -21,7 +21,7 @@ Puntos de la rúbrica y estado al 2026-11-13:
 | Capa oro: precio semanal, variación, etiqueta de dirección y comentarios | 10 | Hecho con el MEM. Las filas de fotos aparecen solas cuando `silver.precios` tenga datos |
 | Modelo: validación temporal, comparación con la línea base y MLflow | 10 | Hecho. 0.55 contra 0.46 de la línea base |
 | Clusters y job: cómputo, job encadenado, programación y alertas | 10 | Hecho, salvo confirmar con el catedrático la equivalencia con serverless |
-| API en el Droplet | 20 | Pendiente. Acordado con el catedrático: API local con el modelo y una copia de oro, empaquetada en Docker y subida a mano |
+| API en el Droplet | 20 | API hecha y probada en local con Docker. Falta subirla al Droplet |
 | Repositorio y README | 10 | Parcial. Faltan el diagrama exportado, la presentación y commits de todos |
 | Informe técnico | 5 | Pendiente |
 | Presentación y demo | 10 | Pendiente |
@@ -96,9 +96,9 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 3 | Tablas de fotos del enunciado definidas en `tablas.sql`: `bronze.fotos_precios`, `silver.precios` y `silver.precios_rejected` | Ricardo | Hecho. Vacías, las llena el equipo de fotos |
 | 3 | Evidencia de al menos 2 corridas exitosas con fotos de semanas distintas | | Pendiente |
 | 4 | Script que descarga el modelo `champion` y la copia de oro: `scripts/exportar_para_api.py` | Ricardo | Hecho y probado contra Databricks el 2026-11-13. Verificó que el modelo descargado predice lo mismo que `gold.predicciones` |
-| 4 | API local con los endpoints del enunciado, con el modelo empaquetado | | Pendiente |
+| 4 | API local con los endpoints del enunciado, con el modelo empaquetado | Rodrigo | Hecho. FastAPI en `api/`, con tests. La predicción coincide con `gold.predicciones` |
 | 4 | Imagen de Docker subida al Droplet, en el puerto del equipo | | Pendiente |
-| 4 | Pruebas de usuario final con `curl` o Postman | | Pendiente |
+| 4 | Pruebas de usuario final con `curl` o Postman | Rodrigo | Hecho. `tests/consultas_api.sh` |
 | 5 | Diagrama de arquitectura exportado y su fuente editable | | Pendiente |
 | 5 | Informe técnico de máximo 5 páginas | | Pendiente |
 | 5 | Presentación, resumen de una página y demo | | Pendiente |
@@ -131,3 +131,4 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 2026-11-13 | El catedrático logró habilitar la escritura y `CREATE EXTERNAL TABLE`. Las tablas pasan a ser externas en los buckets. La API no cambia |
 | 2026-11-13 | Migración a tablas externas hecha. El pipeline corrió completo con las tablas en los buckets y el modelo versión 3. `exportar_para_api.py` verificó que el modelo descargado predice lo mismo |
 | 2026-11-13 | El repo pasó a llamarse `equipo-01-gasolina-gt`. El job corrió completo en `equipo_01`: 0.551 contra 0.458 de la línea base. Se borró el catálogo `gas_price` |
+| 2026-11-14 | API en FastAPI con los 5 endpoints, paginación y `/docs`. Imagen de Docker con el modelo versión 3 y la copia de oro. Probada en local: la predicción coincide con Databricks en los tres combustibles |

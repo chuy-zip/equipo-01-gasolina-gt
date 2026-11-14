@@ -1,0 +1,9 @@
+# En el Droplet: docker compose up -d. El puerto público sale de .env (PUERTO).
+services:
+  api:
+    image: equipo-01-gasolina-api:latest
+    build: .
+    container_name: equipo-01-api
+    ports:
+      - "${PUERTO:-8001}:8000"
+    restart: unless-stopped
