@@ -201,3 +201,46 @@ La técnica de extracción la elige quien trabaje las fotos. Lo que ya se sabe y
 1. El EXIF da la fecha, la hora y el lugar de cada foto. La fecha puede salir de ahí, como permite el enunciado.
 2. Hay más de un tipo de dispensador y la mayoría de fotos son de noche. La extracción tiene que tolerar las dos cosas.
 3. Las imágenes no salen de Databricks. A la API solo llegan el modelo y una copia de oro.
+
+### Técnica elegida: modelo de visión con OCR como línea base (2026-11-14)
+
+**Qué muestra cada foto.** Casi todas son de un dispensador con dos tipos de pantalla:
+
+1. La pantalla grande, con la venta en quetzales y los galones. Venta entre galones da el precio exacto del combustible que se cargó.
+2. Cuatro ventanas pequeñas, una por combustible: Diesel, Regular, Super y V-Power.
+
+Las dos son LCD de 7 segmentos. Algunas fotos son de una bomba vieja sin ventanas o de otra parte de la estación.
+
+**Comparación en las mismas fotos.** Se probaron tres técnicas. La revisión manual está en `data/revision_manual/revision_fotos.csv`: 20 fotos, 31 precios legibles.
+
+| Técnica | Precios correctos | Nota |
+|---|---|---|
+| Llama 4 Maverick, modelo de visión del workspace | 21 a 22 de 31, cerca de 70 % | Varía un poco entre corridas. Lee muy bien venta y galones |
+| RapidOCR con los modelos PP-OCRv5 de PaddleOCR | 3 de 31, 10 % | No reconoce bien los dígitos de 7 segmentos. Notebook `25_evaluacion_ocr` |
+| Gemma 3 12B, modelo de visión del workspace | Peor que Maverick en la prueba de 10 fotos | Confunde los decimales |
+
+PaddleOCR no corre en el cómputo serverless, que es ARM: el proceso se cae. RapidOCR usa los mismos modelos sobre ONNX Runtime y sí corre. Qwen 3.5 del workspace no acepta imágenes.
+
+**Cómo funciona la extracción.** Notebook `21_silver_imagenes`, con la lógica en `src/gas_price/fotos.py`:
+
+1. Maverick recibe la foto completa y un acercamiento a la parte baja. Devuelve JSON con venta, galones y los cuatro precios.
+2. Venta entre galones da el precio despachado. Si coincide con una ventana, esa fila usa el precio calculado. También coincide si solo difiere por la confusión entre 4 y 9, el error más común en 7 segmentos.
+3. La fecha sale de `DateTimeOriginal`. La ubicación es el municipio y el departamento más cercanos al GPS, con la librería `reverse_geocoder`. No se guardan coordenadas.
+4. La modalidad queda como `no_indicada`, porque las fotos no la muestran.
+
+**Reglas de calidad.** Lo que falla va a `silver.precios_rejected` con el motivo:
+
+| Motivo | Regla |
+|---|---|
+| `lectura_fallida` | El modelo no devolvió una respuesta válida |
+| `combustible_no_identificado` | Venta entre galones no coincide con ninguna ventana |
+| `combustible_fuera_de_catalogo` | V-Power, que no está en el catálogo del enunciado |
+| `precio_no_leido` | La ventana no se pudo leer |
+| `precio_fuera_de_rango` | Fuera de Q20 a Q55. La referencia del MEM fue de Q24.80 a Q49.40 entre diciembre de 2022 y 2026, el periodo de las fotos |
+| `fecha_nula`, `fecha_futura` | Sin fecha en el EXIF o con fecha posterior a hoy |
+| `desviado_de_referencia` | Más de 15 % de diferencia con la referencia del MEM vigente ese día. Casi siempre es un dígito mal leído |
+| `duplicado` | Otra foto ya tiene la misma llave. Se queda la más reciente |
+
+**Idempotencia.** Solo se leen las fotos que todavía no están en plata ni en cuarentena. Cada foto queda en al menos una de las dos tablas, así que una segunda corrida no hace nada. El parámetro `reprocesar_fotos` en `true` vuelve a leerlas todas, por ejemplo si cambia el modelo.
+
+**Limitaciones.** El modelo a veces confunde 9 con 4 en las ventanas pequeñas y no siempre da la misma respuesta. Las fotos de otros dispensadores casi no aportan precios.

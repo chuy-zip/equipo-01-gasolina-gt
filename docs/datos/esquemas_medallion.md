@@ -116,10 +116,10 @@ Todas las tablas que pide el enunciado ya están definidas en `databricks/sql/ta
 
 | Tabla | Columnas | Estado |
 |---|---|---|
-| `bronze.fotos_precios` | `path`, `modificationTime`, `length`, `content`, `_ingestion_timestamp`, `_source_file` | Vacía. La llena el notebook `10_ingesta_imagenes` |
-| `silver.precios` | `fecha`, `combustible`, `precio_q_galon`, `modalidad`, `ubicacion`, `foto_origen` | Vacía. La llena el notebook `21_silver_imagenes` con `MERGE` por fecha, ubicación, combustible y modalidad |
-| `silver.precios_rejected` | Las mismas más `motivo` | Vacía. La llena el notebook `21_silver_imagenes` |
-| `gold.precio_semanal` | Ver la sección de oro | Con datos del MEM. Las filas de fotos aparecen cuando `silver.precios` tenga datos |
+| `bronze.fotos_precios` | `path`, `modificationTime`, `length`, `content`, `_ingestion_timestamp`, `_source_file` | Con las 110 fotos. La llena el notebook `10_ingesta_imagenes` con `MERGE` por `path` |
+| `silver.precios` | `fecha`, `combustible`, `precio_q_galon`, `modalidad`, `ubicacion`, `foto_origen` | Con datos. La llena el notebook `21_silver_imagenes` con `MERGE` por fecha, ubicación, combustible y modalidad |
+| `silver.precios_rejected` | Las mismas más `motivo` | Con datos. La llena el notebook `21_silver_imagenes`. Los motivos están en `docs/datos/fuentes_de_datos.md` |
+| `gold.precio_semanal` | Ver la sección de oro | Con datos del MEM y de las fotos |
 | `gold.variacion_semanal` | Ver la sección de oro | Igual que la anterior |
 | `gold.features_modelo` | Ver la sección de oro | Con datos |
 | `gold.predicciones` | Ver la sección de oro | Con datos |

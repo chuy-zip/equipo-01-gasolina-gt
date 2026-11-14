@@ -53,6 +53,7 @@ Lee las pantallas LCD de 7 segmentos. Devuelve solo JSON:
  "precios": {"diesel": número o null, "regular": número o null, "super": número o null, "v_power": número o null}}
 venta_q: pantalla "Esta Venta", dos decimales. galones: línea "Galones", tres decimales.
 precios: ventanas pequeñas "Precio por galón" que están encima de cada etiqueta (Diesel, Regular, Super, V-Power). Asocia cada ventana con la etiqueta de su misma columna. Los precios tienen dos decimales, por ejemplo 28.59.
+Cuidado con el 9 y el 4: en 7 segmentos el 9 tiene encendido el segmento de arriba y el 4 no. Revisa cada uno.
 Si un número no se lee con claridad, pon null."""
 
 
@@ -128,11 +129,29 @@ def precio_despachado(venta_q: float | None, galones: float | None) -> float | N
     return round(venta_q / galones, 2)
 
 
+def confusion_7_segmentos(a: float, b: float) -> bool:
+    """True si dos precios solo difieren en dígitos 4 y 9.
+
+    En una pantalla de 7 segmentos el 9 y el 4 solo se distinguen por el segmento de arriba.
+    Es el error de lectura más común en las fotos.
+    """
+    texto_a, texto_b = f"{a:.2f}", f"{b:.2f}"
+    if texto_a == texto_b or len(texto_a) != len(texto_b):
+        return False
+    return all(x == y or {x, y} == {"4", "9"} for x, y in zip(texto_a, texto_b))
+
+
 def combustible_despachado(precio: float | None, precios: dict, tolerancia: float = TOLERANCIA_DESPACHO) -> str | None:
-    """Ventana cuyo precio coincide con el precio despachado. None si no hay una sola coincidencia."""
+    """Ventana cuyo precio coincide con el precio despachado. None si no hay una sola coincidencia.
+
+    Coincide si está a menos de la tolerancia o si solo difiere por la confusión entre 4 y 9.
+    """
     if precio is None:
         return None
-    coinciden = [v for v, p in precios.items() if p is not None and abs(p - precio) <= tolerancia]
+    coinciden = [
+        v for v, p in precios.items()
+        if p is not None and (abs(p - precio) <= tolerancia or confusion_7_segmentos(p, precio))
+    ]
     return coinciden[0] if len(coinciden) == 1 else None
 
 
@@ -222,6 +241,42 @@ def separar_duplicados(validas: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
     ordenado = validas.sort_values(llave + ["foto_origen"], ascending=[True, True, True, True, False])
     repetida = ordenado.duplicated(subset=llave, keep="first")
     return ordenado[~repetida], ordenado[repetida]
+
+
+def _precio_de_texto(texto: str) -> float | None:
+    """Convierte un texto de OCR como `28.59`, `28,59` o `2859` en precio. None si no parece precio."""
+    limpio = texto.strip().replace(",", ".").replace(" ", "")
+    if re.fullmatch(r"\d{2}\.\d{2}", limpio):
+        return float(limpio)
+    if re.fullmatch(r"\d{4}", limpio):
+        return float(limpio[:2] + "." + limpio[2:])
+    return None
+
+
+def precios_desde_ocr(cajas: list[dict]) -> dict:
+    """Línea base con OCR: a cada etiqueta de combustible le asigna el precio más cercano que esté encima.
+
+    `cajas` es la salida del OCR: una lista de `{"texto": str, "caja": [x0, y0, x1, y1]}`.
+    Devuelve un precio por combustible del catálogo, o None si no se encontró.
+    """
+    etiquetas = {}
+    for caja in cajas:
+        texto = caja["texto"].lower()
+        for combustible in COMBUSTIBLES:
+            if combustible in texto and combustible not in etiquetas:
+                etiquetas[combustible] = caja["caja"]
+    numeros = [(p, c["caja"]) for c in cajas if (p := _precio_de_texto(c["texto"])) is not None]
+
+    resultado = dict.fromkeys(COMBUSTIBLES)
+    for combustible, (x0, y0, x1, _) in etiquetas.items():
+        ancho = x1 - x0
+        candidatos = [
+            (y0 - cy1, precio) for precio, (cx0, _, cx1, cy1) in numeros
+            if cy1 <= y0 and x0 - ancho <= (cx0 + cx1) / 2 <= x1 + ancho
+        ]
+        if candidatos:
+            resultado[combustible] = min(candidatos)[1]
+    return resultado
 
 
 def exactitud(extraido: pd.DataFrame, revision: pd.DataFrame) -> pd.DataFrame:

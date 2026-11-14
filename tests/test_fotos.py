@@ -63,6 +63,19 @@ def test_combustible_despachado_necesita_una_sola_coincidencia():
     assert fotos.combustible_despachado(28.99, {"diesel": 28.99, "super": 28.99}) is None
 
 
+def test_confusion_entre_4_y_9():
+    assert fotos.confusion_7_segmentos(33.44, 33.99)
+    assert fotos.confusion_7_segmentos(32.94, 32.99)
+    assert not fotos.confusion_7_segmentos(33.99, 33.99)
+    assert not fotos.confusion_7_segmentos(33.45, 33.99)
+    assert not fotos.confusion_7_segmentos(9.99, 33.99)
+
+
+def test_combustible_despachado_tolera_la_confusion_entre_4_y_9():
+    precios = {"diesel": 34.19, "regular": 32.34, "super": 33.44, "v_power": 34.44}
+    assert fotos.combustible_despachado(33.99, precios) == "super"
+
+
 def test_filas_usa_el_precio_calculado_para_lo_despachado():
     lectura = {"venta_q": 200.0, "galones": 6.062,
                "precios": {"diesel": 31.23, "regular": None, "super": 32.94, "v_power": None}}
@@ -138,6 +151,19 @@ def test_separar_duplicados_deja_la_foto_mas_reciente():
     quedan, sobran = fotos.separar_duplicados(validas)
     assert len(quedan) == 2 and len(sobran) == 1
     assert sobran.iloc[0]["foto_origen"] == "s3://b/IMG_1.HEIC"
+
+
+def test_precios_desde_ocr_toma_el_numero_encima_de_cada_etiqueta():
+    cajas = [
+        {"texto": "28.99", "caja": [100, 100, 160, 120]},
+        {"texto": "Diesel", "caja": [100, 300, 160, 320]},
+        {"texto": "2749", "caja": [200, 100, 260, 120]},
+        {"texto": "Regular", "caja": [200, 300, 270, 320]},
+        {"texto": "Shell", "caja": [300, 250, 340, 270]},
+        {"texto": "Super", "caja": [300, 300, 350, 320]},
+        {"texto": "99.99", "caja": [100, 400, 160, 420]},
+    ]
+    assert fotos.precios_desde_ocr(cajas) == {"super": None, "regular": 27.49, "diesel": 28.99}
 
 
 def test_exactitud_compara_con_tolerancia_de_un_centavo():

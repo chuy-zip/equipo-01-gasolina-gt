@@ -2,7 +2,7 @@ resources:
   jobs:
     gas_price_exploracion:
       name: equipo-01-exploracion
-      description: Exploración del bucket raw. Se corre a mano y no escribe nada.
+      description: Exploración del bucket raw y línea base de OCR. Se corre a mano y no escribe tablas.
       max_concurrent_runs: 1
       tags:
         proyecto: gas_price
@@ -11,3 +11,6 @@ resources:
         - task_key: exploracion_raw
           notebook_task:
             notebook_path: ../databricks/notebooks/00_exploracion_raw.py
+        - task_key: evaluacion_ocr
+          notebook_task:
+            notebook_path: ../databricks/notebooks/25_evaluacion_ocr.py
