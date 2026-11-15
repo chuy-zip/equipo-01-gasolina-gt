@@ -16,7 +16,7 @@ Puntos de la rúbrica y estado al 2026-11-13:
 
 | Criterio | Puntos | Estado |
 |---|---|---|
-| Capa bronce: fotos por external location, carga incremental y auditoría | 10 | Pendiente. MEM y EIA ya están en bronce como fuentes complementarias |
+| Capa bronce: fotos por external location, carga incremental y auditoría | 10 | Hecho. 110 de 110 fotos en bronce y una segunda carga no agrega nada |
 | Capa plata: extracción de precios, 3 reglas de calidad, cuarentena y exactitud medida a mano | 15 | Pendiente |
 | Capa oro: precio semanal, variación, etiqueta de dirección y comentarios | 10 | Hecho con el MEM. Las filas de fotos aparecen solas cuando `silver.precios` tenga datos |
 | Modelo: validación temporal, comparación con la línea base y MLflow | 10 | Hecho. 0.55 contra 0.46 de la línea base |
@@ -73,7 +73,7 @@ Puntos de la rúbrica y estado al 2026-11-13:
 |---|---|---|
 | Técnica para extraer el precio de las fotos | OCR o modelo de visión, a elección de quien trabaje las fotos. Tesseract no se puede instalar en serverless | [fuentes_de_datos.md](../datos/fuentes_de_datos.md) |
 | Equivalencia entre los clusters del enunciado y serverless | Confirmar con el catedrático | [databricks.md](../infraestructura/databricks.md) |
-| Ubicación de las fotos nuevas | El enunciado menciona `fotos/AAAA-MM-DD/` en el bucket de bronce. Las 110 actuales están en `xloc-raw`. Confirmar con el catedrático | [fuentes_de_datos.md](../datos/fuentes_de_datos.md) |
+| Ubicación de las fotos nuevas | El enunciado menciona `fotos/AAAA-MM-DD/` en el bucket de bronce. Las 110 actuales están en `xloc-raw`. Confirmar con el catedrático. Ya es configurable: basta cambiar los parámetros `ubicacion_fotos` y `carpeta_fotos` del bundle | [fuentes_de_datos.md](../datos/fuentes_de_datos.md) |
 
 ## Fases y tareas
 
@@ -84,7 +84,7 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 0 | Pedir al catedrático escritura en los buckets | Ricardo | Hecho: `CREATE EXTERNAL TABLE` en las tres capas |
 | 0 | Tablas externas en los buckets: `LOCATION` en `tablas.sql`, rutas obtenidas al correr y oro sin deletion vectors | Ricardo | Hecho. Las 14 tablas son externas y están en su bucket, verificado con la CLI |
 | 1 | Acceso ssh al Droplet verificado | | Pendiente |
-| 1 | `bronze.fotos_precios` con carga incremental y columnas de auditoría | | Pendiente |
+| 1 | `bronze.fotos_precios` con carga incremental y columnas de auditoría | Rodrigo | Hecho. Probado dos veces: 110 fotos nuevas y después 0 |
 | 2 | Extracción de precios y `silver.precios` con 3 reglas de calidad | | Pendiente |
 | 2 | `silver.precios_rejected` con el motivo de cada rechazo | | Pendiente |
 | 2 | Revisión manual de al menos 20 fotos y porcentaje de acierto | | Pendiente |
@@ -131,3 +131,4 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 2026-11-13 | El catedrático logró habilitar la escritura y `CREATE EXTERNAL TABLE`. Las tablas pasan a ser externas en los buckets. La API no cambia |
 | 2026-11-13 | Migración a tablas externas hecha. El pipeline corrió completo con las tablas en los buckets y el modelo versión 3. `exportar_para_api.py` verificó que el modelo descargado predice lo mismo |
 | 2026-11-13 | El repo pasó a llamarse `equipo-01-gasolina-gt`. El job corrió completo en `equipo_01`: 0.551 contra 0.458 de la línea base. Se borró el catálogo `gas_price` |
+| 2026-11-14 | Fotos a bronce: `MERGE` por `path` con la ubicación como parámetro. 110 fotos cargadas y una segunda corrida no duplica |
