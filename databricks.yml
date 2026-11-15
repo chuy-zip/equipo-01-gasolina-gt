@@ -48,6 +48,9 @@ variables:
   carpeta_fotos:
     description: Carpeta de las fotos dentro de esa ubicación. Vacía es la raíz. Pendiente de confirmar si las fotos nuevas llegan a fotos/AAAA-MM-DD/
     default: ""
+  modelo_vision:
+    description: Endpoint del modelo de visión que lee los precios de las fotos
+    default: databricks-llama-4-maverick
   prefijo_equipo:
     description: Carpeta del equipo dentro de cada bucket, según el enunciado
     default: equipo-01
