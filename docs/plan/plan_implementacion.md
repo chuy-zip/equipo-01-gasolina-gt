@@ -16,8 +16,8 @@ Puntos de la rúbrica y estado al 2026-11-13:
 
 | Criterio | Puntos | Estado |
 |---|---|---|
-| Capa bronce: fotos por external location, carga incremental y auditoría | 10 | Pendiente. MEM y EIA ya están en bronce como fuentes complementarias |
-| Capa plata: extracción de precios, 3 reglas de calidad, cuarentena y exactitud medida a mano | 15 | Pendiente |
+| Capa bronce: fotos por external location, carga incremental y auditoría | 10 | Hecho. 110 de 110 fotos en bronce y una segunda carga no agrega nada |
+| Capa plata: extracción de precios, 3 reglas de calidad, cuarentena y exactitud medida a mano | 15 | Hecho. Modelo de visión con cerca de 70 % de exactitud en 20 fotos revisadas. OCR como línea base: 10 % |
 | Capa oro: precio semanal, variación, etiqueta de dirección y comentarios | 10 | Hecho con el MEM. Las filas de fotos aparecen solas cuando `silver.precios` tenga datos |
 | Modelo: validación temporal, comparación con la línea base y MLflow | 10 | Hecho. 0.55 contra 0.46 de la línea base |
 | Clusters y job: cómputo, job encadenado, programación y alertas | 10 | Hecho, salvo confirmar con el catedrático la equivalencia con serverless |
@@ -66,14 +66,14 @@ Puntos de la rúbrica y estado al 2026-11-13:
 | 2026-11-13 | **La API se construye en local** con el modelo `champion` y una copia de oro descargados de Databricks, se empaqueta en Docker y se sube al Droplet a mano | Acordado con el catedrático. Sin escritura en S3, la API no puede leer oro desde ahí |
 | 2026-11-13 | El job corre cada martes a las 8:00 y avisa por correo si falla | El enunciado pide programación o disparo por fotos, y una alerta. El MEM publica los martes |
 | 2026-11-13 | El job mantiene una tarea por fuente y por paso, en lugar de 3 tareas | Sigue el orden bronce, plata y oro. Cada tarea se prueba por separado. Se confirma con el catedrático |
+| 2026-11-14 | Los precios de las fotos se extraen con Llama 4 Maverick, servido en el workspace. RapidOCR queda como línea base | En las mismas 20 fotos acertó cerca de 70 % contra 10 % del OCR. Es gratis en Free Edition y las fotos no salen de Databricks. Ver [fuentes_de_datos.md](../datos/fuentes_de_datos.md) |
 
 ## Decisiones pendientes
 
 | Decisión | Recomendación | Dónde se discute |
 |---|---|---|
-| Técnica para extraer el precio de las fotos | OCR o modelo de visión, a elección de quien trabaje las fotos. Tesseract no se puede instalar en serverless | [fuentes_de_datos.md](../datos/fuentes_de_datos.md) |
 | Equivalencia entre los clusters del enunciado y serverless | Confirmar con el catedrático | [databricks.md](../infraestructura/databricks.md) |
-| Ubicación de las fotos nuevas | El enunciado menciona `fotos/AAAA-MM-DD/` en el bucket de bronce. Las 110 actuales están en `xloc-raw`. Confirmar con el catedrático | [fuentes_de_datos.md](../datos/fuentes_de_datos.md) |
+| Ubicación de las fotos nuevas | El enunciado menciona `fotos/AAAA-MM-DD/` en el bucket de bronce. Las 110 actuales están en `xloc-raw`. Confirmar con el catedrático. Ya es configurable: basta cambiar los parámetros `ubicacion_fotos` y `carpeta_fotos` del bundle | [fuentes_de_datos.md](../datos/fuentes_de_datos.md) |
 
 ## Fases y tareas
 
@@ -84,10 +84,10 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 0 | Pedir al catedrático escritura en los buckets | Ricardo | Hecho: `CREATE EXTERNAL TABLE` en las tres capas |
 | 0 | Tablas externas en los buckets: `LOCATION` en `tablas.sql`, rutas obtenidas al correr y oro sin deletion vectors | Ricardo | Hecho. Las 14 tablas son externas y están en su bucket, verificado con la CLI |
 | 1 | Acceso ssh al Droplet verificado | | Pendiente |
-| 1 | `bronze.fotos_precios` con carga incremental y columnas de auditoría | | Pendiente |
-| 2 | Extracción de precios y `silver.precios` con 3 reglas de calidad | | Pendiente |
-| 2 | `silver.precios_rejected` con el motivo de cada rechazo | | Pendiente |
-| 2 | Revisión manual de al menos 20 fotos y porcentaje de acierto | | Pendiente |
+| 1 | `bronze.fotos_precios` con carga incremental y columnas de auditoría | Rodrigo | Hecho. Probado dos veces: 110 fotos nuevas y después 0 |
+| 2 | Extracción de precios y `silver.precios` con 3 reglas de calidad | Rodrigo | Hecho. Llama 4 Maverick y 9 motivos de rechazo |
+| 2 | `silver.precios_rejected` con el motivo de cada rechazo | Rodrigo | Hecho |
+| 2 | Revisión manual de al menos 20 fotos y porcentaje de acierto | Rodrigo | Hecho en `data/revision_manual/revision_fotos.csv`. Falta que otra persona del equipo la confirme |
 | 3 | MEM y EIA de bronce a oro, modelo, MLflow y job de punta a punta | Ricardo | Hecho |
 | 3 | `gold.predicciones` y `gold.metricas_modelo` | Ricardo | Hecho |
 | 3 | Programación semanal y alerta por correo | Ricardo | Hecho. La alerta se verá la primera vez que falle el job |
@@ -131,4 +131,6 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 2026-11-13 | El catedrático logró habilitar la escritura y `CREATE EXTERNAL TABLE`. Las tablas pasan a ser externas en los buckets. La API no cambia |
 | 2026-11-13 | Migración a tablas externas hecha. El pipeline corrió completo con las tablas en los buckets y el modelo versión 3. `exportar_para_api.py` verificó que el modelo descargado predice lo mismo |
 | 2026-11-13 | El repo pasó a llamarse `equipo-01-gasolina-gt`. El job corrió completo en `equipo_01`: 0.551 contra 0.458 de la línea base. Se borró el catálogo `gas_price` |
+| 2026-11-14 | Fotos a bronce: `MERGE` por `path` con la ubicación como parámetro. 110 fotos cargadas y una segunda corrida no duplica |
+| 2026-11-14 | Fotos a plata con Llama 4 Maverick y 9 motivos de rechazo. 110 fotos procesadas y unos 260 precios válidos. Revisión manual de 20 fotos: cerca de 70 % correcto. OCR como línea base: 10 % |
 | 2026-11-14 | API en FastAPI con los 5 endpoints, paginación y `/docs`. Imagen de Docker con el modelo versión 3 y la copia de oro. Probada en local: la predicción coincide con Databricks en los tres combustibles |

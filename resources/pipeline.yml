@@ -29,6 +29,15 @@ resources:
           default: ${var.esquema_gold}
         - name: repo_raw
           default: ${var.repo_raw}
+        - name: ubicacion_fotos
+          default: ${var.ubicacion_fotos}
+        - name: carpeta_fotos
+          default: ${var.carpeta_fotos}
+        - name: modelo_vision
+          default: ${var.modelo_vision}
+        # "true" vuelve a leer todas las fotos, por ejemplo si cambia el modelo de visión.
+        - name: reprocesar_fotos
+          default: "false"
         # "true" entrena aunque los datos no hayan cambiado, por ejemplo después de recrear las tablas.
         - name: forzar_entrenamiento
           default: "false"
