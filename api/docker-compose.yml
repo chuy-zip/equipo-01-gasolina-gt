@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    image: gasolina-gt-api:latest
+    container_name: gasolina-gt-api
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      - "${HOST_PORT:-8001}:8000"

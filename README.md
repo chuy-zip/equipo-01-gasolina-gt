@@ -49,7 +49,7 @@ flowchart LR
 |---|---|---|
 | `pipelines/01_bronze.py`, `02_silver.py`, `03_gold.py` | `databricks/notebooks/`, con prefijos 1x para bronce, 2x para plata, 3x a 5x para oro | Un notebook por fuente y por paso. Cada tarea se puede probar y volver a correr por separado |
 | `pipelines/job.json` | `resources/pipeline.yml` | El job se define como código con un bundle de Databricks y lo despliega el CI. Ver [ci_cd.md](docs/infraestructura/ci_cd.md) |
-| `api/` | `api/` | Por hacer |
+| `api/` | `api/` | FastAPI en Docker. Lee la copia de oro en `api/artefactos/`. `scripts/exportar_para_api.py` la genera desde Databricks y `scripts/exportar_local.py` desde `data/`. Desplegada en `http://157.230.171.204:8001`. Pruebas: `tests/consultas_api.sh` |
 | `docs/arquitectura.png` y su fuente editable | Por hacer | |
 | `docs/informe.pdf` | Por hacer | |
 | `presentacion/` | Por hacer | |
