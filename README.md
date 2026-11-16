@@ -51,7 +51,7 @@ flowchart LR
 | `pipelines/job.json` | `resources/pipeline.yml` | El job se define como código con un bundle de Databricks y lo despliega el CI. Ver [ci_cd.md](docs/infraestructura/ci_cd.md) |
 | `api/` | `api/` | FastAPI en Docker con el modelo y la copia de oro adentro. Ver [api/README.md](api/README.md), que también justifica Docker |
 | `docs/arquitectura.png` y su fuente editable | Por hacer | |
-| `docs/informe.pdf` | Por hacer | |
+| `docs/informe.pdf` | [Informe técnico](docs/informe.pdf) | Fuente Markdown, DOCX y regeneración en [informe/](informe/README.md) |
 | `presentacion/` | Por hacer | |
 
 ## Uso local

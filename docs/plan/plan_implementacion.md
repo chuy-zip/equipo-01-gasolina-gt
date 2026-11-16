@@ -23,7 +23,7 @@ Puntos de la rúbrica y estado documentado al 2026-11-15:
 | Clusters y job: cómputo, job encadenado, programación y alertas | 10 | Hecho, salvo confirmar con el catedrático la equivalencia con serverless |
 | API en el Droplet | 20 | API hecha y probada en local con Docker. Despliegue confirmado por el equipo el 2026-11-15. Falta registrar URL y prueba pública en el repo |
 | Repositorio y README | 10 | Parcial. Faltan el diagrama exportado, la presentación y commits de todos |
-| Informe técnico | 5 | Pendiente |
+| Informe técnico | 5 | Redactado el 2026-11-16: `informe/informe.md`, versión DOCX y PDF de cinco páginas en `docs/informe.pdf`. Pendiente de revisión del equipo |
 | Presentación y demo | 10 | Pendiente |
 
 ## Decisiones tomadas
@@ -94,14 +94,14 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 3 | Migración al catálogo `equipo_01` y borrado del catálogo `gas_price` | Ricardo | Hecho |
 | 3 | `gold.precio_semanal` y `gold.variacion_semanal` | Ricardo | Hecho. Oro ya contiene filas de fotos, según las corridas de desarrollo del 2026-11-14 |
 | 3 | Tablas de fotos del enunciado definidas en `tablas.sql`: `bronze.fotos_precios`, `silver.precios` y `silver.precios_rejected` | Ricardo | Hecho. Las tablas se llenaron en las corridas de desarrollo del 2026-11-14 |
-| 3 | Evidencia de al menos 2 corridas exitosas con fotos de semanas distintas | | No documentada. Las corridas de desarrollo y las repeticiones con 0 fotos nuevas no demuestran este requisito |
+| 3 | Evidencia de al menos 2 corridas exitosas con fotos de semanas distintas | | Evidencia parcial para el informe: las capturas de Databricks compartidas por Nelson muestran varias corridas exitosas del job y fotos en plata de semanas distintas (2022-12-14 a 2026-11-08, según combustible). Las vistas no vinculan fotos concretas a cada corrida; guardar las capturas en los anexos y describir esta limitación |
 | 4 | Script que descarga el modelo `champion` y la copia de oro: `scripts/exportar_para_api.py` | Ricardo | Hecho y probado contra Databricks el 2026-11-13. Verificó que el modelo descargado predice lo mismo que `gold.predicciones` |
 | 4 | API local con los endpoints del enunciado, con el modelo empaquetado | Rodrigo | Hecho e integrado en `main` por el PR #22. FastAPI en `api/`, con tests. La prueba local documentada usó `champion` y coincidió con `gold.predicciones` |
 | 4 | Generación local de artefactos para la API sin Databricks: `scripts/exportar_local.py` | | Integrada en `main` por el PR #23. Entrena un modelo local con MEM y EIA; no incorpora los precios de fotos. No hay evidencia de que se haya usado para desplegar |
 | 4 | Imagen de Docker subida al Droplet, en el puerto del equipo | | Despliegue confirmado por el equipo el 2026-11-15. Falta documentar respuesta pública y origen de los artefactos |
 | 4 | Pruebas de usuario final con `curl` o Postman | Rodrigo | Hecho. `tests/consultas_api.sh` |
 | 5 | Diagrama de arquitectura exportado y su fuente editable | | Pendiente |
-| 5 | Informe técnico de máximo 5 páginas | | Pendiente |
+| 5 | Informe técnico de máximo 5 páginas | | Redactado en `informe/informe.md`, con DOCX y PDF generados mediante LibreOffice. PDF de entrega: `docs/informe.pdf` (cinco páginas). Pendiente de revisión del equipo |
 | 5 | Presentación, resumen de una página y demo | | Pendiente |
 | Extra | CI/CD hacia el Droplet o pruebas automatizadas de la API | | Opcional |
 
@@ -110,7 +110,7 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 1. Borrar una tabla externa no borra sus archivos en el bucket. Para recrearla hay que borrarlos a mano. Ver "Cómo cambiar una tabla".
 2. La API lleva una copia fija de oro. Si nadie la actualiza después de cada corrida, muestra datos de semanas anteriores.
 3. Free Edition tiene cuotas de uso y un máximo de 5 tareas de job a la vez. Con varios desarrolladores probando al mismo tiempo, el cómputo puede apagarse el resto del día.
-4. Las fotos ya pasan por bronce y plata según las pruebas de desarrollo del 2026-11-14. Después de integrar los cambios se ejecutó el notebook de plata y se obtuvo la métrica actualizada, pero procesó 0 fotos nuevas. Aún falta guardar evidencia de una corrida completa del job y de dos corridas con fotos de semanas distintas.
+4. Las fotos ya pasan por bronce y plata según las pruebas de desarrollo del 2026-11-14. Las capturas compartidas muestran varias corridas exitosas y el resumen de plata muestra fotos de distintas semanas, pero no relacionan fotos particulares con corridas individuales. La última ejecución reportada procesó 0 fotos nuevas; conservar esta distinción al presentar la evidencia en el informe.
 5. La versión de scikit-learn de la API tiene que coincidir con la de Databricks, o el modelo no carga.
 6. `scripts/exportar_local.py` y `scripts/exportar_para_api.py` escriben en `api/artefactos/`. El primero genera un modelo nuevo sin las fotos; el segundo descarga `champion` y las tablas de oro. El manifiesto local lleva `origen: local`; el de Databricks lleva `workspace` y `run_id`. Los artefactos no se versionan, así que el repo no prueba cuál quedó dentro de la imagen desplegada.
 
