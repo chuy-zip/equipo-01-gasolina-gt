@@ -17,7 +17,7 @@ Puntos de la rúbrica y estado documentado al 2026-11-15:
 | Criterio | Puntos | Estado |
 |---|---|---|
 | Capa bronce: fotos por external location, carga incremental y auditoría | 10 | Hecho. 110 de 110 fotos en bronce y una segunda carga no agrega nada |
-| Capa plata: extracción de precios, 3 reglas de calidad, cuarentena y exactitud medida a mano | 15 | Hecho y probado en Databricks. Nelson confirmó la revisión de las 20 fotos el 2026-11-15. Falta recalcular en Databricks la exactitud contra el CSV actualizado. La medición anterior dio cerca de 70 %; OCR como línea base: 10 % |
+| Capa plata: extracción de precios, 3 reglas de calidad, cuarentena y exactitud medida a mano | 15 | Hecho y probado en Databricks. En la corrida posterior a la revisión actualizada se compararon 44 precios: 26 correctos (59.1 %). Esa corrida no procesó fotos nuevas. OCR como línea base histórica: 3 de 31 (10 %) |
 | Capa oro: precio semanal, variación, etiqueta de dirección y comentarios | 10 | Hecho. `gold.precio_semanal` tiene filas del MEM y de fotos, según las corridas de desarrollo del 2026-11-14 |
 | Modelo: validación temporal, comparación con la línea base y MLflow | 10 | Hecho. 0.55 contra 0.46 de la línea base |
 | Clusters y job: cómputo, job encadenado, programación y alertas | 10 | Hecho, salvo confirmar con el catedrático la equivalencia con serverless |
@@ -87,7 +87,7 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 1 | `bronze.fotos_precios` con carga incremental y columnas de auditoría | Rodrigo | Hecho e integrado en `main` por el PR #20. Usa `binaryFile`, compara rutas y hace `MERGE` por `path`. Probado dos veces: 110 fotos nuevas y después 0 |
 | 2 | Extracción de precios y `silver.precios` con 3 reglas de calidad | Rodrigo | Hecho e integrado en `main` por el PR #21. Llama 4 Maverick y 9 motivos de rechazo |
 | 2 | `silver.precios_rejected` con el motivo de cada rechazo | Rodrigo | Hecho |
-| 2 | Revisión manual de al menos 20 fotos y porcentaje de acierto | Rodrigo; revisión confirmada por Nelson | Hecha en `data/revision_manual/revision_fotos.csv` para 20 fotos el 2026-11-15. Falta volver a ejecutar el cálculo de exactitud en Databricks con el CSV actualizado |
+| 2 | Revisión manual de al menos 20 fotos y porcentaje de acierto | Rodrigo; revisión confirmada por Nelson | Hecha en `data/revision_manual/revision_fotos.csv` para 20 fotos el 2026-11-15. Última medición en Databricks: 26 de 44 precios correctos (59.1 %); la corrida procesó 0 fotos nuevas |
 | 3 | MEM y EIA de bronce a oro, modelo, MLflow y job de punta a punta | Ricardo | Hecho |
 | 3 | `gold.predicciones` y `gold.metricas_modelo` | Ricardo | Hecho |
 | 3 | Programación semanal y alerta por correo | Ricardo | Hecho. La alerta se verá la primera vez que falle el job |
@@ -110,7 +110,7 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 1. Borrar una tabla externa no borra sus archivos en el bucket. Para recrearla hay que borrarlos a mano. Ver "Cómo cambiar una tabla".
 2. La API lleva una copia fija de oro. Si nadie la actualiza después de cada corrida, muestra datos de semanas anteriores.
 3. Free Edition tiene cuotas de uso y un máximo de 5 tareas de job a la vez. Con varios desarrolladores probando al mismo tiempo, el cómputo puede apagarse el resto del día.
-4. Las fotos ya pasan por bronce y plata según las pruebas de desarrollo del 2026-11-14. Falta documentar una corrida completa del job con el código integrado en `main` y dos corridas con fotos de semanas distintas.
+4. Las fotos ya pasan por bronce y plata según las pruebas de desarrollo del 2026-11-14. Después de integrar los cambios se ejecutó el notebook de plata y se obtuvo la métrica actualizada, pero procesó 0 fotos nuevas. Aún falta guardar evidencia de una corrida completa del job y de dos corridas con fotos de semanas distintas.
 5. La versión de scikit-learn de la API tiene que coincidir con la de Databricks, o el modelo no carga.
 6. `scripts/exportar_local.py` y `scripts/exportar_para_api.py` escriben en `api/artefactos/`. El primero genera un modelo nuevo sin las fotos; el segundo descarga `champion` y las tablas de oro. El manifiesto local lleva `origen: local`; el de Databricks lleva `workspace` y `run_id`. Los artefactos no se versionan, así que el repo no prueba cuál quedó dentro de la imagen desplegada.
 

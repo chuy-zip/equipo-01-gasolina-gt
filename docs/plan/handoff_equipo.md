@@ -34,7 +34,7 @@ El resumen completo de cumplimiento está en `docs/plan/plan_implementacion.md`,
 | [#22](https://github.com/chuy-zip/equipo-01-gasolina-gt/pull/22) | API en FastAPI con Docker | `95af3a4` |
 | [#23](https://github.com/chuy-zip/equipo-01-gasolina-gt/pull/23) | `scripts/exportar_local.py`, alternativa para generar artefactos sin Databricks | `ddcc465` |
 
-Los merges están en el código. El repo no guarda una corrida posterior del job completo con el código de `main` ni una prueba externa del Droplet. El equipo confirmó que el despliegue ya se hizo.
+Los merges están en el código. Después de integrarlos, el equipo ejecutó el job y el notebook de plata informó 0 fotos nuevas; la revisión de exactitud sí se calculó. El repo no guarda la evidencia del historial de esa corrida ni una prueba externa del Droplet. El equipo confirmó que el despliegue ya se hizo.
 
 Lo que ya funciona, probado en Databricks:
 
@@ -45,7 +45,7 @@ Lo que ya funciona, probado en Databricks:
 5. El modelo, el job `equipo-01-pipeline`, la programación de los martes y la alerta por correo siguen igual.
 6. **La API corre en Docker local.** Las 8 consultas de `tests/consultas_api.sh` responden 200 y la predicción coincide con `gold.predicciones` en los tres combustibles.
 
-Las tablas de fotos se llenaron con corridas de desarrollo del código de los PR #20 y #21. Una segunda carga de bronce no agregó fotos y una segunda extracción de plata no reprocesó las ya tratadas. Falta documentar una corrida completa del job con el código integrado en `main`.
+Las tablas de fotos se llenaron con corridas de desarrollo del código de los PR #20 y #21. Una segunda carga de bronce no agregó fotos y una segunda extracción de plata no reprocesó las ya tratadas. Después del merge se ejecutó el job; el notebook de plata volvió a comparar los registros existentes, sin fotos nuevas. Falta guardar evidencia del historial y confirmar la corrida completa de todas las tareas.
 
 **Números de referencia, al 2026-11-14:**
 
@@ -53,8 +53,8 @@ Las tablas de fotos se llenaron con corridas de desarrollo del código de los PR
 |---|---|
 | Fotos en bronce | 110 de 110 |
 | Precios válidos de fotos en plata | Unos 260 |
-| Exactitud anterior a la revisión actual: 20 fotos y 31 precios | 21 a 22 de 31, cerca de 70 %. Falta recalcular con el CSV revisado por Nelson el 2026-11-15 |
-| Exactitud del OCR como línea base, mismas fotos | 3 de 31, 10 % |
+| Exactitud contra la revisión manual actualizada de 20 fotos | 26 de 44 precios, 59.1 %. Medición de la última ejecución; procesó 0 fotos nuevas |
+| Exactitud del OCR como línea base histórica | 3 de 31, 10 %; corresponde a la medición anterior y no se recalculó con la revisión actualizada |
 | Balanced accuracy del modelo, últimos 2 años | 0.55, contra 0.46 de la línea base del enunciado |
 | Modelo en la API | Versión 3 |
 | Predicción de la semana del 2026-11-10 | Baja en los tres combustibles, con 92 a 94 % de probabilidad |
@@ -216,9 +216,9 @@ Sin cambios. Detalle en `docs/datos/esquemas_medallion.md`, sección "Cómo camb
 
 | Tema | Estado | Notas |
 |---|---|---|
-| **Corrida completa con el código de `main`** | Sin evidencia en el repo | Confirmar que `equipo-01-pipeline` pasa después de los merges |
+| **Evidencia de corrida completa con el código de `main`** | El equipo ejecutó el job; evidencia no guardada en el repo | Adjuntar historial y resultados de todas las tareas; la última salida de plata reportó 0 fotos nuevas |
 | **Evidencia del despliegue de la API en el Droplet** | Despliegue confirmado por el equipo; evidencia pendiente | Registrar URL, respuesta pública e imagen usada. Pasos de verificación en `api/README.md` |
-| **Recalcular la exactitud de la extracción** | Pendiente | Nelson revisó las 20 fotos y actualizó `data/revision_manual/revision_fotos.csv` el 2026-11-15. Volver a ejecutar `21_silver_imagenes` para obtener la métrica actualizada |
+| **Exactitud de la extracción contra revisión manual** | Medida | 26 de 44 precios correctos (59.1 %). La ejecución leyó los resultados existentes y no procesó fotos nuevas |
 | **Evidencia de 2 corridas con fotos de semanas distintas** | No documentada | Las repeticiones de desarrollo con 0 fotos nuevas no la prueban. Se necesitan dos ejecuciones exitosas del Job, cada una con fotos nuevas de una semana distinta, y capturas del historial y de la duración de cada tarea |
 | **Ubicación de las fotos nuevas** | Pendiente de confirmar | Solo hay que cambiar el parámetro `carpeta_fotos` |
 | **Diagrama exportado, informe y presentación** | Por hacer | El informe puede usar la comparación de técnicas y las métricas de este documento |
