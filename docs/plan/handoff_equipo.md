@@ -53,7 +53,7 @@ Las tablas de fotos se llenaron con corridas de desarrollo del código de los PR
 |---|---|
 | Fotos en bronce | 110 de 110 |
 | Precios válidos de fotos en plata | Unos 260 |
-| Exactitud de la extracción, revisión manual de 20 fotos y 31 precios | 21 a 22 de 31, cerca de 70 % |
+| Exactitud anterior a la revisión actual: 20 fotos y 31 precios | 21 a 22 de 31, cerca de 70 %. Falta recalcular con el CSV revisado por Nelson el 2026-11-15 |
 | Exactitud del OCR como línea base, mismas fotos | 3 de 31, 10 % |
 | Balanced accuracy del modelo, últimos 2 años | 0.55, contra 0.46 de la línea base del enunciado |
 | Modelo en la API | Versión 3 |
@@ -218,7 +218,7 @@ Sin cambios. Detalle en `docs/datos/esquemas_medallion.md`, sección "Cómo camb
 |---|---|---|
 | **Corrida completa con el código de `main`** | Sin evidencia en el repo | Confirmar que `equipo-01-pipeline` pasa después de los merges |
 | **Evidencia del despliegue de la API en el Droplet** | Despliegue confirmado por el equipo; evidencia pendiente | Registrar URL, respuesta pública e imagen usada. Pasos de verificación en `api/README.md` |
-| **Confirmar la revisión manual** | Pendiente | El enunciado pide que la haga el equipo. Alguien debe revisar `data/revision_manual/revision_fotos.csv` contra las fotos |
+| **Recalcular la exactitud de la extracción** | Pendiente | Nelson revisó las 20 fotos y actualizó `data/revision_manual/revision_fotos.csv` el 2026-11-15. Volver a ejecutar `21_silver_imagenes` para obtener la métrica actualizada |
 | **Evidencia de 2 corridas con fotos de semanas distintas** | No documentada | Las repeticiones de desarrollo con 0 fotos nuevas no la prueban. Se necesitan dos ejecuciones exitosas del Job, cada una con fotos nuevas de una semana distinta, y capturas del historial y de la duración de cada tarea |
 | **Ubicación de las fotos nuevas** | Pendiente de confirmar | Solo hay que cambiar el parámetro `carpeta_fotos` |
 | **Diagrama exportado, informe y presentación** | Por hacer | El informe puede usar la comparación de técnicas y las métricas de este documento |
