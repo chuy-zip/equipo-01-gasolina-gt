@@ -1,6 +1,8 @@
 # Documentación del proyecto final
 
-Monitoreo del precio de la gasolina en Guatemala. Toda la documentación del proyecto vive en esta carpeta, ordenada por tipo.
+Monitoreo del precio de la gasolina en Guatemala. La documentación técnica está organizada aquí por tipo; la fuente editable del informe y su versión DOCX están en `informe/`.
+
+Informe técnico: [PDF de entrega](informe.pdf), [fuente Markdown](../informe/informe.md) y [DOCX](../informe/informe.docx). Instrucciones de regeneración en [informe/README.md](../informe/README.md).
 
 | Carpeta | Documento | Contenido |
 |---|---|---|

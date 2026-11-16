@@ -19,7 +19,7 @@ En resumen: un pipeline de punta a punta en Databricks, con arquitectura medall�
 | Fotos a bronce y plata, con extracción de precios y reglas de calidad | Hecho y probado en Databricks. PR #20 y #21 integrados en `main` | 25 |
 | Oro, modelo, MLflow, job programado y alertas | Hecho. Oro ya toma las filas de las fotos | 30 |
 | API en el Droplet | API integrada en `main` y probada en Docker local. Despliegue confirmado por el equipo; falta documentar URL, respuesta pública y origen de los artefactos | 20 |
-| Repo, informe y presentación | Parcial. Faltan diagrama, informe y presentación | 25 |
+| Repo, informe y presentación | Parcial. Informe redactado y exportado a PDF; faltan revisión del equipo, diagrama y presentación | 25 |
 
 El resumen completo de cumplimiento está en `docs/plan/plan_implementacion.md`, sección "Cumplimiento del enunciado".
 
@@ -219,9 +219,10 @@ Sin cambios. Detalle en `docs/datos/esquemas_medallion.md`, sección "Cómo camb
 | **Evidencia de corrida completa con el código de `main`** | El equipo ejecutó el job; evidencia no guardada en el repo | Adjuntar historial y resultados de todas las tareas; la última salida de plata reportó 0 fotos nuevas |
 | **Evidencia del despliegue de la API en el Droplet** | Despliegue confirmado por el equipo; evidencia pendiente | Registrar URL, respuesta pública e imagen usada. Pasos de verificación en `api/README.md` |
 | **Exactitud de la extracción contra revisión manual** | Medida | 26 de 44 precios correctos (59.1 %). La ejecución leyó los resultados existentes y no procesó fotos nuevas |
-| **Evidencia de 2 corridas con fotos de semanas distintas** | No documentada | Las repeticiones de desarrollo con 0 fotos nuevas no la prueban. Se necesitan dos ejecuciones exitosas del Job, cada una con fotos nuevas de una semana distinta, y capturas del historial y de la duración de cada tarea |
+| **Evidencia de corridas y cobertura temporal de fotos** | Evidencia visual parcial compartida por Nelson | La vista del job muestra varias corridas exitosas; el resumen de `silver.precios` muestra fotos desde 2022-12-14 hasta 2026-11-08 (el máximo depende del combustible). Juntas sirven para describir que el pipeline se ejecutó y que plata contiene fotos de distintas semanas. No identifican cuáles fotos se procesaron en cada corrida; incluir ambas capturas en el informe y declarar esa limitación |
 | **Ubicación de las fotos nuevas** | Pendiente de confirmar | Solo hay que cambiar el parámetro `carpeta_fotos` |
-| **Diagrama exportado, informe y presentación** | Por hacer | El informe puede usar la comparación de técnicas y las métricas de este documento |
+| **Informe técnico** | Redactado; pendiente de revisión del equipo | Fuente en `informe/informe.md`, DOCX en `informe/informe.docx` y PDF de cinco páginas en `docs/informe.pdf`. Incluye extracción, variables, evaluación, cómputo y lecciones aprendidas |
+| **Diagrama exportado y presentación** | Por hacer | Pueden utilizar la comparación de técnicas y las métricas del informe |
 
 **Despliegue y actualización de la API en el Droplet.** Lo acordado con el catedrático:
 
