@@ -25,7 +25,7 @@ flowchart LR
     OR <--> MLF
     MLF -- "se descarga el modelo" --> LOCAL["Computadora<br/>API local y pruebas"]
     OR -- "se descarga una copia de oro" --> LOCAL
-    LOCAL -- "imagen de Docker, a mano" --> DROP["Droplet DigitalOcean<br/>API, puerto 80XX"]
+    LOCAL -- "despliegue manual confirmado" --> DROP["Droplet DigitalOcean<br/>API, puerto 80XX"]
     USER(("Usuario")) -- "HTTP" --> DROP
     DEV(("Equipo")) -- "ssh" --> DROP
 ```
@@ -35,7 +35,7 @@ flowchart LR
 1. **Todo el procesamiento ocurre en Databricks,** hasta el entrenamiento del modelo y la predicción.
 2. **Se descargan de Databricks** el modelo `champion` y una copia de las tablas de oro que usa la API.
 3. **La API se construye y se prueba en local,** con esos archivos dentro de su carpeta.
-4. **El modelo y los datos se empaquetan con la API** en una imagen de Docker, que se sube al Droplet a mano.
+4. **El modelo y los datos se empaquetan con la API** en una imagen de Docker. El equipo confirmó el 2026-11-15 que la API ya se desplegó en el Droplet. El repo no registra la URL pública ni qué artefactos contiene la imagen instalada.
 
 **Las tablas sí viven en los buckets.** El catedrático habilitó la escritura en `xloc-cusn`, `xloc-ag` y `xloc-au` y otorgó `CREATE EXTERNAL TABLE`. Todas las tablas son externas de Unity Catalog, en el bucket de su capa y dentro del prefijo `equipo-01/`. Databricks escribe y lee por medio de las external locations. Nadie del equipo tiene credenciales de AWS.
 
@@ -73,12 +73,12 @@ flowchart LR
 
 | Tarea | Lee | Escribe |
 |---|---|---|
-| 10_ingesta_imagenes | Fotos en el bucket, por external location | `bronze.fotos_precios`. Pendiente |
+| 10_ingesta_imagenes | Fotos en el bucket, por external location | `bronze.fotos_precios`. Implementado y probado con 110 fotos |
 | 11_ingesta_mem | Excel en el repo público | Copia del Excel en bronce y `bronze.mem_precios` |
 | 12_ingesta_eia | Archivos de la EIA en el repo público | `bronze.eia_precios` |
 | 20_silver_mem | `bronze.mem_precios` | `silver.precios_oficiales` |
 | 22_silver_eia | `bronze.eia_precios` | `silver.precios_internacionales` |
-| 21_silver_imagenes | `bronze.fotos_precios` | `silver.precios` y `silver.precios_rejected`. Pendiente |
+| 21_silver_imagenes | `bronze.fotos_precios` | `silver.precios` y `silver.precios_rejected`. Implementado y probado |
 | 30_gold | Plata, incluida `silver.precios` de las fotos | `gold.precios_diarios`, `gold.precio_semanal`, `gold.variacion_semanal`, `gold.features_modelo` y `gold.referencia_actual` |
 | 40_entrenamiento | `gold.features_modelo` | Modelo en MLflow y una fila en `gold.metricas_modelo` |
 | 50_predicciones | `gold.features_modelo` y el modelo `champion` | `gold.predicciones`: la predicción de la semana siguiente y, cuando se conoce, la dirección real |
@@ -89,7 +89,7 @@ Nunca corren más de 3 tareas en paralelo, dentro del límite de 5 de Free Editi
 
 **Carga incremental:**
 
-1. Las fotos se leen con Auto Loader. Guarda un checkpoint en bronce y solo procesa archivos nuevos. Es la comparación entre el bucket y bronce, sin programarla a mano.
+1. El notebook `10_ingesta_imagenes` lista las rutas de fotos con Spark `binaryFile`, compara esas rutas con `bronze.fotos_precios` mediante `left_anti`, lee el contenido de las faltantes y hace `MERGE` por `path`. No usa Auto Loader ni un checkpoint.
 2. El Excel del MEM y los archivos de la EIA solo se cargan si su hash cambió.
 3. Correr el job dos veces no duplica datos. Bronce agrega una versión solo si su huella es nueva. Las tablas de plata del MEM y la EIA se reescriben completas, porque cada archivo trae la historia entera. Las fotos, que llegan de a una, se escriben con `MERGE` por llave.
 4. El entrenamiento solo corre si `gold.features_modelo` cambió. Compara una huella de los datos contra la etiqueta `huella_datos` de las corridas anteriores en MLflow.
@@ -111,7 +111,7 @@ Las fotos son la fuente principal según el enunciado. Lo que pide:
 2. **Plata:** extraer el precio de cada foto con OCR o un modelo de visión y escribir `silver.precios` con fecha, combustible, precio en quetzales por galón, modalidad, ubicación y foto de origen. Al menos 3 reglas de calidad, con las filas rechazadas en `silver.precios_rejected` y su motivo. Escritura con `MERGE` por fecha, ubicación, combustible y modalidad.
 3. **Calidad:** revisar a mano al menos 20 fotos y reportar el porcentaje de precios extraídos correctamente.
 
-Lo que ya se sabe de las fotos está en [fuentes_de_datos.md](../datos/fuentes_de_datos.md). La técnica de extracción la elige quien trabaje las fotos. Si se usa OCR, el cómputo serverless no permite instalar Tesseract con apt, así que conviene una librería que se instale con `%pip`, como EasyOCR, o un modelo de visión.
+La extracción implementada usa Llama 4 Maverick para leer los precios. RapidOCR quedó como línea base. Las reglas y los resultados de la revisión manual están en [fuentes_de_datos.md](../datos/fuentes_de_datos.md).
 
 ## Servicio en el Droplet
 
@@ -152,6 +152,10 @@ La predicción de la API debe coincidir con la que el job guardó en `gold.predi
 3. Escribe `api/artefactos/manifiesto.json` con la versión del modelo, la fecha y las filas de cada tabla. La API lo puede mostrar en `/health`.
 4. Carga el modelo descargado, predice la semana más reciente y verifica que coincida con `gold.predicciones`.
 
+El PR #23 agregó `scripts/exportar_local.py` como alternativa cuando no se usa Databricks. Lee los archivos del MEM y de la EIA en `data/`, entrena un modelo nuevo en local y escribe las tablas y el modelo en la misma carpeta `api/artefactos/`. La copia de `precio_semanal` que genera no incluye las fotos. Su manifiesto lleva `origen: local` y `version_modelo: local`. No equivale a descargar el modelo registrado como `champion` ni a copiar la capa oro de Databricks.
+
+La prueba de la API en Docker local documentada el 2026-11-14 usó el modelo versión 3 descargado de Databricks y comprobó las predicciones contra `gold.predicciones`. El equipo confirmó el despliegue en el Droplet, pero el repo no contiene los artefactos, la imagen ni una prueba de la URL pública. Por eso no se puede identificar desde Git el origen de los artefactos de la imagen instalada. Para comprobarlo, hay que revisar el `manifiesto.json` dentro de esa imagen y consultar su `/health`: este endpoint muestra `version_modelo`, pero no `origen`.
+
 Requisitos, una sola vez por persona: la [CLI de Databricks](https://docs.databricks.com/aws/en/dev-tools/cli/install), `databricks auth login --host <url_del_workspace> --profile DEFAULT` y `pip install -e ".[exportar]"`. La carpeta `api/artefactos/` no se sube al repo: la imagen de Docker la copia al construirse. Las tablas y columnas que se descargan están en `src/gas_price/exportar.py`.
 
 **Versiones:** la librería scikit-learn de la imagen debe ser la misma que usó Databricks al entrenar. Al 2026-11-13 es `scikit-learn==1.7.2`. El modelo descargado de MLflow incluye un `requirements.txt` con las versiones exactas, y el script las imprime. Con otra versión, el modelo carga con advertencias y puede dar resultados distintos.
@@ -175,7 +179,7 @@ equipo-01-gasolina-gt/
 ├── scripts/                actualización de la EIA y evaluación local del modelo
 ├── src/gas_price/
 ├── tests/
-└── api/                    API del Droplet, por hacer
+└── api/                    API implementada y probada en Docker local
 ```
 
 Los notebooks van en formato fuente de Databricks (`.py`), para que los cambios se puedan revisar en los pull requests.

@@ -12,16 +12,16 @@ Según el enunciado oficial, en `docs/contexto/`: un pipeline de punta a punta q
 
 ## Cumplimiento del enunciado
 
-Puntos de la rúbrica y estado al 2026-11-13:
+Puntos de la rúbrica y estado documentado al 2026-11-15:
 
 | Criterio | Puntos | Estado |
 |---|---|---|
 | Capa bronce: fotos por external location, carga incremental y auditoría | 10 | Hecho. 110 de 110 fotos en bronce y una segunda carga no agrega nada |
-| Capa plata: extracción de precios, 3 reglas de calidad, cuarentena y exactitud medida a mano | 15 | Hecho. Modelo de visión con cerca de 70 % de exactitud en 20 fotos revisadas. OCR como línea base: 10 % |
-| Capa oro: precio semanal, variación, etiqueta de dirección y comentarios | 10 | Hecho con el MEM. Las filas de fotos aparecen solas cuando `silver.precios` tenga datos |
+| Capa plata: extracción de precios, 3 reglas de calidad, cuarentena y exactitud medida a mano | 15 | Hecho y probado en Databricks. Modelo de visión con cerca de 70 % de exactitud en 20 fotos revisadas. OCR como línea base: 10 %. Falta que otra persona confirme la revisión manual |
+| Capa oro: precio semanal, variación, etiqueta de dirección y comentarios | 10 | Hecho. `gold.precio_semanal` tiene filas del MEM y de fotos, según las corridas de desarrollo del 2026-11-14 |
 | Modelo: validación temporal, comparación con la línea base y MLflow | 10 | Hecho. 0.55 contra 0.46 de la línea base |
 | Clusters y job: cómputo, job encadenado, programación y alertas | 10 | Hecho, salvo confirmar con el catedrático la equivalencia con serverless |
-| API en el Droplet | 20 | API hecha y probada en local con Docker. Falta subirla al Droplet |
+| API en el Droplet | 20 | API hecha y probada en local con Docker. Despliegue confirmado por el equipo el 2026-11-15. Falta registrar URL y prueba pública en el repo |
 | Repositorio y README | 10 | Parcial. Faltan el diagrama exportado, la presentación y commits de todos |
 | Informe técnico | 5 | Pendiente |
 | Presentación y demo | 10 | Pendiente |
@@ -51,7 +51,7 @@ Puntos de la rúbrica y estado al 2026-11-13:
 | 2026-11-11 | El catálogo y los esquemas se crean una sola vez con un script SQL versionado | Son pocos objetos y no cambian |
 | 2026-11-12 | El Excel del MEM no se edita a mano. Los duplicados y los precios en 0 se resuelven en plata | El archivo queda igual a la publicación original y las reglas quedan versionadas en `src/gas_price/mem.py` |
 | 2026-11-12 | Fechas repetidas: si son idénticas se deja una fila, si difieren el pipeline falla | Las 3 fechas repetidas actuales son copias exactas |
-| 2026-11-12 | Primero se arma el pipeline completo del Excel hasta el modelo. Las tareas de fotos siguen vacías | El curso evalúa la ingeniería del pipeline. Las fotos se conectan después sin cambiar el resto |
+| 2026-11-12 | Primero se armó el pipeline completo del Excel hasta el modelo. En esa fecha, las tareas de fotos seguían vacías. Se implementaron el 2026-11-14 y se integraron en `main` el 2026-11-15 | El curso evalúa la ingeniería del pipeline. Las fotos se conectaron después sin cambiar el resto |
 | 2026-11-12 | Se agregan los precios internacionales de la EIA como segunda fuente, versionados en `data/eia/` | Sin ese dato el modelo no supera a la regla de repetir la semana pasada. Con él sí. Ver [modelo.md](../modelo/modelo.md) |
 | 2026-11-12 | Las tablas se definen en `databricks/sql/tablas.sql`. Las crea el job `gas_price_setup`, que el CI corre después de cada despliegue | Los bundles no tienen un recurso para tablas. Así los tipos quedan versionados, una tarea no puede cambiar una tabla en silencio y la estructura se aplica al hacer merge, separada del procesamiento de datos |
 | 2026-11-11 | El Droplet no se administra desde el proyecto. Una persona del equipo tiene acceso por ssh con sudo | El Droplet lo provee el curso |
@@ -83,21 +83,22 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 |---|---|---|---|
 | 0 | Pedir al catedrático escritura en los buckets | Ricardo | Hecho: `CREATE EXTERNAL TABLE` en las tres capas |
 | 0 | Tablas externas en los buckets: `LOCATION` en `tablas.sql`, rutas obtenidas al correr y oro sin deletion vectors | Ricardo | Hecho. Las 14 tablas son externas y están en su bucket, verificado con la CLI |
-| 1 | Acceso ssh al Droplet verificado | | Pendiente |
-| 1 | `bronze.fotos_precios` con carga incremental y columnas de auditoría | Rodrigo | Hecho. Probado dos veces: 110 fotos nuevas y después 0 |
-| 2 | Extracción de precios y `silver.precios` con 3 reglas de calidad | Rodrigo | Hecho. Llama 4 Maverick y 9 motivos de rechazo |
+| 1 | Acceso ssh al Droplet verificado | | El equipo confirmó el despliegue en el Droplet; no hay registro del acceso ssh en el repo |
+| 1 | `bronze.fotos_precios` con carga incremental y columnas de auditoría | Rodrigo | Hecho e integrado en `main` por el PR #20. Usa `binaryFile`, compara rutas y hace `MERGE` por `path`. Probado dos veces: 110 fotos nuevas y después 0 |
+| 2 | Extracción de precios y `silver.precios` con 3 reglas de calidad | Rodrigo | Hecho e integrado en `main` por el PR #21. Llama 4 Maverick y 9 motivos de rechazo |
 | 2 | `silver.precios_rejected` con el motivo de cada rechazo | Rodrigo | Hecho |
 | 2 | Revisión manual de al menos 20 fotos y porcentaje de acierto | Rodrigo | Hecho en `data/revision_manual/revision_fotos.csv`. Falta que otra persona del equipo la confirme |
 | 3 | MEM y EIA de bronce a oro, modelo, MLflow y job de punta a punta | Ricardo | Hecho |
 | 3 | `gold.predicciones` y `gold.metricas_modelo` | Ricardo | Hecho |
 | 3 | Programación semanal y alerta por correo | Ricardo | Hecho. La alerta se verá la primera vez que falle el job |
 | 3 | Migración al catálogo `equipo_01` y borrado del catálogo `gas_price` | Ricardo | Hecho |
-| 3 | `gold.precio_semanal` y `gold.variacion_semanal` | Ricardo | Hecho con el MEM. Las fotos se suman solas |
-| 3 | Tablas de fotos del enunciado definidas en `tablas.sql`: `bronze.fotos_precios`, `silver.precios` y `silver.precios_rejected` | Ricardo | Hecho. Vacías, las llena el equipo de fotos |
-| 3 | Evidencia de al menos 2 corridas exitosas con fotos de semanas distintas | | Pendiente |
+| 3 | `gold.precio_semanal` y `gold.variacion_semanal` | Ricardo | Hecho. Oro ya contiene filas de fotos, según las corridas de desarrollo del 2026-11-14 |
+| 3 | Tablas de fotos del enunciado definidas en `tablas.sql`: `bronze.fotos_precios`, `silver.precios` y `silver.precios_rejected` | Ricardo | Hecho. Las tablas se llenaron en las corridas de desarrollo del 2026-11-14 |
+| 3 | Evidencia de al menos 2 corridas exitosas con fotos de semanas distintas | | No documentada. Las corridas de desarrollo y las repeticiones con 0 fotos nuevas no demuestran este requisito |
 | 4 | Script que descarga el modelo `champion` y la copia de oro: `scripts/exportar_para_api.py` | Ricardo | Hecho y probado contra Databricks el 2026-11-13. Verificó que el modelo descargado predice lo mismo que `gold.predicciones` |
-| 4 | API local con los endpoints del enunciado, con el modelo empaquetado | Rodrigo | Hecho. FastAPI en `api/`, con tests. La predicción coincide con `gold.predicciones` |
-| 4 | Imagen de Docker subida al Droplet, en el puerto del equipo | | Pendiente |
+| 4 | API local con los endpoints del enunciado, con el modelo empaquetado | Rodrigo | Hecho e integrado en `main` por el PR #22. FastAPI en `api/`, con tests. La prueba local documentada usó `champion` y coincidió con `gold.predicciones` |
+| 4 | Generación local de artefactos para la API sin Databricks: `scripts/exportar_local.py` | | Integrada en `main` por el PR #23. Entrena un modelo local con MEM y EIA; no incorpora los precios de fotos. No hay evidencia de que se haya usado para desplegar |
+| 4 | Imagen de Docker subida al Droplet, en el puerto del equipo | | Despliegue confirmado por el equipo el 2026-11-15. Falta documentar respuesta pública y origen de los artefactos |
 | 4 | Pruebas de usuario final con `curl` o Postman | Rodrigo | Hecho. `tests/consultas_api.sh` |
 | 5 | Diagrama de arquitectura exportado y su fuente editable | | Pendiente |
 | 5 | Informe técnico de máximo 5 páginas | | Pendiente |
@@ -109,8 +110,9 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 1. Borrar una tabla externa no borra sus archivos en el bucket. Para recrearla hay que borrarlos a mano. Ver "Cómo cambiar una tabla".
 2. La API lleva una copia fija de oro. Si nadie la actualiza después de cada corrida, muestra datos de semanas anteriores.
 3. Free Edition tiene cuotas de uso y un máximo de 5 tareas de job a la vez. Con varios desarrolladores probando al mismo tiempo, el cómputo puede apagarse el resto del día.
-4. Bronce y plata de fotos valen 25 puntos y todavía no empiezan. Es la parte con más peso pendiente.
+4. Las fotos ya pasan por bronce y plata según las pruebas de desarrollo del 2026-11-14. Falta documentar una corrida completa del job con el código integrado en `main` y dos corridas con fotos de semanas distintas.
 5. La versión de scikit-learn de la API tiene que coincidir con la de Databricks, o el modelo no carga.
+6. `scripts/exportar_local.py` y `scripts/exportar_para_api.py` escriben en `api/artefactos/`. El primero genera un modelo nuevo sin las fotos; el segundo descarga `champion` y las tablas de oro. El manifiesto local lleva `origen: local`; el de Databricks lleva `workspace` y `run_id`. Los artefactos no se versionan, así que el repo no prueba cuál quedó dentro de la imagen desplegada.
 
 ## Bitácora
 
@@ -134,3 +136,4 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 2026-11-14 | Fotos a bronce: `MERGE` por `path` con la ubicación como parámetro. 110 fotos cargadas y una segunda corrida no duplica |
 | 2026-11-14 | Fotos a plata con Llama 4 Maverick y 9 motivos de rechazo. 110 fotos procesadas y unos 260 precios válidos. Revisión manual de 20 fotos: cerca de 70 % correcto. OCR como línea base: 10 % |
 | 2026-11-14 | API en FastAPI con los 5 endpoints, paginación y `/docs`. Imagen de Docker con el modelo versión 3 y la copia de oro. Probada en local: la predicción coincide con Databricks en los tres combustibles |
+| 2026-11-15 | Se integraron los PR #20, #21, #22 y #23 en `main`. El #23 añadió `scripts/exportar_local.py` como alternativa para generar artefactos desde MEM y EIA sin Databricks. El equipo confirmó que la API se desplegó en el Droplet; falta registrar qué artefactos usa y una prueba pública |
