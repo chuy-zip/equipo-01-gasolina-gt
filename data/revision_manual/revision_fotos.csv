@@ -1,21 +1,21 @@
-archivo,diesel,regular,super,notas
-IMG_2976.HEIC,,,33.99,Diesel y regular poco legibles
-IMG_3605.HEIC,,,,Dispensador sin ventanas de precio
-IMG_4447.HEIC,28.99,27.49,28.99,
-IMG_5383.HEIC,,,32.99,Diesel y regular apagados
-IMG_6400.HEIC,25.69,28.99,30.49,
-IMG_6820.HEIC,,,30.49,Diesel y regular tapados por la manguera
-IMG_7203.HEIC,27.49,28.49,29.49,Venta entre galones confirma super 29.49
-IMG_7804.HEIC,27.79,28.59,29.59,
-IMG_8193.HEIC,,,,Ventanas poco legibles
-IMG_8485.HEIC,46.39,41.09,43.09,
-IMG_3313.HEIC,36.19,34.29,35.69,
-IMG_4143.HEIC,,,,Foto de otra parte de la bomba
-IMG_5100.HEIC,,32.99,34.49,Diesel cortado
-IMG_5850.HEIC,,27.39,28.89,Diesel cortado
-IMG_6514.HEIC,,,,Dispensador sin ventanas de precio
-IMG_6987.HEIC,,,,Último dígito ambiguo en las tres ventanas
-IMG_7344.HEIC,26.49,27.59,28.59,
-IMG_8063.HEIC,,,,Ventanas poco legibles
-IMG_8286.HEIC,,38.59,39.59,Diesel tapado por la manguera
-IMG_8678.HEIC,,,36.19,Diesel y regular poco legibles
+archivo,diesel,regular,super,notas,revisado_por,fecha_revision
+IMG_2976.HEIC,34.19,32.35,33.99,Regular no se aprecia bien,Nelson Garcia,2026-11-15
+IMG_3605.HEIC,,,,Los precios no aparecen,Nelson Garcia,2026-11-15
+IMG_4447.HEIC,28.99,27.49,28.99,Se distinguen bien todos los precios,Nelson Garcia,2026-11-15
+IMG_5383.HEIC,27.29,31.49,32.99,Regular muy oscura y difícil de ver,Nelson Garcia,2026-11-15
+IMG_6400.HEIC,25.69,28.99,30.49,,Nelson Garcia,2026-11-15
+IMG_6820.HEIC,27.49,28.99,30.49,La parte superior de los números no se distingue bien,Nelson Garcia,2026-11-15
+IMG_7203.HEIC,27.49,28.49,29.49,Se distinguen bien todos los precios,Nelson Garcia,2026-11-15
+IMG_7804.HEIC,27.79,28.59,29.59,,Nelson Garcia,2026-11-15
+IMG_8193.HEIC,,,,Los precios están recortados y no se pueden leer,Nelson Garcia,2026-11-15
+IMG_8485.HEIC,46.39,41.09,43.09,,Nelson Garcia,2026-11-15
+IMG_3313.HEIC,36.19,34.29,35.69,,Nelson Garcia,2026-11-15
+IMG_4143.HEIC,,,,La foto muestra la parte superior de la bomba,Nelson Garcia,2026-11-15
+IMG_5100.HEIC,29.19,32.99,34.49,,Nelson Garcia,2026-11-15
+IMG_5850.HEIC,25.59,27.39,28.89,,Nelson Garcia,2026-11-15
+IMG_6514.HEIC,,,,Los precios no aparecen,Nelson Garcia,2026-11-15
+IMG_6987.HEIC,25.89,28.49,29.44,No se distingue bien la parte superior de los números,Nelson Garcia,2026-11-15
+IMG_7344.HEIC,26.49,27.59,28.59,Se distinguen bien todos los precios,Nelson Garcia,2026-11-15
+IMG_8063.HEIC,,,,Los números están partidos a menos de la mitad y no se distinguen bien,Nelson Garcia,2026-11-15
+IMG_8286.HEIC,39.59,38.59,39.59,Los números están partidos a la mitad pero son reconocibles,Nelson Garcia,2026-11-15
+IMG_8678.HEIC,,34.89,36.79,No se distingue el primer dígito del diésel y la parte superior de los números tampoco se ve bien,Nelson Garcia,2026-11-15

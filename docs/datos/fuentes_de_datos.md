@@ -211,12 +211,12 @@ La técnica de extracción la elige quien trabaje las fotos. Lo que ya se sabe y
 
 Las dos son LCD de 7 segmentos. Algunas fotos son de una bomba vieja sin ventanas o de otra parte de la estación.
 
-**Comparación en las mismas fotos.** Se probaron tres técnicas. La revisión manual está en `data/revision_manual/revision_fotos.csv`: 20 fotos, 31 precios legibles.
+**Comparación en las mismas fotos.** Se probaron tres técnicas. La revisión manual está en `data/revision_manual/revision_fotos.csv`. Nelson Garcia revisó las 20 fotos y actualizó los precios el 2026-11-15. La ejecución anterior del notebook comparó 31 precios; falta volver a ejecutarlo para calcular la exactitud contra esta revisión actualizada.
 
 | Técnica | Precios correctos | Nota |
 |---|---|---|
-| Llama 4 Maverick, modelo de visión del workspace | 21 a 22 de 31, cerca de 70 % | Varía un poco entre corridas. Lee muy bien venta y galones |
-| RapidOCR con los modelos PP-OCRv5 de PaddleOCR | 3 de 31, 10 % | No reconoce bien los dígitos de 7 segmentos. Notebook `25_evaluacion_ocr` |
+| Llama 4 Maverick, modelo de visión del workspace | Medición anterior: 21 a 22 de 31, cerca de 70 % | Se debe actualizar al volver a ejecutar `21_silver_imagenes` contra la revisión vigente. Varía un poco entre corridas. Lee muy bien venta y galones |
+| RapidOCR con los modelos PP-OCRv5 de PaddleOCR | Medición anterior: 3 de 31, 10 % | No reconoce bien los dígitos de 7 segmentos. Notebook `25_evaluacion_ocr` |
 | Gemma 3 12B, modelo de visión del workspace | Peor que Maverick en la prueba de 10 fotos | Confunde los decimales |
 
 PaddleOCR no corre en el cómputo serverless, que es ARM: el proceso se cae. RapidOCR usa los mismos modelos sobre ONNX Runtime y sí corre. Qwen 3.5 del workspace no acepta imágenes.

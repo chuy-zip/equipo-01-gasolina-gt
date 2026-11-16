@@ -1,6 +1,6 @@
 # Handoff del proyecto final: predicción del precio de la gasolina
 
-Fecha: 2026-11-14. Reemplaza al handoff del 2026-11-13. Equipo 01, MLOps, UVG.
+Actualizado: 2026-11-15. Los resultados de Databricks y Docker citados abajo se midieron el 2026-11-14, salvo que se indique otra fecha. Equipo 01, MLOps, UVG.
 
 Este documento da el contexto completo del proyecto para quien siga trabajando en él. No hace falta leerlo entero: cada sección apunta al documento del repo que tiene el detalle. También se puede pasar completo a un agente de código como contexto inicial. La sección 12 tiene instrucciones para ese caso.
 
@@ -12,28 +12,29 @@ Repo: <https://github.com/chuy-zip/equipo-01-gasolina-gt>. Todas las rutas de es
 
 **El enunciado oficial está en `docs/contexto/enunciado_proyecto_final.pdf`. Léanlo primero: define los nombres de las tablas, la rúbrica y los entregables. Si algo de este documento lo contradice, manda el enunciado.**
 
-En resumen: un pipeline de punta a punta en Databricks, con arquitectura medallón, que convierte **fotos de precios** en datos y predice si el precio de cada combustible sube, baja o se mantiene la semana siguiente. Una API en un Droplet publica precios y predicciones, con el modelo y una copia de oro empaquetados en su imagen de Docker.
+En resumen: un pipeline de punta a punta en Databricks, con arquitectura medallón, que convierte **fotos de precios** en datos y predice si el precio de cada combustible sube, baja o se mantiene la semana siguiente. La API está implementada y probada en Docker local. El equipo confirmó el 2026-11-15 que ya se desplegó en el Droplet; la respuesta pública y el origen de los artefactos no están documentados en este repo.
 
 | Parte | Estado | Puntos en la rúbrica |
 |---|---|---|
-| Fotos a bronce y plata, con extracción de precios y reglas de calidad | **Hecho y probado en Databricks. Falta hacer merge de los PR #20 y #21** | 25 |
+| Fotos a bronce y plata, con extracción de precios y reglas de calidad | Hecho y probado en Databricks. PR #20 y #21 integrados en `main` | 25 |
 | Oro, modelo, MLflow, job programado y alertas | Hecho. Oro ya toma las filas de las fotos | 30 |
-| API en el Droplet | **Hecha y probada en Docker local, PR #22. Falta subirla al Droplet** | 20 |
+| API en el Droplet | API integrada en `main` y probada en Docker local. Despliegue confirmado por el equipo; falta documentar URL, respuesta pública y origen de los artefactos | 20 |
 | Repo, informe y presentación | Parcial. Faltan diagrama, informe y presentación | 25 |
 
 El resumen completo de cumplimiento está en `docs/plan/plan_implementacion.md`, sección "Cumplimiento del enunciado".
 
 ## 2. Estado actual
 
-**PR abiertos, en este orden:**
+**PR integrados en `main` el 2026-11-15, según el historial local:**
 
-| PR | Qué trae | Depende de |
+| PR | Qué integró | Commit de merge |
 |---|---|---|
-| [#20](https://github.com/chuy-zip/equipo-01-gasolina-gt/pull/20) | Fotos a bronce | Nada |
-| [#21](https://github.com/chuy-zip/equipo-01-gasolina-gt/pull/21) | Fotos a plata, reglas de calidad, revisión manual y línea base de OCR | #20. Mientras #20 no entre, #21 muestra también su commit |
-| [#22](https://github.com/chuy-zip/equipo-01-gasolina-gt/pull/22) | API en FastAPI con Docker | Nada. Puede chocar con #21 en la bitácora de `plan_implementacion.md`: son líneas agregadas al final, se resuelve dejando las dos |
+| [#20](https://github.com/chuy-zip/equipo-01-gasolina-gt/pull/20) | Fotos a bronce | `61c69e9` |
+| [#21](https://github.com/chuy-zip/equipo-01-gasolina-gt/pull/21) | Fotos a plata, reglas de calidad, revisión manual y línea base de OCR | `bd25e1c` |
+| [#22](https://github.com/chuy-zip/equipo-01-gasolina-gt/pull/22) | API en FastAPI con Docker | `95af3a4` |
+| [#23](https://github.com/chuy-zip/equipo-01-gasolina-gt/pull/23) | `scripts/exportar_local.py`, alternativa para generar artefactos sin Databricks | `ddcc465` |
 
-Ninguno necesita pasos manuales después del merge: no cambian columnas de tablas.
+Los merges están en el código. El repo no guarda una corrida posterior del job completo con el código de `main` ni una prueba externa del Droplet. El equipo confirmó que el despliegue ya se hizo.
 
 Lo que ya funciona, probado en Databricks:
 
@@ -44,7 +45,7 @@ Lo que ya funciona, probado en Databricks:
 5. El modelo, el job `equipo-01-pipeline`, la programación de los martes y la alerta por correo siguen igual.
 6. **La API corre en Docker local.** Las 8 consultas de `tests/consultas_api.sh` responden 200 y la predicción coincide con `gold.predicciones` en los tres combustibles.
 
-Ojo: las tablas de fotos se llenaron con corridas de prueba del código de los PR #20 y #21, no con el job. Después del merge, el job encuentra 0 fotos nuevas y no cambia nada.
+Las tablas de fotos se llenaron con corridas de desarrollo del código de los PR #20 y #21. Una segunda carga de bronce no agregó fotos y una segunda extracción de plata no reprocesó las ya tratadas. Falta documentar una corrida completa del job con el código integrado en `main`.
 
 **Números de referencia, al 2026-11-14:**
 
@@ -52,7 +53,7 @@ Ojo: las tablas de fotos se llenaron con corridas de prueba del código de los P
 |---|---|
 | Fotos en bronce | 110 de 110 |
 | Precios válidos de fotos en plata | Unos 260 |
-| Exactitud de la extracción, revisión manual de 20 fotos y 31 precios | 21 a 22 de 31, cerca de 70 % |
+| Exactitud anterior a la revisión actual: 20 fotos y 31 precios | 21 a 22 de 31, cerca de 70 %. Falta recalcular con el CSV revisado por Nelson el 2026-11-15 |
 | Exactitud del OCR como línea base, mismas fotos | 3 de 31, 10 % |
 | Balanced accuracy del modelo, últimos 2 años | 0.55, contra 0.46 de la línea base del enunciado |
 | Modelo en la API | Versión 3 |
@@ -86,7 +87,7 @@ Decisiones vigentes:
 
 1. **Cada capa vive en su bucket de S3**, como tablas externas de Unity Catalog dentro del prefijo `equipo-01/`.
 2. **Las fotos se leen con un modelo de visión**, Llama 4 Maverick, que ya sirve el workspace. Es gratis dentro de la cuota de Free Edition y las fotos no salen de Databricks. El OCR queda como línea base. Ver la sección 7.
-3. **La API no lee S3.** El Droplet no tiene acceso. Lleva adentro el modelo `champion` y una copia de oro, descargados con `scripts/exportar_para_api.py`. Se construye en local y se sube al Droplet a mano.
+3. **La API no lee S3.** El Droplet no tiene acceso. La prueba documentada en Docker local usó el modelo `champion` y una copia de oro descargados con `scripts/exportar_para_api.py`. El equipo confirmó que la imagen ya se desplegó en el Droplet, pero aún no documentó qué exportador generó los artefactos de esa imagen.
 
 Detalle: `docs/arquitectura/arquitectura.md` y `docs/datos/esquemas_medallion.md`.
 
@@ -103,6 +104,7 @@ Detalle: `docs/arquitectura/arquitectura.md` y `docs/datos/esquemas_medallion.md
 | `api/` | La API: `app/`, `Dockerfile`, `docker-compose.yml`, `requirements.txt`, `.env.example` y su README |
 | `tests/` | Tests del paquete, de la API y `consultas_api.sh` con las pruebas de usuario final |
 | `scripts/exportar_para_api.py` | Descarga el modelo `champion` y la copia de oro a `api/artefactos/` |
+| `scripts/exportar_local.py` | Genera artefactos para la misma carpeta desde `data/`, con un modelo entrenado en local y sin precios de fotos. El manifiesto indica `origen: local` |
 | `databricks/sql/tablas.sql` | Columnas y tipos de todas las tablas |
 | `.github/workflows/` | `bundle-plan.yml`, `tests.yml` y `bundle-deploy.yml` |
 | `docs/` | Documentación. Empezar por `docs/README.md` |
@@ -214,14 +216,16 @@ Sin cambios. Detalle en `docs/datos/esquemas_medallion.md`, sección "Cómo camb
 
 | Tema | Estado | Notas |
 |---|---|---|
-| **Merge de los PR #20, #21 y #22** | Abiertos | En orden. Después, correr `equipo-01-pipeline` una vez para confirmar que todo pasa con el código de `main` |
-| **Subir la API al Droplet** | Falta la IP del Droplet y la llave SSH | 20 puntos. Pasos en `api/README.md` |
-| **Confirmar la revisión manual** | Pendiente | El enunciado pide que la haga el equipo. Alguien debe revisar `data/revision_manual/revision_fotos.csv` contra las fotos |
-| **Evidencia de 2 corridas con fotos de semanas distintas** | Pendiente | Capturas del historial del job y de la duración de cada tarea. Necesita fotos nuevas del catedrático |
+| **Corrida completa con el código de `main`** | Sin evidencia en el repo | Confirmar que `equipo-01-pipeline` pasa después de los merges |
+| **Evidencia del despliegue de la API en el Droplet** | Despliegue confirmado por el equipo; evidencia pendiente | Registrar URL, respuesta pública e imagen usada. Pasos de verificación en `api/README.md` |
+| **Recalcular la exactitud de la extracción** | Pendiente | Nelson revisó las 20 fotos y actualizó `data/revision_manual/revision_fotos.csv` el 2026-11-15. Volver a ejecutar `21_silver_imagenes` para obtener la métrica actualizada |
+| **Evidencia de 2 corridas con fotos de semanas distintas** | No documentada | Las repeticiones de desarrollo con 0 fotos nuevas no la prueban. Se necesitan dos ejecuciones exitosas del Job, cada una con fotos nuevas de una semana distinta, y capturas del historial y de la duración de cada tarea |
 | **Ubicación de las fotos nuevas** | Pendiente de confirmar | Solo hay que cambiar el parámetro `carpeta_fotos` |
 | **Diagrama exportado, informe y presentación** | Por hacer | El informe puede usar la comparación de técnicas y las métricas de este documento |
 
-**Subir la API al Droplet.** Lo acordado con el catedrático:
+**Despliegue y actualización de la API en el Droplet.** Lo acordado con el catedrático:
+
+El PR #23 agregó `scripts/exportar_local.py` para generar el modelo y las tablas desde `data/` cuando no se usa Databricks. Ese script no incluye los precios de fotos en la copia de oro y asigna `version_modelo: local`. La prueba local registrada antes del PR #23 usó el `champion` de Databricks. El equipo confirmó el despliegue, pero aún no consta qué origen tienen los artefactos de la imagen instalada. El archivo `api/artefactos/manifiesto.json`, generado al exportar y excluido de Git, permite distinguirlos: el local lleva `origen: local` y `version_modelo: local`; el de Databricks lleva el nombre registrado del modelo, la versión, `workspace` y `run_id`. `/health` muestra la versión, pero no el campo `origen`.
 
 1. Exportar: `python scripts/exportar_para_api.py --perfil DEFAULT`. Verifica que el modelo descargado prediga lo mismo que Databricks.
 2. Construir en local: `cd api` y `docker build -t equipo-01-gasolina-api:latest .`

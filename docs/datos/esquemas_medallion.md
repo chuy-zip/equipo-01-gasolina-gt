@@ -30,7 +30,7 @@ Un esquema por capa. Los esquemas no tienen ubicación propia: cada tabla declar
 | `equipo_01.gold` | Tablas de oro y el modelo |
 
 1. Raw no tiene esquema. Las fotos se leen por ruta, por la external location `xloc-raw`.
-2. El volumen administrado `archivos` del esquema de bronce guarda la copia del Excel y de la EIA que vienen del repo, y los checkpoints de Auto Loader.
+2. El volumen administrado `archivos` del esquema de bronce guarda la copia del Excel y de la EIA que vienen del repo. La ingesta de fotos no usa Auto Loader ni checkpoints: compara las rutas del bucket con `bronze.fotos_precios`.
 3. El catálogo y los nombres de los esquemas son parámetros del bundle. Cambiarlos no requiere cambiar los notebooks.
 
 En el resto de los documentos, `bronze.tabla` abrevia la tabla en el esquema de bronce, y lo mismo para plata y oro.
