@@ -1,146 +1,133 @@
+"""API del precio de la gasolina en Guatemala.
+
+Sirve la copia de la capa oro y el modelo `champion` que se descargan de Databricks.
+La documentación interactiva está en /docs.
+"""
+
+from __future__ import annotations
+
 import datetime as dt
-import math
+import os
 from enum import Enum
-from typing import Optional
+from pathlib import Path
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 
-from app import store
+from app import datos
 
-DEFAULT_LIMIT = 100
-MAX_LIMIT = 1000
-
-app = FastAPI(
-    title="Precio de la gasolina en Guatemala",
-    description="Precios semanales y predicción de la dirección del precio, leídos de la capa Oro.",
-    version="1.0.0",
-)
+RUTA_ARTEFACTOS = Path(os.getenv("RUTA_ARTEFACTOS", Path(__file__).resolve().parents[1] / "artefactos"))
+LIMITE_MAXIMO = 1000
 
 
-class Fuel(str, Enum):
+class Combustible(str, Enum):
     super = "super"
     regular = "regular"
     diesel = "diesel"
 
 
-class Source(str, Enum):
+class Fuente(str, Enum):
     mem = "mem"
     fotos = "fotos"
 
 
-def to_records(frame: pd.DataFrame) -> list[dict]:
-    frame = frame.astype(object).where(frame.notna(), None)
-    records = frame.to_dict(orient="records")
-    return [{key: clean(value) for key, value in row.items()} for row in records]
+def crear_app(ruta: Path) -> FastAPI:
+    artefactos = datos.cargar(ruta)
+    predicciones = datos.predecir(artefactos)
+
+    app = FastAPI(
+        title="Precio de la gasolina en Guatemala",
+        description=(
+            "Precios de referencia del MEM, precios leídos de fotos de gasolineras y la predicción de la "
+            "semana siguiente: sube, baja o se mantiene. Datos de la capa oro del pipeline en Databricks. "
+            "Equipo 01, MLOps, UVG."
+        ),
+        version=str(artefactos.manifiesto.get("version_modelo", "")),
+    )
+
+    @app.get("/health", summary="Estado del servicio")
+    def health():
+        manifiesto = artefactos.manifiesto
+        return {
+            "estado": "ok",
+            "modelo": manifiesto.get("modelo"),
+            "version_modelo": manifiesto.get("version_modelo"),
+            "datos_exportados_en": manifiesto.get("exportado_en"),
+            "semana_mas_reciente": manifiesto.get("semana_mas_reciente"),
+        }
+
+    @app.get("/precios/actual", summary="Último precio de referencia por combustible")
+    def precios_actual(combustible: Combustible | None = None):
+        tabla = artefactos.referencia_actual
+        if combustible:
+            tabla = tabla[tabla["combustible"] == combustible.value]
+        return {
+            "nota": "Precio igual o menor que precio_referencia es bueno. Hasta limite_normal es normal. Arriba es caro.",
+            "datos": datos.registros(tabla),
+        }
+
+    @app.get("/precios", summary="Histórico semanal con filtros y paginación")
+    def precios(
+        combustible: Combustible | None = None,
+        desde: dt.date | None = Query(None, description="Primera semana, AAAA-MM-DD"),
+        hasta: dt.date | None = Query(None, description="Última semana, AAAA-MM-DD"),
+        fuente: Fuente | None = Query(None, description="mem para el precio oficial, fotos para los precios de las fotos"),
+        limit: int = Query(100, ge=1, le=LIMITE_MAXIMO),
+        offset: int = Query(0, ge=0),
+    ):
+        if desde and hasta and desde > hasta:
+            raise HTTPException(status_code=400, detail="desde no puede ser posterior a hasta")
+        tabla = artefactos.precio_semanal
+        semana = pd.to_datetime(tabla["semana"]).dt.date
+        filtro = pd.Series(True, index=tabla.index)
+        if combustible:
+            filtro &= tabla["combustible"] == combustible.value
+        if fuente:
+            filtro &= tabla["fuente"] == fuente.value
+        if desde:
+            filtro &= semana >= desde
+        if hasta:
+            filtro &= semana <= hasta
+        filtrada = tabla[filtro].sort_values(["semana", "combustible", "fuente"])
+        return {
+            "total": len(filtrada),
+            "limit": limit,
+            "offset": offset,
+            "datos": datos.registros(filtrada.iloc[offset: offset + limit]),
+        }
+
+    @app.get("/prediccion", summary="Predicción de la semana siguiente")
+    def prediccion(combustible: Combustible | None = None):
+        """El modelo `champion` predice con la semana más reciente de la copia de `gold.features_modelo`.
+
+        `coincide_con_databricks` compara contra lo que guardó el job en `gold.predicciones`.
+        Si es true, el modelo empaquetado es el mismo que el de Databricks.
+        """
+        guardadas = artefactos.predicciones.set_index(["semana", "combustible"])["prediccion"].to_dict()
+        tabla = predicciones
+        if combustible:
+            tabla = tabla[tabla["combustible"] == combustible.value]
+        resultado = datos.registros(tabla)
+        for fila, original in zip(resultado, tabla.itertuples()):
+            esperada = guardadas.get((original.semana_datos, original.combustible))
+            fila["coincide_con_databricks"] = None if esperada is None else esperada == original.prediccion
+            fila["version_modelo"] = artefactos.manifiesto.get("version_modelo")
+        if combustible:
+            if not resultado:
+                raise HTTPException(status_code=404, detail="No hay predicción para ese combustible")
+            return resultado[0]
+        return {"datos": resultado}
+
+    @app.get("/modelo/metricas", summary="Exactitud del modelo y de la línea base")
+    def modelo_metricas():
+        """Métricas de la evaluación temporal: los últimos 2 años que el modelo no vio al entrenar.
+
+        La línea base es la del enunciado: se repite la dirección de la semana anterior.
+        """
+        tabla = artefactos.metricas_modelo.sort_values("entrenado_en", ascending=False).head(1)
+        return datos.registros(tabla)[0]
+
+    return app
 
 
-def clean(value):
-    if isinstance(value, (dt.date, dt.datetime, pd.Timestamp)):
-        return value.isoformat()
-    if isinstance(value, float) and math.isnan(value):
-        return None
-    if hasattr(value, "item"):
-        return value.item()
-    return value
-
-
-def require_rows(frame: pd.DataFrame, detail: str) -> pd.DataFrame:
-    if frame.empty:
-        raise HTTPException(status_code=404, detail=detail)
-    return frame
-
-
-@app.get("/health")
-def health():
-    manifest = store.load_manifest()
-    tables = {name: len(store.load_table(name)) for name in store.TABLES}
-    return {
-        "status": "ok",
-        "tablas": tables,
-        "exportado_en": manifest.get("exportado_en"),
-        "version_modelo": manifest.get("version_modelo"),
-    }
-
-
-@app.get("/precios/actual")
-def current_prices(combustible: Optional[Fuel] = None):
-    frame = store.load_table("referencia_actual")
-    if combustible:
-        frame = frame[frame["combustible"] == combustible.value]
-    return to_records(require_rows(frame, "Sin precio para ese combustible").sort_values("combustible"))
-
-
-@app.get("/precios")
-def weekly_prices(
-    combustible: Optional[Fuel] = None,
-    fuente: Optional[Source] = None,
-    desde: Optional[dt.date] = None,
-    hasta: Optional[dt.date] = None,
-    limit: int = Query(DEFAULT_LIMIT, ge=1, le=MAX_LIMIT),
-    offset: int = Query(0, ge=0),
-):
-    frame = store.load_table("precio_semanal")
-    if combustible:
-        frame = frame[frame["combustible"] == combustible.value]
-    if fuente:
-        frame = frame[frame["fuente"] == fuente.value]
-    if desde:
-        frame = frame[frame["semana"] >= desde]
-    if hasta:
-        frame = frame[frame["semana"] <= hasta]
-    frame = frame.sort_values(["semana", "combustible", "fuente"], ascending=[False, True, True])
-    return {
-        "total": len(frame),
-        "limit": limit,
-        "offset": offset,
-        "datos": to_records(frame.iloc[offset : offset + limit]),
-    }
-
-
-@app.get("/prediccion")
-def prediction(combustible: Optional[Fuel] = None):
-    frame = store.load_table("predicciones")
-    if combustible:
-        frame = frame[frame["combustible"] == combustible.value]
-    frame = require_rows(frame, "Sin predicción para ese combustible")
-    latest = frame[frame["semana"] == frame["semana"].max()].sort_values("combustible")
-    columns = [
-        "semana",
-        "semana_objetivo",
-        "combustible",
-        "prediccion",
-        "probabilidad",
-        "prob_sube",
-        "prob_baja",
-        "prob_se_mantiene",
-        "version_modelo",
-        "predicho_en",
-    ]
-    records = to_records(latest[columns])
-    return records[0] if combustible else records
-
-
-@app.get("/modelo/metricas")
-def model_metrics():
-    frame = require_rows(store.load_table("metricas_modelo"), "Sin métricas del modelo")
-    latest = frame.sort_values("entrenado_en", ascending=False).iloc[[0]]
-    row = to_records(latest)[0]
-    return {
-        "version_modelo": row["version_modelo"],
-        "entrenado_en": row["entrenado_en"],
-        "inicio_prueba": row["inicio_prueba"],
-        "filas_entrenamiento": row["filas_entrenamiento"],
-        "filas_prueba": row["filas_prueba"],
-        "supera_linea_base": row["supera_linea_base"],
-        "modelo": {
-            "balanced_accuracy": row["modelo_balanced_accuracy"],
-            "f1_macro": row["modelo_f1_macro"],
-            "direccion_con_movimiento": row["modelo_direccion_con_movimiento"],
-        },
-        "linea_base": {
-            "balanced_accuracy": row["linea_base_balanced_accuracy"],
-            "f1_macro": row["linea_base_f1_macro"],
-            "direccion_con_movimiento": row["linea_base_direccion_con_movimiento"],
-        },
-    }
+app = crear_app(RUTA_ARTEFACTOS)

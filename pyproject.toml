@@ -16,7 +16,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=8"]
+# Incluye lo que necesitan los tests de la API. La imagen de Docker usa api/requirements.txt, con versiones fijas.
+test = ["pytest>=8", "fastapi>=0.110", "httpx>=0.27", "cloudpickle>=3", "pyarrow>=14"]
 # Para scripts/exportar_para_api.py, que descarga el modelo y la copia de oro para la API.
 exportar = ["databricks-sdk>=0.30", "mlflow-skinny>=2.16", "pyarrow>=14"]
 

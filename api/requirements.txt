@@ -1,4 +1,8 @@
-fastapi==0.115.6
-uvicorn==0.34.0
-pandas==2.2.3
-pyarrow==18.1.0
+# Versiones fijas. scikit-learn, pandas, pyarrow y cloudpickle deben coincidir con las del modelo,
+# que están en artefactos/modelo/requirements.txt. Si el modelo se reentrena con otra versión, se cambian aquí.
+fastapi==0.115.12
+uvicorn==0.34.2
+scikit-learn==1.7.2
+pandas==2.3.3
+pyarrow==21.0.0
+cloudpickle==3.1.1

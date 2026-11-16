@@ -4,7 +4,7 @@ Usa el mismo código de `gas_price` que el pipeline, pero entrena el modelo en l
 fotos. Sirve cuando no hay acceso a Databricks. El manifiesto queda con `origen: local`.
 Para la copia oficial usar `scripts/exportar_para_api.py`.
 
-    pip install -e . pyarrow
+    pip install -e . pyarrow cloudpickle
     python scripts/exportar_local.py
 """
 
@@ -12,6 +12,7 @@ import datetime as dt
 import json
 from pathlib import Path
 
+import cloudpickle
 import pandas as pd
 
 from gas_price import eia, features, mem, modelo
@@ -55,6 +56,7 @@ def main() -> None:
         "precio_semanal": features.precio_semanal(diarios),
         "metricas_modelo": metricas,
         "predicciones": predicciones,
+        "features_modelo": semanales[semanales["semana"] == semanales["semana"].max()].sort_values("combustible"),
     }
     carpeta = DESTINO / "datos"
     carpeta.mkdir(parents=True, exist_ok=True)
@@ -62,8 +64,15 @@ def main() -> None:
         tabla.to_parquet(carpeta / f"{nombre}.parquet", index=False)
         print(f"{nombre}: {len(tabla)} filas")
 
+    carpeta_modelo = DESTINO / "modelo"
+    carpeta_modelo.mkdir(parents=True, exist_ok=True)
+    with open(carpeta_modelo / "model.pkl", "wb") as archivo:
+        cloudpickle.dump(campeon, archivo)
+
     manifiesto = {
         "origen": "local",
+        "modelo": "local",
+        "semana_mas_reciente": str(semanales["semana"].max()),
         "exportado_en": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "version_modelo": VERSION_MODELO,
         "filas": {nombre: len(tabla) for nombre, tabla in tablas.items()},
