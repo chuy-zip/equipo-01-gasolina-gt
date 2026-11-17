@@ -234,3 +234,6 @@ api/artefactos/
 *.pem
 id_rsa*
 id_ed25519*
+
+# Imágenes de revisión de la presentación
+presentacion/png/

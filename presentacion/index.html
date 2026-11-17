@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Cargo hoy o espero? · Equipo 01</title>
+<meta name="description" content="Predicción semanal del precio de los combustibles en Guatemala. Proyecto final de MLOps, Equipo 01, UVG.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+<!-- Fondo vivo -->
+<div class="fondo" aria-hidden="true">
+  <div class="aurora a1"></div>
+  <div class="aurora a2"></div>
+  <div class="aurora a3"></div>
+  <canvas id="particulas"></canvas>
+  <div class="rejilla"></div>
+  <div class="grano"></div>
+</div>
+
+<!-- Íconos reutilizables, estilo trazo fino -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="flujo-grad" x1="0" x2="1"><stop offset="0" stop-color="#64d2ff"/><stop offset="1" stop-color="#bf5af2"/></linearGradient>
+  </defs>
+  <symbol id="i-camara" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></symbol>
+  <symbol id="i-tabla" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M3 15h18M9 9.5V20"/></symbol>
+  <symbol id="i-globo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></symbol>
+  <symbol id="i-cerebro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="5" cy="7" r="2"/><circle cx="5" cy="17" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 7.5l3 3.5M7 16.5l3-3.5M7 7l3-1.5M7 17l3 1.5M14 12h3M14 5.8l3.4 4.8M14 18.2l3.4-4.8"/></symbol>
+  <symbol id="i-servidor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6"/></symbol>
+  <symbol id="i-usuario" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></symbol>
+  <symbol id="i-git" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="9" r="2"/><path d="M6 7v10M18 11c0 4-6 3-12 6"/></symbol>
+  <symbol id="i-reloj" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+  <symbol id="i-campana" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></symbol>
+  <symbol id="i-escudo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v6c0 4.5-3.2 7.8-7.5 9-4.3-1.2-7.5-4.5-7.5-9V6z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.4"/></symbol>
+  <symbol id="i-bomba" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="11" height="18" rx="2"/><path d="M5.5 7h6M14 9h2.5a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3"/></symbol>
+  <symbol id="i-capas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12.5l9 5 9-5M3 17l9 5 9-5"/></symbol>
+  <symbol id="i-docker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 12h17c1 0 1.8-.6 2-1.5.3 1.6-.5 6.5-8.5 8.5-6 1.5-10-2-10.5-7z"/><path d="M5 12V9.5h3V12M8 12V9.5h3V12M11 12V9.5h3V12M8 9.5V7h3v2.5M11 9.5V7h3v2.5M14 12V9.5h3V12"/></symbol>
+  <symbol id="i-rayo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+</svg>
+
+<main class="escenario" id="escenario">
+
+<!-- ======================================================= 1 · PORTADA -->
+<section class="diapo portada" data-titulo="Portada" data-presenta="Daniel" data-aurora="#0a84ff,#bf5af2,#ff453a">
+  <div class="ceja" data-a style="--i:0; --acento: var(--diesel)"><span class="punto"></span>Equipo 01 · MLOps · Universidad del Valle de Guatemala</div>
+  <h1 class="titulo-xl" data-a style="--i:1">¿Cargo hoy<br><span class="degradado-fuego">o espero?</span></h1>
+  <p class="sub" data-a style="--i:2">Un sistema de punta a punta que convierte fotos de gasolineras en datos y predice si el precio de la gasolina subirá, bajará o se mantendrá la próxima semana.</p>
+
+  <div class="vidrio medidor" data-a="zoom" style="--i:3">
+    <svg viewBox="0 0 520 300" aria-hidden="true">
+      <defs>
+        <linearGradient id="g-medidor" x1="0" x2="1"><stop offset="0" stop-color="#30d158"/><stop offset=".5" stop-color="rgba(255,255,255,.55)"/><stop offset="1" stop-color="#ff453a"/></linearGradient>
+      </defs>
+      <path d="M50 270 A210 210 0 0 1 470 270" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="26" stroke-linecap="round"/>
+      <path d="M50 270 A210 210 0 0 1 470 270" fill="none" stroke="url(#g-medidor)" stroke-width="26" stroke-linecap="round" stroke-dasharray="2 11" opacity=".9"/>
+      <text x="40" y="300" style="fill:#30d158;font-size:20px;font-weight:650">Baja</text>
+      <text x="260" y="40" text-anchor="middle" style="fill:rgba(255,255,255,.55);font-size:20px;font-weight:650">Igual</text>
+      <text x="480" y="300" text-anchor="end" style="fill:#ff453a;font-size:20px;font-weight:650">Sube</text>
+      <g class="aguja" id="aguja" style="--giro: -78deg">
+        <path d="M260 270 L254 110 L260 92 L266 110 Z" fill="#fff"/>
+        <circle cx="260" cy="270" r="18" fill="#0a0c12" stroke="#fff" stroke-width="4"/>
+      </g>
+    </svg>
+    <div class="medidor-pie">
+      <div class="pequeno">Súper · semana siguiente</div>
+      <div class="medidor-valor"><span id="medidor-dir" class="c-regular">Baja</span> <span id="medidor-prob">94 %</span></div>
+    </div>
+  </div>
+
+  <div class="equipo" data-a style="--i:4">
+    <div class="pequeno">Presentan</div>
+    <div class="nombres" id="lista-equipo"></div>
+  </div>
+
+  <div class="precios-vivos">
+    <div class="vidrio s chip-precio" data-a="zoom" style="--i:5"><div class="nombre c-super"><i></i>Súper</div><div class="valor"><small>Q</small><span data-api="actual.super">32.49</span></div></div>
+    <div class="vidrio s chip-precio" data-a="zoom" style="--i:6"><div class="nombre c-regular"><i></i>Regular</div><div class="valor"><small>Q</small><span data-api="actual.regular">29.98</span></div></div>
+    <div class="vidrio s chip-precio" data-a="zoom" style="--i:7"><div class="nombre c-diesel"><i></i>Diésel</div><div class="valor"><small>Q</small><span data-api="actual.diesel">41.01</span></div></div>
+  </div>
+  <aside class="notas">
+    Buenas. Somos el Equipo 01. Todos los que cargamos gasolina en Guatemala nos hemos hecho esta pregunta: ¿cargo hoy o espero?
+    Los precios que ven abajo a la derecha no son de una imagen. Vienen en vivo de nuestra API, con la referencia oficial vigente por galón.
+    En los próximos 10 minutos les contamos cómo pasamos de una foto de un dispensador a una predicción, y al final lo prueban ustedes desde su teléfono.
+    Tiempo objetivo: 20 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 2 · PROBLEMA -->
+<section class="diapo" data-titulo="El problema" data-presenta="Daniel" data-aurora="#ff453a,#ff9f0a,#0a84ff">
+  <div class="ceja" data-a style="--i:0; --acento: var(--super)"><span class="punto"></span>El problema</div>
+  <h2 class="titulo" data-a style="--i:1">El precio cambia cada semana.<br><span class="c-tenue">El conductor decide a ciegas.</span></h2>
+  <div class="vidrio panel-grafica" data-a style="--i:3">
+    <div class="fila" style="justify-content: space-between; align-items: center;">
+      <div class="leyenda">
+        <span class="c-super"><i></i>Súper</span>
+        <span class="c-regular"><i></i>Regular</span>
+        <span class="c-diesel"><i></i>Diésel</span>
+      </div>
+      <div class="pequeno">Precio de referencia del MEM al cierre de cada semana, en quetzales por galón · 2013 a 2026</div>
+    </div>
+    <div class="crece" id="g-historia" style="margin-top: 18px;"></div>
+  </div>
+  <aside class="notas">
+    Esta es la historia real: 711 semanas de precios oficiales del Ministerio de Energía y Minas.
+    La súper ha ido de Q16 a más de Q45 por galón. Solo en 2026 hubo un subsidio de mayo a julio y en octubre una exención de impuestos que bajó Q9.10 en una sola semana.
+    El MEM publica la referencia cada martes y el precio se mueve en saltos. Pero quien carga no sabe qué viene: si llena el tanque el lunes y el martes baja, perdió dinero.
+    Tiempo objetivo: 40 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 3 · DECISIÓN -->
+<section class="diapo" data-titulo="Para quién" data-presenta="Daniel" data-aurora="#ffd60a,#ff453a,#5e5ce6">
+  <div class="ceja" data-a style="--i:0; --acento: var(--diesel)"><span class="punto"></span>Para quién y por qué</div>
+  <p class="pregunta-grande mt" data-a style="--i:1">Si espero al próximo cambio de precio,<br><span class="degradado">¿pagaré más, menos o lo mismo?</span></p>
+  <div class="rejilla-3 mt-l">
+    <div class="vidrio tarjeta tinte-ml" data-a style="--i:3">
+      <div class="icono" style="background: rgba(10,132,255,0.22); color: var(--cian)"><svg><use href="#i-reloj"/></svg></div>
+      <h3>Cuándo cargar</h3>
+      <p>Saber si conviene llenar hoy o esperar. Evitar llenar el tanque justo antes de una baja. <b>Es nuestro foco.</b></p>
+    </div>
+    <div class="vidrio tarjeta" data-a style="--i:4">
+      <div class="icono" style="background: rgba(255,255,255,0.08); color: var(--texto-2)"><svg><use href="#i-bomba"/></svg></div>
+      <h3>Dónde cargar</h3>
+      <p>Entre estaciones la diferencia es de <b>Q0.50 a Q1.00</b> por galón. Saber si la estación ya aplicó el cambio.</p>
+    </div>
+    <div class="vidrio tarjeta" data-a style="--i:5">
+      <div class="icono" style="background: rgba(255,255,255,0.08); color: var(--texto-2)"><svg><use href="#i-rayo"/></svg></div>
+      <h3>Cuánto cargar</h3>
+      <p>Llenar o cargar lo justo. El servicio completo cuesta cerca de <b>Q1.03</b> más por galón que el autoservicio.</p>
+    </div>
+  </div>
+  <p class="pequeno mt" data-a style="--i:6">Para conductores, flotillas y pequeños negocios que dependen del combustible. Fuente: análisis de negocio del equipo, julio de 2026.</p>
+  <aside class="notas">
+    ¿Para quién es esto? Para cualquier conductor, pero sobre todo para flotillas, repartidores y negocios donde el combustible pesa en el costo.
+    Hay tres decisiones: cuándo, dónde y cuánto. Nos enfocamos en la primera, que es la que más depende del futuro.
+    La pregunta concreta que respondemos es: si espero al próximo cambio, ¿pagaré más, menos o lo mismo?
+    Tiempo objetivo: 30 segundos. Paso a Diego.
+  </aside>
+</section>
+
+<!-- ======================================================= 4 · SOLUCIÓN -->
+<section class="diapo" data-titulo="Nuestra respuesta" data-presenta="Diego" data-aurora="#0a84ff,#64d2ff,#bf5af2">
+  <div class="ceja" data-a style="--i:0"><span class="punto"></span>Nuestra respuesta</div>
+  <h2 class="titulo" data-a style="--i:1">De una foto del dispensador<br>a una <span class="degradado">predicción en tu teléfono.</span></h2>
+  <div class="fila mt-l" style="gap: 40px; align-items: stretch;">
+    <div class="rejilla-3 crece" style="gap: 28px;">
+      <div class="vidrio tarjeta" data-a style="--i:3">
+        <div class="icono" style="background: rgba(255,214,10,0.18); color: var(--diesel)"><svg><use href="#i-camara"/></svg></div>
+        <h3>Datos</h3>
+        <p>110 fotos de precios, 13 años de precios oficiales del MEM y el precio internacional de la EIA.</p>
+      </div>
+      <div class="vidrio tarjeta" data-a style="--i:4">
+        <div class="icono" style="background: rgba(10,132,255,0.2); color: var(--cian)"><svg><use href="#i-cerebro"/></svg></div>
+        <h3>Modelo</h3>
+        <p>Un clasificador que aprende de 711 semanas y le gana a la regla de “repetir la semana pasada”.</p>
+      </div>
+      <div class="vidrio tarjeta" data-a style="--i:5">
+        <div class="icono" style="background: rgba(48,209,88,0.18); color: var(--regular)"><svg><use href="#i-servidor"/></svg></div>
+        <h3>Servicio</h3>
+        <p>Una API pública que corre sola en la nube y se actualiza cada semana.</p>
+      </div>
+    </div>
+    <div class="vidrio terminal" data-a="der" style="--i:6; width: 560px;">
+      <div class="barra-t"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span>GET /prediccion?combustible=super</span></div>
+      <div class="json" id="json-ejemplo"></div>
+    </div>
+  </div>
+  <aside class="notas">
+    Nuestra respuesta tiene tres piezas. Datos: las fotos que nos dio el catedrático, más dos fuentes públicas para tener historia.
+    Modelo: un clasificador que aprende de más de 700 semanas.
+    Servicio: una API pública. A la derecha está una respuesta real: dice qué semana predice, la dirección y la probabilidad.
+    Tiempo objetivo: 25 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 5 · ARQUITECTURA -->
+<section class="diapo" data-titulo="Arquitectura" data-presenta="Diego" data-aurora="#0a84ff,#5e5ce6,#f5c451">
+  <div class="ceja" data-a style="--i:0"><span class="punto"></span>Arquitectura</div>
+  <h2 class="titulo" data-a style="--i:1; font-size: 76px">Cuatro paradas, un solo flujo automático.</h2>
+  <div class="diagrama" id="diagrama-arq" data-a style="--i:2">
+    <svg class="conexiones" aria-hidden="true"></svg>
+
+    <div class="grupo-caja" style="left: 300px; top: 10px; width: 860px; height: 610px;"><span>Databricks · Unity Catalog · tablas Delta en S3</span></div>
+    <div class="grupo-caja" style="left: 1200px; top: 10px; width: 440px; height: 610px;"><span>DigitalOcean · Droplet</span></div>
+
+    <div class="vidrio s nodo" id="n-fotos" style="left: 0; top: 60px;"><svg class="n-icono"><use href="#i-camara"/></svg><div class="n-ceja">Fuente principal</div><div class="n-titulo">Fotos</div><div class="n-texto">Bucket S3, solo lectura</div></div>
+    <div class="vidrio s nodo" id="n-mem" style="left: 0; top: 250px;"><svg class="n-icono"><use href="#i-tabla"/></svg><div class="n-ceja">Complementaria</div><div class="n-titulo">MEM</div><div class="n-texto">Precio oficial desde 2013</div></div>
+    <div class="vidrio s nodo" id="n-eia" style="left: 0; top: 440px;"><svg class="n-icono"><use href="#i-globo"/></svg><div class="n-ceja">Complementaria</div><div class="n-titulo">EIA</div><div class="n-texto">Precio internacional</div></div>
+
+    <div class="vidrio s nodo paso" id="n-bronce" style="left: 330px; top: 230px; width: 240px;"><div class="n-ceja"><span class="medalla" style="background: var(--bronce)"></span>Bronce</div><div class="n-titulo">Tal como llega</div><div class="n-texto">Fotos y archivos originales</div></div>
+    <div class="vidrio s nodo paso" id="n-plata" style="left: 610px; top: 230px; width: 240px;"><div class="n-ceja"><span class="medalla" style="background: var(--plata)"></span>Plata</div><div class="n-titulo">Limpio</div><div class="n-texto">Precios extraídos y validados</div></div>
+    <div class="vidrio s nodo paso" id="n-oro" style="left: 890px; top: 230px; width: 240px;"><div class="n-ceja"><span class="medalla" style="background: var(--oro)"></span>Oro</div><div class="n-titulo">Para decidir</div><div class="n-texto">Semanas, variables, predicción</div></div>
+    <div class="vidrio s nodo paso tinte-ml" id="n-mlflow" style="left: 890px; top: 450px; width: 240px;"><svg class="n-icono"><use href="#i-cerebro"/></svg><div class="n-ceja">MLflow</div><div class="n-titulo">Modelo</div><div class="n-texto">Versión “champion”</div></div>
+    <div class="vidrio s nodo paso" id="n-git" style="left: 330px; top: 450px; width: 240px;"><svg class="n-icono"><use href="#i-git"/></svg><div class="n-ceja">GitHub Actions</div><div class="n-titulo">CI/CD</div><div class="n-texto">Pruebas y despliegue</div></div>
+    <div class="vidrio s nodo paso" id="n-job" style="left: 610px; top: 60px; width: 240px;"><svg class="n-icono"><use href="#i-reloj"/></svg><div class="n-ceja">Databricks Job</div><div class="n-titulo">Martes 8:00</div><div class="n-texto">Corre solo, avisa si falla</div></div>
+
+    <div class="vidrio s nodo paso tinte-regular" id="n-api" style="left: 1240px; top: 230px; width: 360px;"><svg class="n-icono"><use href="#i-docker"/></svg><div class="n-ceja">FastAPI en Docker</div><div class="n-titulo">API pública</div><div class="n-texto">Modelo y copia de oro dentro de la imagen</div></div>
+    <div class="vidrio s nodo paso" id="n-usuario" style="left: 1240px; top: 450px; width: 360px;"><svg class="n-icono"><use href="#i-usuario"/></svg><div class="n-ceja">HTTP</div><div class="n-titulo">Usuario</div><div class="n-texto">Consulta desde su teléfono</div></div>
+  </div>
+  <aside class="notas">
+    Así funciona por dentro, sin jerga. Cada clic agrega una parada.
+    Bronce guarda todo tal como llega, para poder reprocesar si mejoramos la lectura.
+    Plata tiene los precios ya extraídos y validados. Oro tiene lo que sirve para decidir: semanas, variables y la predicción.
+    El modelo se guarda en MLflow. Un job corre todo cada martes a las 8:00, que es cuando el MEM publica, y nos avisa por correo si falla.
+    La API vive en un servidor de DigitalOcean, dentro de un contenedor Docker.
+    Tiempo objetivo: 50 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 6 · CAPAS -->
+<section class="diapo" data-titulo="Tres capas" data-presenta="Diego" data-aurora="#d9925b,#c7ced8,#f5c451">
+  <div class="ceja" data-a style="--i:0; --acento: var(--oro)"><span class="punto"></span>Arquitectura medallón</div>
+  <h2 class="titulo" data-a style="--i:1">Tres capas, tres promesas.</h2>
+  <div class="rejilla-3 mt">
+    <div class="vidrio capa" data-a style="--i:2">
+      <div class="metal bronce">B</div>
+      <h3>Bronce</h3>
+      <p class="lema">Nada se pierde.</p>
+      <ul>
+        <li>Lee las fotos con Spark <span class="mono">binaryFile</span> desde S3</li>
+        <li>Carga incremental: compara rutas y hace <span class="mono">MERGE</span></li>
+        <li>Columnas de auditoría: hora de carga y archivo de origen</li>
+      </ul>
+      <div class="dato"><span class="cifra-s" data-cuenta="110">110</span><span class="pequeno">fotos de 110. Segunda carga: 0 duplicados</span></div>
+    </div>
+    <div class="vidrio capa" data-a style="--i:3">
+      <div class="metal plata">P</div>
+      <h3>Plata</h3>
+      <p class="lema">Solo pasa lo confiable.</p>
+      <ul>
+        <li>Un modelo de visión lee cada foto</li>
+        <li>9 reglas de calidad y cuarentena con motivo</li>
+        <li>Una fila por fecha, ubicación, combustible y modalidad</li>
+      </ul>
+      <div class="dato"><span class="cifra-s">~<span data-cuenta="260">260</span></span><span class="pequeno">precios válidos y ~210 rechazos explicados</span></div>
+    </div>
+    <div class="vidrio capa" data-a style="--i:4">
+      <div class="metal oro">O</div>
+      <h3>Oro</h3>
+      <p class="lema">Responde la pregunta.</p>
+      <ul>
+        <li>Precio semanal, de martes a lunes como el MEM</li>
+        <li>Variación y etiqueta: sube, baja o se mantiene</li>
+        <li>Variables, métricas y predicciones documentadas</li>
+      </ul>
+      <div class="dato"><span class="cifra-s" data-cuenta="711">711</span><span class="pequeno">semanas listas para el modelo</span></div>
+    </div>
+  </div>
+  <aside class="notas">
+    Cada capa tiene una promesa. Bronce: nada se pierde. Las 110 fotos están ahí y si corremos la carga otra vez no se duplica ninguna.
+    Plata: solo pasa lo confiable. Lo que falla va a una tabla de cuarentena con el motivo.
+    Oro: responde la pregunta. Ahí están las semanas, las variables y las predicciones.
+    Todas son tablas Delta externas, cada una en su bucket de S3. Le paso a Rodrigo.
+    Tiempo objetivo: 30 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 7 · FOTO → DATO -->
+<section class="diapo" data-titulo="De la foto al dato" data-presenta="Rodrigo" data-aurora="#64d2ff,#0a84ff,#ffd60a">
+  <div class="ceja" data-a style="--i:0; --acento: var(--cian)"><span class="punto"></span>De la foto al dato</div>
+  <h2 class="titulo" data-a style="--i:1">Leemos el dispensador<br><span class="c-tenue">como lo leería una persona.</span></h2>
+  <div class="fila" style="gap: 70px; margin-top: 20px; flex: 1; align-items: center;">
+    <div class="dispensador" data-a="izq" style="--i:2; width: 560px; height: 640px;">
+      <svg viewBox="0 0 560 640" id="svg-dispensador">
+        <defs>
+          <linearGradient id="carcasa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2d36"/><stop offset="1" stop-color="#15171d"/></linearGradient>
+          <linearGradient id="lcd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1a12"/><stop offset="1" stop-color="#06100b"/></linearGradient>
+          <filter id="brillo-lcd"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect x="10" y="10" width="540" height="620" rx="36" fill="url(#carcasa)" stroke="rgba(255,255,255,0.14)"/>
+        <rect x="10" y="10" width="540" height="620" rx="36" fill="none" stroke="url(#flujo-grad)" stroke-opacity="0.25"/>
+        <text x="280" y="62" text-anchor="middle" style="fill: rgba(255,255,255,0.4); font-size: 18px; letter-spacing: 0.3em;">DISPENSADOR</text>
+        <!-- pantalla grande -->
+        <rect x="50" y="90" width="460" height="250" rx="18" fill="url(#lcd)" stroke="rgba(255,255,255,0.1)"/>
+        <text x="80" y="140" style="fill: rgba(140,255,180,0.55); font-size: 20px; letter-spacing: 0.18em;">VENTA  Q</text>
+        <text x="480" y="210" text-anchor="end" filter="url(#brillo-lcd)" style="fill: #8dffb4; font-family: var(--mono); font-size: 76px; font-weight: 600;">450.00</text>
+        <text x="80" y="262" style="fill: rgba(140,255,180,0.55); font-size: 20px; letter-spacing: 0.18em;">GALONES</text>
+        <text x="480" y="320" text-anchor="end" filter="url(#brillo-lcd)" style="fill: #8dffb4; font-family: var(--mono); font-size: 62px; font-weight: 600;">13.85</text>
+        <rect class="caja-deteccion" id="caja-venta" x="58" y="96" width="444" height="236" rx="14"/>
+        <!-- ventanas de precio -->
+        <g style="font-family: var(--mono);">
+          <g transform="translate(50,380)"><rect width="105" height="150" rx="14" fill="#0d0f14" stroke="rgba(255,214,10,0.5)"/><text x="52" y="38" text-anchor="middle" style="fill:#ffd60a; font-size:15px; font-family: var(--fuente); letter-spacing:.1em">DIESEL</text><text x="52" y="100" text-anchor="middle" filter="url(#brillo-lcd)" style="fill:#ffe9a0; font-size:30px">41.01</text></g>
+          <g transform="translate(168,380)"><rect width="105" height="150" rx="14" fill="#0d0f14" stroke="rgba(48,209,88,0.5)"/><text x="52" y="38" text-anchor="middle" style="fill:#30d158; font-size:15px; font-family: var(--fuente); letter-spacing:.1em">REGULAR</text><text x="52" y="100" text-anchor="middle" filter="url(#brillo-lcd)" style="fill:#b9f5c8; font-size:30px">29.98</text></g>
+          <g transform="translate(286,380)"><rect id="ventana-super" width="105" height="150" rx="14" fill="#0d0f14" stroke="rgba(255,69,58,0.55)"/><text x="52" y="38" text-anchor="middle" style="fill:#ff453a; font-size:15px; font-family: var(--fuente); letter-spacing:.1em">SUPER</text><text x="52" y="100" text-anchor="middle" filter="url(#brillo-lcd)" style="fill:#ffc2bd; font-size:30px">32.49</text></g>
+          <g transform="translate(404,380)" opacity="0.5"><rect width="105" height="150" rx="14" fill="#0d0f14" stroke="rgba(255,255,255,0.2)"/><text x="52" y="38" text-anchor="middle" style="fill:#aaa; font-size:15px; font-family: var(--fuente); letter-spacing:.1em">V-POWER</text><text x="52" y="100" text-anchor="middle" style="fill:#ccc; font-size:30px">34.99</text></g>
+          <rect class="caja-deteccion" id="caja-super" x="280" y="374" width="117" height="162" rx="16" style="stroke: var(--super)"/>
+        </g>
+        <rect x="50" y="560" width="460" height="40" rx="12" fill="rgba(255,255,255,0.04)"/>
+        <text x="280" y="587" text-anchor="middle" style="fill: rgba(255,255,255,0.35); font-size: 16px; letter-spacing: 0.1em;">IMG_4447.HEIC · EXIF 2026-11-08</text>
+      </svg>
+      <div class="escaneo"></div>
+    </div>
+
+    <div class="col crece" style="gap: 22px;">
+      <div class="vidrio s paso" style="padding: 26px 32px;">
+        <div class="pequeno">1 · Modelo de visión</div>
+        <div class="texto" style="margin-top: 8px;"><b>Llama 4 Maverick</b> recibe la foto completa y un acercamiento a las ventanas. Responde en JSON.</div>
+      </div>
+      <div class="vidrio s paso tinte-ml" style="padding: 26px 32px;">
+        <div class="pequeno">2 · El truco: venta entre galones</div>
+        <div class="ecuacion" style="margin-top: 10px;">Q450.00<span class="op">÷</span>13.85<span class="op">=</span><span class="c-super">Q32.49</span></div>
+        <div class="texto" style="margin-top: 6px; font-size: 24px;">Da el precio exacto y coincide con una sola ventana: <b class="c-super">Súper</b>.</div>
+      </div>
+      <div class="vidrio s paso" style="padding: 26px 32px;">
+        <div class="pequeno">3 · Contexto sin exponer datos</div>
+        <div class="texto" style="margin-top: 8px;">La <b>fecha</b> sale del EXIF de la foto. La <b>ubicación</b> se reduce al municipio. No guardamos coordenadas.</div>
+      </div>
+    </div>
+  </div>
+  <aside class="notas">
+    Casi todas las fotos son de un dispensador como este: una pantalla grande con la venta y los galones, y cuatro ventanas pequeñas con los precios.
+    Probamos OCR tradicional y fallaba mucho con los dígitos de siete segmentos. Así que usamos un modelo de visión, Llama 4 Maverick, que ya corre dentro de Databricks. Las fotos nunca salen del workspace.
+    El truco: dividir la venta entre los galones da el precio exacto del combustible que se despachó, y nos dice cuál ventana es. Si da 32.49, es súper.
+    La fecha sale del EXIF y la ubicación solo a nivel de municipio. Tiempo objetivo: 50 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 8 · REGLAS -->
+<section class="diapo" data-titulo="Reglas de calidad" data-presenta="Rodrigo" data-aurora="#ffd60a,#30d158,#ff453a">
+  <div class="ceja" data-a style="--i:0; --acento: var(--regular)"><span class="punto"></span>Reglas de calidad</div>
+  <h2 class="titulo" data-a style="--i:1">Plausible no significa correcto.</h2>
+  <div class="fila mt" style="gap: 48px; flex: 1;">
+    <div class="col crece" style="gap: 10px;">
+      <div class="vidrio s regla enunciado" data-a style="--i:2"><span class="num">01</span>Precio entre <code>Q20</code> y <code>Q55</code> por galón<span class="marca">Enunciado</span></div>
+      <div class="vidrio s regla enunciado" data-a style="--i:3"><span class="num">02</span>Combustible dentro del catálogo<span class="marca">Enunciado</span></div>
+      <div class="vidrio s regla enunciado" data-a style="--i:4"><span class="num">03</span>Fecha válida y no futura<span class="marca">Enunciado</span></div>
+      <div class="vidrio s regla" data-a style="--i:5"><span class="num">04</span>A no más de <code>15 %</code> de la referencia del MEM</div>
+      <div class="vidrio s regla" data-a style="--i:6"><span class="num">05</span>Combustible identificado, precio leído, sin lectura fallida</div>
+      <div class="vidrio s regla" data-a style="--i:7"><span class="num">06</span>Sin duplicados: fecha + ubicación + combustible + modalidad</div>
+      <p class="pequeno" data-a style="--i:8; margin-top: 10px;">9 motivos de rechazo en total. Cada fila rechazada va a <span class="mono">silver.precios_rejected</span> con su motivo.</p>
+    </div>
+    <div class="col" style="width: 640px; justify-content: center;">
+      <div class="embudo">
+        <div class="vidrio s barra-embudo paso" style="width: 100%;"><span>Fotos procesadas</span><b data-cuenta="110">110</b></div>
+        <div class="vidrio s barra-embudo paso tinte-regular" style="width: 100%;"><span>Precios válidos en plata</span><b>~<span data-cuenta="260">260</span></b></div>
+        <div class="vidrio s barra-embudo paso tinte-super" style="width: 100%;"><span>En cuarentena con motivo</span><b>~<span data-cuenta="210">210</span></b></div>
+      </div>
+      <p class="pequeno paso" style="margin-top: 26px;">Una foto aporta varios precios: uno por ventana. Por eso hay más filas que fotos. Una segunda corrida produce el mismo resultado: la carga es idempotente.</p>
+    </div>
+  </div>
+  <aside class="notas">
+    Un 9 que se lee como 4 sigue pareciendo un precio normal. Por eso no basta con un rango.
+    Cumplimos las tres reglas que pide el enunciado y agregamos otras: la más útil compara contra la referencia del MEM de ese día. Si se aleja más de 15 %, casi siempre es un dígito mal leído.
+    Nada se borra: lo que falla queda en cuarentena con su motivo. De 110 fotos sacamos unos 260 precios válidos. Le paso a Nelson.
+    Tiempo objetivo: 35 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 9 · EXACTITUD -->
+<section class="diapo" data-titulo="Exactitud de la lectura" data-presenta="Nelson" data-aurora="#64d2ff,#5e5ce6,#ff453a">
+  <div class="ceja" data-a style="--i:0; --acento: var(--cian)"><span class="punto"></span>Revisión manual</div>
+  <h2 class="titulo" data-a style="--i:1">Revisamos 20 fotos a mano.<br><span class="c-tenue">Esto es lo que acierta cada técnica.</span></h2>
+  <div class="fila mt" style="gap: 60px; align-items: center; flex: 1;">
+    <div class="col centro" data-a="zoom" style="--i:2">
+      <div class="anillo" style="--c: 1194; --off: calc(1194 * (1 - 0.591));">
+        <svg viewBox="0 0 420 420"><defs><linearGradient id="g-anillo" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#64d2ff"/><stop offset="1" stop-color="#5e5ce6"/></linearGradient></defs><circle class="fondo-anillo" cx="210" cy="210" r="190"/><circle class="valor-anillo" cx="210" cy="210" r="190" stroke="url(#g-anillo)"/></svg>
+        <div class="centro-anillo"><div class="cifra"><span data-cuenta="59.1" data-dec="1">59.1</span><span style="font-size: 54px">%</span></div><div class="etiqueta">26 de 44 precios visibles</div></div>
+      </div>
+      <div class="texto mt-s"><b>Llama 4 Maverick</b> · modelo de visión</div>
+    </div>
+    <div class="col centro" data-a="zoom" style="--i:3">
+      <div class="anillo" style="--c: 1194; --off: calc(1194 * (1 - 0.097)); width: 300px; height: 300px;">
+        <svg viewBox="0 0 420 420"><circle class="fondo-anillo" cx="210" cy="210" r="190"/><circle class="valor-anillo" cx="210" cy="210" r="190" stroke="rgba(255,255,255,0.5)"/></svg>
+        <div class="centro-anillo"><div class="cifra-m"><span data-cuenta="9.7" data-dec="1">9.7</span><span style="font-size: 36px">%</span></div><div class="etiqueta">3 de 31 precios</div></div>
+      </div>
+      <div class="texto mt-s c-tenue">RapidOCR · línea base</div>
+    </div>
+    <div class="col crece" style="gap: 18px;">
+      <div class="vidrio s paso" style="padding: 24px 28px;"><div class="texto"><b>Criterio estricto.</b> Comparamos por foto y combustible con tolerancia de un centavo. Un precio visible que no llegó a plata cuenta como error.</div></div>
+      <div class="vidrio s paso" style="padding: 24px 28px;"><div class="texto"><b>Dónde falla.</b> Reflejos, pantallas de siete segmentos y la confusión entre 4 y 9.</div></div>
+      <div class="vidrio s paso" style="padding: 24px 28px;"><div class="texto"><b>Ojo con comparar.</b> La medición anterior daba 68 a 71 % sobre 31 precios. Ampliamos y corregimos la referencia, así que no es una caída comprobada.</div></div>
+    </div>
+  </div>
+  <aside class="notas">
+    El enunciado pide revisar al menos 20 fotos a mano. Yo las revisé: anoté el precio real de cada combustible visible.
+    Con el modelo de visión acertamos 26 de 44 precios, 59.1 %. Con OCR tradicional, menos del 10 %.
+    El criterio es estricto: si un precio se veía en la foto pero no llegó a plata, cuenta como error, aunque lo haya rechazado una regla de calidad.
+    Sabemos dónde falla: reflejos y la confusión entre 4 y 9. Tiempo objetivo: 40 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 10 · FUENTES -->
+<section class="diapo" data-titulo="Más historia" data-presenta="Nelson" data-aurora="#ff9f0a,#ff453a,#0a84ff">
+  <div class="ceja" data-a style="--i:0; --acento: #ff9f0a"><span class="punto"></span>Fuentes complementarias</div>
+  <h2 class="titulo" data-a style="--i:1">110 fotos no alcanzan para aprender.<br><span class="c-tenue">13 años de historia, sí.</span></h2>
+  <div class="fila mt" style="gap: 32px; flex: 1;">
+    <div class="vidrio panel-grafica" data-a style="--i:2; margin-top: 0; flex: 1.6;">
+      <div class="fila" style="justify-content: space-between; align-items: center;">
+        <div class="leyenda">
+          <span class="c-super"><i></i>Súper en Guatemala</span>
+          <span style="color: #ff9f0a"><i></i>Gasolina en la Costa del Golfo, en quetzales</span>
+        </div>
+      </div>
+      <div class="crece" id="g-internacional" style="margin-top: 14px;"></div>
+      <div class="pequeno">Últimos 3 años. El precio local sigue al internacional con unas semanas de retraso.</div>
+    </div>
+    <div class="col" style="flex: 1; gap: 20px;">
+      <div class="vidrio s tarjeta" data-a style="--i:3; padding: 30px 34px;">
+        <h3 style="font-size: 30px;">MEM · desde 2013</h3>
+        <p style="font-size: 21px;">4,359 días de precio oficial y tipo de cambio. Se versiona en Git.</p>
+      </div>
+      <div class="vidrio s tarjeta" data-a style="--i:4; padding: 30px 34px;">
+        <h3 style="font-size: 30px;">EIA · precio internacional</h3>
+        <p style="font-size: 21px;">Gasolina y diésel de la Costa del Golfo, el mercado del que importa Guatemala.</p>
+      </div>
+      <div class="vidrio s tarjeta tinte-regular" data-a style="--i:5; padding: 30px 34px;">
+        <h3 style="font-size: 30px;">Prueba de “no empeorar”</h3>
+        <p style="font-size: 21px;">Cada actualización pasa 6 reglas en el CI: no perder fechas, no cambiar historia en silencio, sin nulos nuevos.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notas">
+    Con 110 fotos no se entrena un modelo semanal. El enunciado permite fuentes complementarias y usamos dos.
+    El Excel del MEM con 13 años de precios diarios, y el precio internacional de la EIA.
+    En la gráfica se ve la idea clave: el precio local sigue al internacional, con unas semanas de retraso. Eso es lo que el modelo aprovecha.
+    Cuidamos los datos como código: cada actualización pasa una prueba automática que impide perder fechas o cambiar historia en silencio. Le paso a Chuy.
+    Tiempo objetivo: 35 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 11 · MODELO -->
+<section class="diapo" data-titulo="El modelo" data-presenta="Chuy" data-aurora="#5e5ce6,#bf5af2,#0a84ff">
+  <div class="ceja" data-a style="--i:0; --acento: var(--ml-3)"><span class="punto"></span>El modelo</div>
+  <h2 class="titulo" data-a style="--i:1">Tres respuestas posibles,<br><span class="degradado">una probabilidad para cada una.</span></h2>
+  <div class="semanas mt" data-a style="--i:2">
+    <div class="semana">Semana −3<b>Mar 13 oct</b></div>
+    <div class="semana">Semana −2<b>Mar 20 oct</b></div>
+    <div class="semana">Semana −1<b>Mar 27 oct</b></div>
+    <div class="semana hoy">Con datos hasta el lunes<b>Mar 3 nov</b></div>
+    <div class="semana objetivo">Se predice<b>Mar 10 nov</b></div>
+  </div>
+  <p class="pequeno" data-a style="--i:3; margin-top: 14px;">Semanas de martes a lunes, como la referencia del MEM. Solo se usa lo que se sabía al cierre de la semana. Nada del futuro.</p>
+  <div class="rejilla-3 mt-s">
+    <div class="vidrio s clase paso"><div class="flecha" style="background: rgba(255,69,58,0.18); color: var(--super)">↑</div><div><h4>Sube</h4><p>Cambio de Q0.10 o más</p></div></div>
+    <div class="vidrio s clase paso"><div class="flecha" style="background: rgba(255,255,255,0.08); color: var(--texto-2)">→</div><div><h4>Se mantiene</h4><p>Menos de Q0.10 de diferencia</p></div></div>
+    <div class="vidrio s clase paso"><div class="flecha" style="background: rgba(48,209,88,0.18); color: var(--regular)">↓</div><div><h4>Baja</h4><p>Cambio de −Q0.10 o menos</p></div></div>
+  </div>
+  <div class="fila mt-s paso" style="gap: 32px; align-items: flex-start;">
+    <div class="vidrio s" style="padding: 26px 30px; width: 520px;">
+      <div class="pequeno">Algoritmo</div>
+      <div class="texto" style="margin-top: 6px;"><b>Regresión logística</b> con clases balanceadas. Más estable que Gradient Boosting en nuestras pruebas.</div>
+    </div>
+    <div class="crece">
+      <div class="pequeno" style="margin-bottom: 12px;">16 variables por semana y combustible</div>
+      <div class="chips">
+        <span class="chip">combustible</span><span class="chip">cambio_l1…l4</span><span class="chip">tendencia_4</span><span class="chip">tendencia_8</span>
+        <span class="chip">tipo_cambio_cambio</span><span class="chip">mes</span><span class="chip">otro_super_l1</span><span class="chip">otro_regular_l1</span><span class="chip">otro_diesel_l1</span>
+        <span class="chip fuerte">intl_cambio_1…3</span><span class="chip fuerte">brecha_vs_8</span>
+      </div>
+    </div>
+  </div>
+  <aside class="notas">
+    El modelo responde una de tres cosas: sube, se mantiene o baja. Usamos un umbral de 10 centavos.
+    Las semanas van de martes a lunes, igual que el MEM. Con los datos hasta el lunes predecimos la semana siguiente. Nunca usamos información del futuro.
+    Elegimos regresión logística: es estable, explicable y entrega una probabilidad. Las variables en azul son las del precio internacional.
+    Tiempo objetivo: 35 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 12 · QUÉ MIRA -->
+<section class="diapo" data-titulo="Qué mira el modelo" data-presenta="Chuy" data-aurora="#ff9f0a,#0a84ff,#5e5ce6">
+  <div class="ceja" data-a style="--i:0; --acento: #ff9f0a"><span class="punto"></span>Qué mira el modelo</div>
+  <h2 class="titulo" data-a style="--i:1">Lo que más pesa<br><span class="c-tenue">tiene sentido económico.</span></h2>
+  <div class="fila mt" style="gap: 70px; flex: 1;">
+    <div class="vidrio crece" data-a style="--i:2; padding: 46px 50px;">
+      <div class="pequeno" style="margin-bottom: 28px;">Peso promedio de cada variable en el modelo · las 8 más importantes · <span style="color: var(--diesel)">en ámbar, las del precio internacional</span></div>
+      <div class="barras" id="barras-pesos"></div>
+    </div>
+    <div class="col" style="width: 520px; gap: 22px; justify-content: center;">
+      <div class="vidrio s tinte-diesel paso" style="padding: 30px 34px;">
+        <div class="cifra-s" style="color: var(--diesel)">#1 brecha</div>
+        <div class="texto" style="margin-top: 12px;">Si el precio local quedó muy por encima del internacional, lo esperable es que baje.</div>
+      </div>
+      <div class="vidrio s paso" style="padding: 30px 34px;">
+        <div class="cifra-s">Sin la EIA</div>
+        <div class="texto" style="margin-top: 12px;">Con solo el MEM, ningún modelo le ganó a “repetir la semana pasada”. El precio internacional fue la diferencia.</div>
+      </div>
+    </div>
+  </div>
+  <aside class="notas">
+    Estas son las variables que más pesan. La primera es la brecha entre el precio local y el internacional. Si en Guatemala el precio quedó muy arriba del internacional, lo normal es que baje. Tiene sentido económico.
+    Y un hallazgo importante: con solo los datos del MEM ningún modelo le ganaba a la regla simple. El precio internacional fue lo que hizo la diferencia.
+    Tiempo objetivo: 30 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 13 · RESULTADOS -->
+<section class="diapo" data-titulo="Resultados" data-presenta="Chuy" data-aurora="#0a84ff,#64d2ff,#30d158">
+  <div class="ceja" data-a style="--i:0; --acento: var(--regular)"><span class="punto"></span>Resultados · validación temporal</div>
+  <h2 class="titulo" data-a style="--i:1">Le gana a la regla simple<br><span class="c-tenue">en semanas que nunca vio.</span></h2>
+  <div class="fila mt" style="gap: 60px; flex: 1;">
+    <div class="col crece" style="justify-content: center;">
+      <div class="comparacion">
+        <div class="metrica-fila" data-a style="--i:2">
+          <div class="cab"><span><b>Exactitud balanceada</b></span><span class="pequeno">Azar con 3 clases: 0.33</span></div>
+          <div class="rieles">
+            <div class="riel-m"><div class="r modelo" style="--w: 54.8%">0.55</div></div>
+            <div class="riel-m"><div class="r base" style="--w: 45.8%">0.46</div></div>
+            <div class="azar" style="left: 33.3%"><span>azar</span></div>
+          </div>
+        </div>
+        <div class="metrica-fila" data-a style="--i:3">
+          <div class="cab"><span><b>F1 macro</b></span></div>
+          <div class="rieles">
+            <div class="riel-m"><div class="r modelo" style="--w: 54.8%">0.55</div></div>
+            <div class="riel-m"><div class="r base" style="--w: 45.8%">0.46</div></div>
+          </div>
+        </div>
+        <div class="metrica-fila" data-a style="--i:4">
+          <div class="cab"><span><b>Acierta la dirección</b> cuando hay movimiento</span></div>
+          <div class="rieles">
+            <div class="riel-m"><div class="r modelo" style="--w: 73.8%">74 %</div></div>
+            <div class="riel-m"><div class="r base" style="--w: 64%">64 %</div></div>
+          </div>
+        </div>
+        <div class="leyenda" data-a style="--i:5"><span style="color: var(--cian)"><i></i>Nuestro modelo</span><span class="c-tenue"><i></i>Repetir la dirección de la semana pasada</span></div>
+      </div>
+    </div>
+    <div class="vidrio" data-a="der" style="--i:4; width: 640px; padding: 36px 40px;">
+      <div class="fila" style="justify-content: space-between; align-items: baseline;">
+        <div class="texto"><b>Matriz de confusión</b></div>
+        <div class="pequeno">312 predicciones</div>
+      </div>
+      <div class="pequeno" style="margin: 6px 0 22px;">Filas: lo que pasó. Columnas: lo que predijo el modelo.</div>
+      <div class="matriz" id="matriz-modelo"></div>
+      <div class="pequeno mt-s">Entrena hasta noviembre de 2024 y se prueba en las <b>104 semanas</b> siguientes. Partición por tiempo, nunca aleatoria.</div>
+    </div>
+  </div>
+  <aside class="notas">
+    Lo importante: evaluamos con semanas que el modelo nunca vio. Entrenamos hasta noviembre de 2024 y probamos en los dos años siguientes.
+    La línea base es la que pide el enunciado: repetir la dirección de la semana pasada.
+    En exactitud balanceada sacamos 0.55 contra 0.46. El azar daría 0.33. Cuando el precio sí se mueve, acertamos la dirección 74 % de las veces contra 64 %.
+    En la matriz, la diagonal son los aciertos. Tiempo objetivo: 40 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 14 · LIMITACIONES -->
+<section class="diapo" data-titulo="Limitaciones" data-presenta="Chuy" data-aurora="#ff453a,#5e5ce6,#ffd60a">
+  <div class="ceja" data-a style="--i:0; --acento: var(--super)"><span class="punto"></span>Limitaciones</div>
+  <h2 class="titulo" data-a style="--i:1">Lo que el modelo no puede ver.</h2>
+  <div class="rejilla-2 mt" style="gap: 28px;">
+    <div class="vidrio tarjeta" data-a style="--i:2">
+      <div class="icono" style="background: rgba(255,69,58,0.18); color: var(--super)"><svg><use href="#i-escudo"/></svg></div>
+      <h3>Decisiones del Gobierno</h3>
+      <p>La baja de <b>Q9.10</b> del 5 de octubre por la exención de impuestos no la anticipa ningún dato del mercado.</p>
+    </div>
+    <div class="vidrio tarjeta" data-a style="--i:3">
+      <div class="icono" style="background: rgba(255,214,10,0.16); color: var(--diesel)"><svg><use href="#i-bomba"/></svg></div>
+      <h3>Tu estación no es el promedio</h3>
+      <p>Predecimos la referencia oficial. Cada estación cobra con su propio margen y aplica el cambio a su ritmo.</p>
+    </div>
+    <div class="vidrio tarjeta" data-a style="--i:4">
+      <div class="icono" style="background: rgba(10,132,255,0.2); color: var(--cian)"><svg><use href="#i-camara"/></svg></div>
+      <h3>Fotos con cobertura irregular</h3>
+      <p>Las fotos llegan a oro, pero todavía no entrenan el modelo: no hay suficientes semanas seguidas.</p>
+    </div>
+    <div class="vidrio tarjeta" data-a style="--i:5">
+      <div class="icono" style="background: rgba(191,90,242,0.2); color: var(--ml-3)"><svg><use href="#i-cerebro"/></svg></div>
+      <h3>Margen modesto</h3>
+      <p>Nueve puntos sobre la línea base, sin intervalos de confianza todavía. Las predicciones semanales se acumulan para medirlo.</p>
+    </div>
+  </div>
+  <aside class="notas">
+    Queremos ser honestos con lo que no puede hacer.
+    No puede anticipar decisiones del Gobierno, como la exención de octubre. Predice la referencia oficial, no el precio de tu estación.
+    Las fotos todavía no entrenan el modelo porque su cobertura es irregular. Y la mejora es real pero modesta. Por eso guardamos cada predicción semanal con su resultado real. Le paso a Joaquín.
+    Tiempo objetivo: 25 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 15 · OPERACIÓN -->
+<section class="diapo" data-titulo="Operación automática" data-presenta="Joaquín" data-aurora="#30d158,#0a84ff,#64d2ff">
+  <div class="ceja" data-a style="--i:0; --acento: var(--regular)"><span class="punto"></span>MLOps · operación automática</div>
+  <h2 class="titulo" data-a style="--i:1">Corre solo cada martes.<br><span class="c-tenue">Nadie toca un notebook.</span></h2>
+  <div class="dag mt" id="dag-job" data-a style="--i:2">
+    <svg aria-hidden="true"></svg>
+    <div class="vidrio s tarea" data-t="10" style="left: 0; top: 0;"><span class="estado"></span>10_ingesta_imagenes</div>
+    <div class="vidrio s tarea" data-t="11" style="left: 0; top: 140px;"><span class="estado"></span>11_ingesta_mem</div>
+    <div class="vidrio s tarea" data-t="12" style="left: 0; top: 280px;"><span class="estado"></span>12_ingesta_eia</div>
+    <div class="vidrio s tarea" data-t="21" style="left: 340px; top: 0;"><span class="estado"></span>21_silver_imagenes</div>
+    <div class="vidrio s tarea" data-t="20" style="left: 340px; top: 140px;"><span class="estado"></span>20_silver_mem</div>
+    <div class="vidrio s tarea" data-t="22" style="left: 340px; top: 280px;"><span class="estado"></span>22_silver_eia</div>
+    <div class="vidrio s tarea" data-t="30" style="left: 680px; top: 140px;"><span class="estado"></span>30_gold</div>
+    <div class="vidrio s tarea" data-t="40" style="left: 1020px; top: 140px;"><span class="estado"></span>40_entrenamiento</div>
+    <div class="vidrio s tarea" data-t="50" style="left: 1360px; top: 140px; width: 280px;"><span class="estado"></span>50_predicciones</div>
+  </div>
+  <div class="rejilla-4" style="margin-top: -40px;">
+    <div class="vidrio s paso" style="padding: 24px 28px;"><div class="cifra-s" style="font-size: 40px;">Martes 8:00</div><div class="pequeno" style="margin-top: 8px;">Programado cuando el MEM publica. También con “Run now”.</div></div>
+    <div class="vidrio s paso" style="padding: 24px 28px;"><div class="cifra-s" style="font-size: 40px;">Incremental</div><div class="pequeno" style="margin-top: 8px;">Solo fotos nuevas. Solo reentrena si cambian los datos.</div></div>
+    <div class="vidrio s paso" style="padding: 24px 28px;"><div class="cifra-s" style="font-size: 40px;">Alertas</div><div class="pequeno" style="margin-top: 8px;">Correo automático si una tarea falla.</div></div>
+    <div class="vidrio s paso" style="padding: 24px 28px;"><div class="cifra-s" style="font-size: 40px;">CI/CD</div><div class="pequeno" style="margin-top: 8px;">Solo GitHub Actions despliega a Databricks, después de pruebas.</div></div>
+  </div>
+  <aside class="notas">
+    Todo esto corre solo. Es un job de Databricks con 9 tareas: tres ingestas, tres limpiezas, oro, entrenamiento y predicción. Lo ven ejecutarse en la animación.
+    Se programa cada martes a las 8:00. Solo procesa fotos nuevas y solo reentrena si los datos cambiaron. Si algo falla, llega un correo.
+    Y nadie despliega a mano: cada cambio pasa por pull request, pruebas automáticas y GitHub Actions lo despliega.
+    Usamos cómputo serverless: se enciende al correr el job y se apaga al terminar, como un job cluster. Tiempo objetivo: 35 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 16 · API -->
+<section class="diapo" data-titulo="La API" data-presenta="Joaquín" data-aurora="#30d158,#64d2ff,#5e5ce6">
+  <div class="ceja" data-a style="--i:0; --acento: var(--regular)"><span class="punto"></span>El servicio</div>
+  <h2 class="titulo" data-a style="--i:1">Una API pública, siempre encendida.</h2>
+  <div class="fila mt" style="gap: 40px; flex: 1;">
+    <div class="col crece" style="gap: 12px;">
+      <div class="vidrio s endpoint" data-a style="--i:2"><span class="verbo">GET</span><code>/health</code><span class="desc">Estado y versión del modelo</span></div>
+      <div class="vidrio s endpoint" data-a style="--i:3"><span class="verbo">GET</span><code>/precios/actual</code><span class="desc">Referencia vigente</span></div>
+      <div class="vidrio s endpoint" data-a style="--i:4"><span class="verbo">GET</span><code>/precios?combustible=&amp;desde=&amp;hasta=</code><span class="desc">Histórico semanal</span></div>
+      <div class="vidrio s endpoint tinte-ml" data-a style="--i:5"><span class="verbo">GET</span><code>/prediccion?combustible=super</code><span class="desc">Semana siguiente</span></div>
+      <div class="vidrio s endpoint" data-a style="--i:6"><span class="verbo">GET</span><code>/modelo/metricas</code><span class="desc">Modelo contra línea base</span></div>
+      <div class="rejilla-3 mt-s" style="gap: 16px;">
+        <div class="vidrio s paso" style="padding: 22px 24px;"><div class="texto" style="font-size: 22px;"><b>Docker</b><br>Dependencias aisladas, reinicio automático.</div></div>
+        <div class="vidrio s paso" style="padding: 22px 24px;"><div class="texto" style="font-size: 22px;"><b>Swagger</b><br>Documentación en <span class="mono">/docs</span>.</div></div>
+        <div class="vidrio s paso" style="padding: 22px 24px;"><div class="texto" style="font-size: 22px;"><b>Seguro</b><br><span class="mono">.env</span> con permisos 600, fuera de Git.</div></div>
+      </div>
+    </div>
+    <div class="vidrio terminal" data-a="der" style="--i:5; width: 640px;">
+      <div class="barra-t"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span>Droplet · puerto 8001</span></div>
+      <div class="cuerpo" id="terminal-health"></div>
+      <div style="padding: 0 30px 26px;" class="fila"><span class="estado-vivo" id="estado-api"><i></i><span>Conectando…</span></span></div>
+    </div>
+  </div>
+  <aside class="notas">
+    La API tiene los cinco endpoints que pide el enunciado, con filtros, límite de resultados y documentación en Swagger.
+    Corre en Docker en el Droplet, con reinicio automático: sigue viva aunque cerremos la sesión SSH.
+    El Droplet no tiene acceso a S3. Por acuerdo con el catedrático, la imagen lleva dentro el modelo y una copia de las tablas de oro.
+    La terminal de la derecha está consultando el servidor en este momento. Tiempo objetivo: 30 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 17 · DEMO -->
+<section class="diapo" data-titulo="Demo en vivo" data-presenta="Rodrigo" data-aurora="#bf5af2,#0a84ff,#30d158">
+  <div class="fila" style="flex: 1; gap: 90px; align-items: center;">
+    <div class="col crece">
+      <div class="ceja" data-a style="--i:0; --acento: var(--ml-3)"><span class="punto"></span>Demo en vivo</div>
+      <h2 class="titulo-xl" data-a style="--i:1; font-size: 140px; margin-top: 22px;">Pruébenlo<br><span class="degradado">ustedes.</span></h2>
+      <p class="sub" data-a style="--i:2">Escaneen el código con la cámara del teléfono. Verán la predicción de la súper para la próxima semana.</p>
+      <div class="col mt" style="gap: 14px;">
+        <div class="vidrio s paso" style="padding: 22px 28px;"><div class="texto"><b>1.</b> En Databricks: <b>Run now</b> sobre <span class="mono">equipo-01-pipeline</span>.</div></div>
+        <div class="vidrio s paso" style="padding: 22px 28px;"><div class="texto"><b>2.</b> Vemos las tareas avanzar y las tablas de oro actualizarse.</div></div>
+        <div class="vidrio s paso" style="padding: 22px 28px;"><div class="texto"><b>3.</b> Consultamos <span class="mono">/prediccion</span> para los tres combustibles.</div></div>
+      </div>
+    </div>
+    <div class="col centro" data-a="zoom" style="--i:3">
+      <div class="qr" style="width: 520px; height: 520px;"><img src="datos/qr_prediccion.svg" alt="Código QR hacia la predicción de la súper"></div>
+      <div class="mono mt-s" style="font-size: 22px; color: var(--texto-2);">157.230.171.204:8001/prediccion</div>
+      <div class="estado-vivo mt-s" data-estado-api><i></i><span>Conectando…</span></div>
+    </div>
+  </div>
+  <aside class="notas">
+    Ahora la demo, cinco minutos. Primero, el jurado escanea el QR.
+    En paralelo: abrir Databricks, Jobs, equipo-01-pipeline, Run now. Mostrar el grafo de tareas avanzando.
+    Después, abrir Swagger o la diapositiva siguiente, que consulta la API en vivo.
+    Plan B si no hay conexión: la diapositiva siguiente muestra la última respuesta guardada y el anexo tiene capturas.
+  </aside>
+</section>
+
+<!-- ======================================================= 18 · PREDICCIÓN -->
+<section class="diapo" data-titulo="Predicción en vivo" data-presenta="Rodrigo" data-aurora="#30d158,#64d2ff,#ff453a">
+  <div class="fila" style="justify-content: space-between; align-items: flex-end;">
+    <div>
+      <div class="ceja" data-a style="--i:0; --acento: var(--regular)"><span class="punto"></span>Predicción en vivo · respuesta de la API</div>
+      <h2 class="titulo" data-a style="--i:1">Semana del <span class="degradado" id="semana-objetivo">10 de noviembre</span></h2>
+    </div>
+    <div class="estado-vivo" data-estado-api data-a style="--i:2"><i></i><span>Conectando…</span></div>
+  </div>
+  <div class="rejilla-3 mt" id="tarjetas-prediccion"></div>
+  <p class="pequeno mt-s" data-a style="--i:6" id="pie-prediccion">Datos hasta la semana del 3 de noviembre. Precio de referencia vigente del MEM.</p>
+  <aside class="notas">
+    Esta es la respuesta real de la API, consultada en este momento. Para cada combustible: la dirección, la probabilidad y cómo se reparte entre las tres clases.
+    Esta predicción queda registrada en gold.predicciones. Cuando llegue la semana siguiente, el job completa la dirección real y si acertamos.
+  </aside>
+</section>
+
+<!-- ======================================================= 19 · LECCIONES -->
+<section class="diapo" data-titulo="Lecciones aprendidas" data-presenta="Diego" data-aurora="#5e5ce6,#ffd60a,#0a84ff">
+  <div class="ceja" data-a style="--i:0; --acento: var(--diesel)"><span class="punto"></span>Lecciones aprendidas</div>
+  <h2 class="titulo" data-a style="--i:1">Lo que nos llevamos.</h2>
+  <div class="rejilla-3 mt" style="gap: 26px;">
+    <div class="vidrio leccion" data-a style="--i:2"><div class="n">01</div><h3>El ojo humano sigue siendo la referencia</h3><p>Un dígito mal leído pasa los rangos. La revisión manual corrigió nuestra propia vara de medir.</p></div>
+    <div class="vidrio leccion" data-a style="--i:3"><div class="n">02</div><h3>El tiempo es una variable delicada</h3><p>Carpetas con el año equivocado: usamos el EXIF. Semanas incompletas fuera y nada posterior al cierre.</p></div>
+    <div class="vidrio leccion" data-a style="--i:4"><div class="n">03</div><h3>Los datos también se versionan</h3><p>Una prueba de “no empeorar” evita que una actualización rompa la historia sin que nadie lo note.</p></div>
+    <div class="vidrio leccion" data-a style="--i:5"><div class="n">04</div><h3>El entorno manda</h3><p>Serverless es ARM: PaddleOCR se caía. Adaptamos la lectura de HEIC y cambiamos a un modelo de visión.</p></div>
+    <div class="vidrio leccion" data-a style="--i:6"><div class="n">05</div><h3>Una corrida exitosa no prueba todo</h3><p>Un job puede terminar bien sin procesar nada nuevo. Hay que guardar qué procesó cada corrida.</p></div>
+    <div class="vidrio leccion" data-a style="--i:7"><div class="n">06</div><h3>Solo el CI despliega</h3><p>Bundles de Databricks y GitHub Actions: cada cambio queda revisado, probado y trazable.</p></div>
+  </div>
+  <aside class="notas">
+    Seis lecciones. La más importante: la revisión humana sigue siendo la referencia. Un número plausible puede estar mal.
+    El tiempo es delicado: usamos la fecha del EXIF y nunca información posterior al cierre de la semana.
+    Los datos se versionan como el código. Y el entorno manda: tuvimos que cambiar de herramienta porque el cómputo serverless es ARM.
+    Tiempo objetivo: 30 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 20 · CON MÁS TIEMPO -->
+<section class="diapo" data-titulo="Con más tiempo" data-presenta="Daniel" data-aurora="#0a84ff,#bf5af2,#30d158">
+  <div class="ceja" data-a style="--i:0"><span class="punto"></span>Siguientes pasos</div>
+  <h2 class="titulo" data-a style="--i:1">Con más tiempo y más datos.</h2>
+  <div class="ruta" style="margin-top: 110px;">
+    <div class="hito" data-a style="--i:2"><div class="marca-r vidrio s tinte-diesel"><svg width="32" height="32" style="color: var(--diesel)"><use href="#i-camara"/></svg></div><h4>Más fotos por estación</h4><p>Entrenar con el precio real de cada estación, no solo el promedio oficial.</p></div>
+    <div class="hito" data-a style="--i:3"><div class="marca-r vidrio s tinte-ml"><svg width="32" height="32" style="color: var(--cian)"><use href="#i-rayo"/></svg></div><h4>Disparo por llegada de fotos</h4><p>Correr el job en cuanto llegue una foto nueva al bucket.</p></div>
+    <div class="hito" data-a style="--i:4"><div class="marca-r vidrio s tinte-ml"><svg width="32" height="32" style="color: var(--ml-3)"><use href="#i-escudo"/></svg></div><h4>Régimen fiscal como variable</h4><p>Incorporar subsidios y exenciones conocidos de antemano.</p></div>
+    <div class="hito" data-a style="--i:5"><div class="marca-r vidrio s tinte-regular"><svg width="32" height="32" style="color: var(--regular)"><use href="#i-servidor"/></svg></div><h4>API leyendo oro en vivo</h4><p>Con acceso del Droplet a S3, sin reconstruir la imagen cada semana.</p></div>
+    <div class="hito" data-a style="--i:6"><div class="marca-r vidrio s tinte-super"><svg width="32" height="32" style="color: var(--super)"><use href="#i-usuario"/></svg></div><h4>App: toma una foto</h4><p>El usuario fotografía el rótulo y sabe si es buen precio y si conviene esperar.</p></div>
+  </div>
+  <div class="vidrio tinte-ml" data-a style="--i:7; margin-top: auto; padding: 38px 46px; display: flex; align-items: center; gap: 36px;">
+    <div class="cifra-s degradado" style="white-space: nowrap;">La base ya está.</div>
+    <div class="texto">Datos versionados, un pipeline que corre solo y un modelo que se mide cada semana contra la realidad. Lo siguiente es sumar datos, no rehacer el sistema.</div>
+  </div>
+  <aside class="notas">
+    Con más tiempo: más fotos por estación para predecir el precio que realmente pagas. Disparar el job en cuanto llega una foto.
+    Agregar el régimen fiscal como variable, cuando se conoce de antemano. Que la API lea oro directamente.
+    Y la idea original del proyecto: una app donde tomas una foto del rótulo y te dice si es buen precio y si conviene esperar.
+    Tiempo objetivo: 25 segundos.
+  </aside>
+</section>
+
+<!-- ======================================================= 21 · GRACIAS -->
+<section class="diapo" data-titulo="Gracias" data-presenta="Todos" data-aurora="#ff453a,#0a84ff,#bf5af2">
+  <div class="fila" style="flex: 1; align-items: center; gap: 100px;">
+    <div class="col crece">
+      <div class="ceja" data-a style="--i:0; --acento: var(--diesel)"><span class="punto"></span>Equipo 01 · Gasolina GT</div>
+      <div class="gracias mt-s" data-a style="--i:1">Gracias.</div>
+      <p class="sub" data-a style="--i:2">¿Preguntas? Cualquiera de nosotros puede responder.</p>
+      <div class="nombres sub" data-a style="--i:3; color: var(--texto); font-size: 30px;" id="lista-equipo-2"></div>
+      <div class="pequeno mt" data-a style="--i:4">github.com/chuy-zip/equipo-01-gasolina-gt</div>
+    </div>
+    <div class="col centro" data-a="zoom" style="--i:3">
+      <div class="qr" style="width: 400px; height: 400px;"><img src="datos/qr_docs.svg" alt="Código QR hacia la documentación de la API"></div>
+      <div class="mono mt-s" style="font-size: 20px; color: var(--texto-2);">157.230.171.204:8001/docs</div>
+    </div>
+  </div>
+  <aside class="notas">
+    Gracias. Quedamos atentos a sus preguntas. El QR abre la documentación interactiva de la API para que la exploren.
+  </aside>
+</section>
+
+<!-- ======================================================= 22 · ANEXO A -->
+<section class="diapo" data-titulo="Anexo · Databricks" data-presenta="Plan B" data-aurora="#5e5ce6,#0a84ff,#64d2ff">
+  <div class="ceja" data-a style="--i:0"><span class="punto"></span>Anexo · evidencia en Databricks</div>
+  <h2 class="titulo" data-a style="--i:1; font-size: 64px">El pipeline en ejecución.</h2>
+  <div class="rejilla-2 mt-s" style="flex: 1; grid-template-rows: 1fr 1fr; gap: 22px;">
+    <div class="captura" data-a style="--i:2" data-captura="01_job_historial.png" data-pie="Historial de corridas del job"></div>
+    <div class="captura" data-a style="--i:3" data-captura="02_job_grafo.png" data-pie="Grafo de tareas y duración"></div>
+    <div class="captura" data-a style="--i:4" data-captura="03_mlflow_experimento.png" data-pie="Experimento en MLflow"></div>
+    <div class="captura" data-a style="--i:5" data-captura="04_modelo_champion.png" data-pie="Modelo registrado como champion"></div>
+  </div>
+  <aside class="notas">Plan B. Si falla la conexión, mostrar estas capturas en lugar de la demo en vivo.</aside>
+</section>
+
+<!-- ======================================================= 23 · ANEXO B -->
+<section class="diapo" data-titulo="Anexo · Datos y API" data-presenta="Plan B" data-aurora="#f5c451,#d9925b,#0a84ff">
+  <div class="ceja" data-a style="--i:0; --acento: var(--oro)"><span class="punto"></span>Anexo · datos y API</div>
+  <h2 class="titulo" data-a style="--i:1">Las tablas y el servicio.</h2>
+  <div class="rejilla-2 mt-s" style="flex: 1; grid-template-rows: 1fr 1fr; gap: 22px;">
+    <div class="captura" data-a style="--i:2" data-captura="05_silver_precios.png" data-pie="silver.precios"></div>
+    <div class="captura" data-a style="--i:3" data-captura="06_silver_rechazos.png" data-pie="silver.precios_rejected por motivo"></div>
+    <div class="captura" data-a style="--i:4" data-captura="07_gold_predicciones.png" data-pie="gold.predicciones"></div>
+    <div class="captura" data-a style="--i:5" data-captura="08_api_swagger.png" data-pie="Swagger de la API en el Droplet"></div>
+  </div>
+  <aside class="notas">Plan B. Evidencia de las tablas y de la API pública.</aside>
+</section>
+
+</main>
+
+<!-- Interfaz -->
+<div class="progreso"><i id="barra-progreso"></i></div>
+<div class="hud vidrio s" id="hud">
+  <button id="b-ant" aria-label="Anterior">←</button>
+  <span id="contador">1 / 23</span>
+  <button id="b-sig" aria-label="Siguiente">→</button>
+  <button id="b-general" aria-label="Vista general">▦</button>
+  <button id="b-pantalla" aria-label="Pantalla completa">⤢</button>
+  <button id="b-ayuda" aria-label="Atajos">?</button>
+</div>
+<div class="general" id="general"></div>
+<div class="ayuda" id="ayuda">
+  <div class="vidrio">
+    <h3>Atajos</h3>
+    <dl>
+      <dt>→ · Espacio</dt><dd>Siguiente paso o diapositiva</dd>
+      <dt>← </dt><dd>Anterior</dd>
+      <dt>F</dt><dd>Pantalla completa</dd>
+      <dt>O · Esc</dt><dd>Vista general</dd>
+      <dt>P</dt><dd>Abrir vista del presentador (notas y cronómetro)</dd>
+      <dt>R</dt><dd>Volver a consultar la API</dd>
+      <dt>Inicio · Fin</dt><dd>Primera o última diapositiva</dd>
+      <dt>?</dt><dd>Mostrar u ocultar esta ayuda</dd>
+    </dl>
+  </div>
+</div>
+
+<script src="datos/datos.js"></script>
+<script src="datos/api_respaldo.js"></script>
+<script src="js/graficas.js"></script>
+<script src="js/api.js"></script>
+<script src="js/motor.js"></script>
+</body>
+</html>
