@@ -39,6 +39,10 @@ flowchart LR
 
 **Las tablas sí viven en los buckets.** El catedrático habilitó la escritura en `xloc-cusn`, `xloc-ag` y `xloc-au` y otorgó `CREATE EXTERNAL TABLE`. Todas las tablas son externas de Unity Catalog, en el bucket de su capa y dentro del prefijo `equipo-01/`. Databricks escribe y lee por medio de las external locations. Nadie del equipo tiene credenciales de AWS.
 
+## Modelo
+
+El detalle del modelo, de las fuentes a la predicción, está en [modelo.md](../modelo/modelo.md#arquitectura-del-modelo), con su diagrama en [arquitectura_modelo.png](../modelo/arquitectura_modelo.png).
+
 ## Jobs
 
 ### Job de exploración: `equipo-01-exploracion`

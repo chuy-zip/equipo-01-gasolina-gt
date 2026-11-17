@@ -1,0 +1,57 @@
+%% Arquitectura del modelo de tendencia del precio. Fuente editable de arquitectura_modelo.png y .svg.
+%% Para regenerar: npx -y @mermaid-js/mermaid-cli -i docs/modelo/arquitectura_modelo.mmd -o docs/modelo/arquitectura_modelo.png -b white -w 2000
+flowchart LR
+    subgraph FUENTES["1. Fuentes en plata"]
+        MEM["silver.precios_oficiales<br/>Excel del MEM, diario desde 2013"]
+        EIA["silver.precios_internacionales<br/>EIA, gasolina y diésel en USD"]
+        FOT["silver.precios<br/>fotos leídas con Llama 4 Maverick"]
+    end
+
+    subgraph VARIABLES["2. Variables por semana y combustible: 30_gold"]
+        VMEM["Del MEM<br/>cambio de 1 a 4 semanas<br/>tendencia de 4 y 8 semanas<br/>cambio del tipo de cambio, mes<br/>último cambio de los otros combustibles"]
+        VEIA["De la EIA, en quetzales<br/>cambio internacional de 1 a 3 semanas<br/>brecha local contra internacional"]
+        VFOT["De las fotos<br/>foto_disponible<br/>foto_brecha: fotos menos precio oficial"]
+        ETI["Etiqueta<br/>dirección de la semana siguiente<br/>sube, baja o se_mantiene, umbral Q0.10"]
+    end
+
+    FM[("gold.features_modelo<br/>17 variables más la etiqueta")]
+
+    subgraph MODELO["3. Modelo: 40_entrenamiento"]
+        PREP["Preparación<br/>combustible: one-hot<br/>numéricas: estandarizadas"]
+        LR["Regresión logística<br/>3 clases, clases balanceadas"]
+        EVAL["Evaluación temporal<br/>prueba: últimas 104 semanas<br/>contra repetir la semana pasada"]
+        FINAL["Modelo final<br/>entrenado con todas las semanas"]
+    end
+
+    subgraph REGISTRO["4. MLflow y Unity Catalog"]
+        EXP["Experimento<br/>parámetros, métricas y huella de datos"]
+        UC["gold.modelo_tendencia_precio<br/>alias champion"]
+        MET[("gold.metricas_modelo")]
+    end
+
+    subgraph SALIDA["5. Predicción: 50_predicciones"]
+        SEM["Semana más reciente<br/>sin etiqueta"]
+        PRED[("gold.predicciones<br/>predicción y probabilidades")]
+        API["API /prediccion<br/>mismo modelo empaquetado"]
+    end
+
+    MEM --> VMEM
+    MEM --> ETI
+    EIA --> VEIA
+    MEM -. "tipo de cambio" .-> VEIA
+    FOT --> VFOT
+    MEM -. "precio oficial" .-> VFOT
+    VMEM --> FM
+    VEIA --> FM
+    VFOT --> FM
+    ETI --> FM
+    FM --> PREP --> LR
+    LR --> EVAL
+    LR --> FINAL
+    EVAL --> EXP
+    EVAL --> MET
+    FINAL --> UC
+    FM --> SEM
+    UC --> SEM
+    SEM --> PRED
+    UC -. "exportar_para_api.py" .-> API
