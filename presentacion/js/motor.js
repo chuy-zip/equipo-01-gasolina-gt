@@ -3,7 +3,7 @@
   "use strict";
 
   /* Quién presenta cada parte. Cambiar aquí si se reparte distinto. */
-  const EQUIPO = ["Daniel", "Diego", "Rodrigo", "Nelson", "Chuy", "Joaquín"];
+  const EQUIPO = ["Daniel", "Diego", "Rodrigo", "Nelson", "Chuy", "Joaquín", "Sergio"];
 
   const params = new URLSearchParams(location.search);
   const MODO_PDF = params.has("pdf");
@@ -21,8 +21,6 @@
   /* ---------------------------------------------------------------- Montaje */
   function montar() {
     document.getElementById("lista-equipo").textContent = EQUIPO.join(" · ");
-    const l2 = document.getElementById("lista-equipo-2");
-    if (l2) l2.textContent = EQUIPO.join(" · ");
 
     diapos.forEach((d, i) => {
       const quien = d.dataset.presenta;

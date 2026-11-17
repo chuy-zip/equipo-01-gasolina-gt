@@ -13,13 +13,27 @@ Presentación web de 23 diapositivas: 21 para exponer y 2 de anexo como plan B. 
 
 ## Presentar
 
-Requisito: Python 3 y Chrome, Edge o Safari.
+Solo hace falta Python 3 y Chrome, Edge o Safari. No hay nada que instalar.
+
+**Un comando**, desde la raíz del repo:
 
 ```
-python presentacion/servir.py
+python3 presentacion/servir.py
 ```
 
-Abre `http://localhost:8080`. Hace falta `servir.py` porque la API no envía encabezados CORS. Así el navegador puede consultarla en vivo. Si se abre `index.html` directo o no hay red, las diapositivas usan el respaldo guardado y lo indican con un punto amarillo.
+**O doble clic** en `presentacion/Presentar.command` (macOS) o `presentacion/presentar.bat` (Windows).
+
+Se abre el navegador solo y la terminal muestra:
+
+```
+  Presentación:  http://localhost:8080/
+  API:           en vivo, modelo versión 4
+```
+
+- Si el puerto 8080 está ocupado, usa el siguiente libre.
+- Si no hay red, la terminal lo avisa y las diapositivas usan la última respuesta guardada, con un punto amarillo.
+- Hace falta este servidor porque la API no envía encabezados CORS. Así el navegador puede consultarla en vivo.
+- Para apagarla: `Ctrl+C` o cerrar la ventana.
 
 | Tecla | Acción |
 |---|---|
@@ -35,7 +49,7 @@ Para proyectar: abrir la presentación en la pantalla del proyector con `F` y la
 
 ## Reparto y tiempos
 
-10 minutos de exposición, 5 de demo y 5 de preguntas. Los tiempos objetivo están en las notas de cada diapositiva y suman unos 10 minutos.
+Cada integrante presenta un solo bloque seguido, en el orden de la portada. 10 minutos de exposición, 5 de demo y 5 de preguntas. Los tiempos objetivo están en las notas de cada diapositiva y suman unos 10 minutos.
 
 | Diapositivas | Presenta | Tema |
 |---|---|---|
@@ -44,10 +58,8 @@ Para proyectar: abrir la presentación en la pantalla del proyector con `F` y la
 | 7 y 8 | Rodrigo | De la foto al dato y reglas de calidad |
 | 9 y 10 | Nelson | Revisión manual y fuentes complementarias |
 | 11 a 14 | Chuy | Modelo, variables, resultados y limitaciones |
-| 15 y 16 | Joaquín | Operación automática y API |
-| 17 y 18 | Rodrigo y Joaquín | Demo en vivo con QR y predicción |
-| 19 | Diego | Lecciones aprendidas |
-| 20 y 21 | Daniel | Siguientes pasos y cierre |
+| 15 a 18 | Joaquín | Operación automática, API y demo en vivo |
+| 19 a 21 | Sergio | Lecciones, siguientes pasos y cierre |
 | 22 y 23 | | Anexo: capturas de respaldo |
 
 El reparto se cambia en `js/motor.js`, en la constante `EQUIPO`, y en el atributo `data-presenta` de cada diapositiva.

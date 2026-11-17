@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>¿Cargo hoy o espero? · Equipo 01</title>
+<title>¿Fulleo hoy o me espero? · Equipo 01</title>
 <meta name="description" content="Predicción semanal del precio de los combustibles en Guatemala. Proyecto final de MLOps, Equipo 01, UVG.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -45,29 +45,52 @@
 <main class="escenario" id="escenario">
 
 <!-- ======================================================= 1 · PORTADA -->
-<section class="diapo portada" data-titulo="Portada" data-presenta="Daniel" data-aurora="#0a84ff,#bf5af2,#ff453a">
-  <div class="ceja" data-a style="--i:0; --acento: var(--diesel)"><span class="punto"></span>Equipo 01 · MLOps · Universidad del Valle de Guatemala</div>
-  <h1 class="titulo-xl" data-a style="--i:1">¿Cargo hoy<br><span class="degradado-fuego">o espero?</span></h1>
+<section class="diapo portada" data-titulo="Portada" data-presenta="Daniel" data-aurora="#0a84ff,#bf5af2,#5e5ce6">
+  <div class="ceja" data-a style="--i:0; --acento: var(--cian)"><span class="punto"></span>Equipo 01 · MLOps · Universidad del Valle de Guatemala</div>
+  <h1 class="titulo-xl" data-a style="--i:1">¿Fulleo hoy<br><span class="degradado-frio">o me espero?</span></h1>
   <p class="sub" data-a style="--i:2">Un sistema de punta a punta que convierte fotos de gasolineras en datos y predice si el precio de la gasolina subirá, bajará o se mantendrá la próxima semana.</p>
 
   <div class="vidrio medidor" data-a="zoom" style="--i:3">
-    <svg viewBox="0 0 520 300" aria-hidden="true">
+    <div class="medidor-cab">
+      <div class="medidor-titulo">Precio de la súper</div>
+      <div class="pequeno">Semana siguiente</div>
+    </div>
+    <svg viewBox="0 0 520 266" aria-label="Predicción del modelo para la súper">
       <defs>
-        <linearGradient id="g-medidor" x1="0" x2="1"><stop offset="0" stop-color="#30d158"/><stop offset=".5" stop-color="rgba(255,255,255,.55)"/><stop offset="1" stop-color="#ff453a"/></linearGradient>
+        <filter id="brillo-medidor" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7"/></filter>
       </defs>
-      <path d="M50 270 A210 210 0 0 1 470 270" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="26" stroke-linecap="round"/>
-      <path d="M50 270 A210 210 0 0 1 470 270" fill="none" stroke="url(#g-medidor)" stroke-width="26" stroke-linecap="round" stroke-dasharray="2 11" opacity=".9"/>
-      <text x="40" y="300" style="fill:#30d158;font-size:20px;font-weight:650">Baja</text>
-      <text x="260" y="40" text-anchor="middle" style="fill:rgba(255,255,255,.55);font-size:20px;font-weight:650">Igual</text>
-      <text x="480" y="300" text-anchor="end" style="fill:#ff453a;font-size:20px;font-weight:650">Sube</text>
-      <g class="aguja" id="aguja" style="--giro: -78deg">
-        <path d="M260 270 L254 110 L260 92 L266 110 Z" fill="#fff"/>
-        <circle cx="260" cy="270" r="18" fill="#0a0c12" stroke="#fff" stroke-width="4"/>
+      <path d="M420.0 250.0L430.0 250.0M422.1 233.0L428.1 232.3M419.4 216.1L425.3 214.9M415.0 199.6L420.7 197.8M408.9 183.7L414.4 181.3M398.6 170.0L407.2 165.0M391.9 154.2L396.7 150.7M381.1 140.9L385.6 136.9M369.1 128.9L373.1 124.4M355.8 118.1L359.3 113.3M340.0 111.4L345.0 102.8M326.3 101.1L328.7 95.6M310.4 95.0L312.2 89.3M293.9 90.6L295.1 84.7M277.0 87.9L277.7 81.9M260.0 90.0L260.0 80.0M243.0 87.9L242.3 81.9M226.1 90.6L224.9 84.7M209.6 95.0L207.8 89.3M193.7 101.1L191.3 95.6M180.0 111.4L175.0 102.8M164.2 118.1L160.7 113.3M150.9 128.9L146.9 124.4M138.9 140.9L134.4 136.9M128.1 154.2L123.3 150.7M121.4 170.0L112.8 165.0M111.1 183.7L105.6 181.3M105.0 199.6L99.3 197.8M100.6 216.1L94.7 214.9M97.9 233.0L91.9 232.3M100.0 250.0L90.0 250.0" stroke="rgba(255,255,255,.16)" stroke-width="2" stroke-linecap="round"/>
+      <g class="tramos">
+        <g class="tramo activo" id="tramo-baja" style="--c: var(--regular)">
+          <path class="halo" d="M70 250 A190 190 0 0 1 153.75 92.49"/>
+          <path d="M70 250 A190 190 0 0 1 153.75 92.49"/>
+        </g>
+        <g class="tramo" id="tramo-se_mantiene" style="--c: #e5e5ea">
+          <path class="halo" d="M176.71 79.23 A190 190 0 0 1 343.29 79.23"/>
+          <path d="M176.71 79.23 A190 190 0 0 1 343.29 79.23"/>
+        </g>
+        <g class="tramo" id="tramo-sube" style="--c: var(--sube)">
+          <path class="halo" d="M366.25 92.49 A190 190 0 0 1 450 250"/>
+          <path d="M366.25 92.49 A190 190 0 0 1 450 250"/>
+        </g>
       </g>
+      <text class="etiqueta activo" id="etq-baja" x="70" y="140" text-anchor="end" style="--c: var(--regular)">Baja</text>
+      <text class="etiqueta" id="etq-se_mantiene" x="260" y="30" text-anchor="middle" style="--c: #e5e5ea">Igual</text>
+      <text class="etiqueta" id="etq-sube" x="450" y="140" text-anchor="start" style="--c: var(--sube)">Sube</text>
+      <g class="marcador" id="aguja" style="--giro: -81deg">
+        <circle cx="260" cy="60" r="17" fill="rgba(0,0,0,.35)" filter="url(#brillo-medidor)"/>
+        <circle cx="260" cy="60" r="12" fill="#fff" stroke="#0b0d13" stroke-width="5"/>
+      </g>
+      <text class="lectura-dir" id="medidor-dir" x="260" y="172" text-anchor="middle" style="--c: var(--regular)">Baja</text>
+      <text class="lectura-num" x="260" y="250" text-anchor="middle"><tspan id="medidor-prob" data-cuenta="95">95</tspan><tspan class="pct" dx="6">%</tspan></text>
     </svg>
     <div class="medidor-pie">
-      <div class="pequeno">Súper · semana siguiente</div>
-      <div class="medidor-valor"><span id="medidor-dir" class="c-regular">Baja</span> <span id="medidor-prob">94 %</span></div>
+      <div class="pequeno">Probabilidad</div>
+      <div class="medidor-probs">
+        <span><i style="background: var(--regular)"></i>Baja <b id="p-baja">95</b></span>
+        <span><i style="background: #e5e5ea"></i>Igual <b id="p-se_mantiene">5</b></span>
+        <span><i style="background: var(--sube)"></i>Sube <b id="p-sube">&lt;1</b></span>
+      </div>
     </div>
   </div>
 
@@ -82,7 +105,7 @@
     <div class="vidrio s chip-precio" data-a="zoom" style="--i:7"><div class="nombre c-diesel"><i></i>Diésel</div><div class="valor"><small>Q</small><span data-api="actual.diesel">41.01</span></div></div>
   </div>
   <aside class="notas">
-    Buenas. Somos el Equipo 01. Todos los que cargamos gasolina en Guatemala nos hemos hecho esta pregunta: ¿cargo hoy o espero?
+    Buenas. Somos el Equipo 01. Todos los que cargamos gasolina en Guatemala nos hemos hecho esta pregunta: ¿fulleo hoy o me espero?
     Los precios que ven abajo a la derecha no son de una imagen. Vienen en vivo de nuestra API, con la referencia oficial vigente por galón.
     En los próximos 10 minutos les contamos cómo pasamos de una foto de un dispensador a una predicción, y al final lo prueban ustedes desde su teléfono.
     Tiempo objetivo: 20 segundos.
@@ -90,8 +113,8 @@
 </section>
 
 <!-- ======================================================= 2 · PROBLEMA -->
-<section class="diapo" data-titulo="El problema" data-presenta="Daniel" data-aurora="#ff453a,#ff9f0a,#0a84ff">
-  <div class="ceja" data-a style="--i:0; --acento: var(--super)"><span class="punto"></span>El problema</div>
+<section class="diapo" data-titulo="El problema" data-presenta="Daniel" data-aurora="#bf5af2,#64d2ff,#0a84ff">
+  <div class="ceja" data-a style="--i:0; --acento: var(--ml-3)"><span class="punto"></span>El problema</div>
   <h2 class="titulo" data-a style="--i:1">El precio cambia cada semana.<br><span class="c-tenue">El conductor decide a ciegas.</span></h2>
   <div class="vidrio panel-grafica" data-a style="--i:3">
     <div class="fila" style="justify-content: space-between; align-items: center;">
@@ -113,8 +136,8 @@
 </section>
 
 <!-- ======================================================= 3 · DECISIÓN -->
-<section class="diapo" data-titulo="Para quién" data-presenta="Daniel" data-aurora="#ffd60a,#ff453a,#5e5ce6">
-  <div class="ceja" data-a style="--i:0; --acento: var(--diesel)"><span class="punto"></span>Para quién y por qué</div>
+<section class="diapo" data-titulo="Para quién" data-presenta="Daniel" data-aurora="#30d158,#bf5af2,#5e5ce6">
+  <div class="ceja" data-a style="--i:0; --acento: var(--cian)"><span class="punto"></span>Para quién y por qué</div>
   <p class="pregunta-grande mt" data-a style="--i:1">Si espero al próximo cambio de precio,<br><span class="degradado">¿pagaré más, menos o lo mismo?</span></p>
   <div class="rejilla-3 mt-l">
     <div class="vidrio tarjeta tinte-ml" data-a style="--i:3">
@@ -149,7 +172,7 @@
   <div class="fila mt-l" style="gap: 40px; align-items: stretch;">
     <div class="rejilla-3 crece" style="gap: 28px;">
       <div class="vidrio tarjeta" data-a style="--i:3">
-        <div class="icono" style="background: rgba(255,214,10,0.18); color: var(--diesel)"><svg><use href="#i-camara"/></svg></div>
+        <div class="icono" style="background: rgba(255,214,10,0.18); color: var(--amarillo)"><svg><use href="#i-camara"/></svg></div>
         <h3>Datos</h3>
         <p>110 fotos de precios, 13 años de precios oficiales del MEM y el precio internacional de la EIA.</p>
       </div>
@@ -165,7 +188,7 @@
       </div>
     </div>
     <div class="vidrio terminal" data-a="der" style="--i:6; width: 560px;">
-      <div class="barra-t"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span>GET /prediccion?combustible=super</span></div>
+      <div class="barra-t"><i style="background:rgba(255,255,255,.2)"></i><i style="background:rgba(255,255,255,.2)"></i><i style="background:rgba(255,255,255,.2)"></i><span>GET /prediccion?combustible=super</span></div>
       <div class="json" id="json-ejemplo"></div>
     </div>
   </div>
@@ -178,7 +201,7 @@
 </section>
 
 <!-- ======================================================= 5 · ARQUITECTURA -->
-<section class="diapo" data-titulo="Arquitectura" data-presenta="Diego" data-aurora="#0a84ff,#5e5ce6,#f5c451">
+<section class="diapo" data-titulo="Arquitectura" data-presenta="Diego" data-aurora="#0a84ff,#5e5ce6,#bf5af2">
   <div class="ceja" data-a style="--i:0"><span class="punto"></span>Arquitectura</div>
   <h2 class="titulo" data-a style="--i:1; font-size: 76px">Cuatro paradas, un solo flujo automático.</h2>
   <div class="diagrama" id="diagrama-arq" data-a style="--i:2">
@@ -212,8 +235,8 @@
 </section>
 
 <!-- ======================================================= 6 · CAPAS -->
-<section class="diapo" data-titulo="Tres capas" data-presenta="Diego" data-aurora="#d9925b,#c7ced8,#f5c451">
-  <div class="ceja" data-a style="--i:0; --acento: var(--oro)"><span class="punto"></span>Arquitectura medallón</div>
+<section class="diapo" data-titulo="Tres capas" data-presenta="Diego" data-aurora="#64d2ff,#c7ced8,#5e5ce6">
+  <div class="ceja" data-a style="--i:0; --acento: var(--ml-2)"><span class="punto"></span>Arquitectura medallón</div>
   <h2 class="titulo" data-a style="--i:1">Tres capas, tres promesas.</h2>
   <div class="rejilla-3 mt">
     <div class="vidrio capa" data-a style="--i:2">
@@ -260,7 +283,7 @@
 </section>
 
 <!-- ======================================================= 7 · FOTO → DATO -->
-<section class="diapo" data-titulo="De la foto al dato" data-presenta="Rodrigo" data-aurora="#64d2ff,#0a84ff,#ffd60a">
+<section class="diapo" data-titulo="De la foto al dato" data-presenta="Rodrigo" data-aurora="#64d2ff,#0a84ff,#30d158">
   <div class="ceja" data-a style="--i:0; --acento: var(--cian)"><span class="punto"></span>De la foto al dato</div>
   <h2 class="titulo" data-a style="--i:1">Leemos el dispensador<br><span class="c-tenue">como lo leería una persona.</span></h2>
   <div class="fila" style="gap: 70px; margin-top: 20px; flex: 1; align-items: center;">
@@ -283,9 +306,9 @@
         <rect class="caja-deteccion" id="caja-venta" x="58" y="96" width="444" height="236" rx="14"/>
         <!-- ventanas de precio -->
         <g style="font-family: var(--mono);">
-          <g transform="translate(50,380)"><rect width="105" height="150" rx="14" fill="#0d0f14" stroke="rgba(255,214,10,0.5)"/><text x="52" y="38" text-anchor="middle" style="fill:#ffd60a; font-size:15px; font-family: var(--fuente); letter-spacing:.1em">DIESEL</text><text x="52" y="100" text-anchor="middle" filter="url(#brillo-lcd)" style="fill:#ffe9a0; font-size:30px">41.01</text></g>
+          <g transform="translate(50,380)"><rect width="105" height="150" rx="14" fill="#0d0f14" stroke="rgba(100,210,255,0.5)"/><text x="52" y="38" text-anchor="middle" style="fill:#64d2ff; font-size:15px; font-family: var(--fuente); letter-spacing:.1em">DIESEL</text><text x="52" y="100" text-anchor="middle" filter="url(#brillo-lcd)" style="fill:#d4f3ff; font-size:30px">41.01</text></g>
           <g transform="translate(168,380)"><rect width="105" height="150" rx="14" fill="#0d0f14" stroke="rgba(48,209,88,0.5)"/><text x="52" y="38" text-anchor="middle" style="fill:#30d158; font-size:15px; font-family: var(--fuente); letter-spacing:.1em">REGULAR</text><text x="52" y="100" text-anchor="middle" filter="url(#brillo-lcd)" style="fill:#b9f5c8; font-size:30px">29.98</text></g>
-          <g transform="translate(286,380)"><rect id="ventana-super" width="105" height="150" rx="14" fill="#0d0f14" stroke="rgba(255,69,58,0.55)"/><text x="52" y="38" text-anchor="middle" style="fill:#ff453a; font-size:15px; font-family: var(--fuente); letter-spacing:.1em">SUPER</text><text x="52" y="100" text-anchor="middle" filter="url(#brillo-lcd)" style="fill:#ffc2bd; font-size:30px">32.49</text></g>
+          <g transform="translate(286,380)"><rect id="ventana-super" width="105" height="150" rx="14" fill="#0d0f14" stroke="rgba(191,90,242,0.55)"/><text x="52" y="38" text-anchor="middle" style="fill:#bf5af2; font-size:15px; font-family: var(--fuente); letter-spacing:.1em">SUPER</text><text x="52" y="100" text-anchor="middle" filter="url(#brillo-lcd)" style="fill:#ecd6ff; font-size:30px">32.49</text></g>
           <g transform="translate(404,380)" opacity="0.5"><rect width="105" height="150" rx="14" fill="#0d0f14" stroke="rgba(255,255,255,0.2)"/><text x="52" y="38" text-anchor="middle" style="fill:#aaa; font-size:15px; font-family: var(--fuente); letter-spacing:.1em">V-POWER</text><text x="52" y="100" text-anchor="middle" style="fill:#ccc; font-size:30px">34.99</text></g>
           <rect class="caja-deteccion" id="caja-super" x="280" y="374" width="117" height="162" rx="16" style="stroke: var(--super)"/>
         </g>
@@ -320,7 +343,7 @@
 </section>
 
 <!-- ======================================================= 8 · REGLAS -->
-<section class="diapo" data-titulo="Reglas de calidad" data-presenta="Rodrigo" data-aurora="#ffd60a,#30d158,#ff453a">
+<section class="diapo" data-titulo="Reglas de calidad" data-presenta="Rodrigo" data-aurora="#64d2ff,#30d158,#bf5af2">
   <div class="ceja" data-a style="--i:0; --acento: var(--regular)"><span class="punto"></span>Reglas de calidad</div>
   <h2 class="titulo" data-a style="--i:1">Plausible no significa correcto.</h2>
   <div class="fila mt" style="gap: 48px; flex: 1;">
@@ -351,7 +374,7 @@
 </section>
 
 <!-- ======================================================= 9 · EXACTITUD -->
-<section class="diapo" data-titulo="Exactitud de la lectura" data-presenta="Nelson" data-aurora="#64d2ff,#5e5ce6,#ff453a">
+<section class="diapo" data-titulo="Exactitud de la lectura" data-presenta="Nelson" data-aurora="#64d2ff,#5e5ce6,#bf5af2">
   <div class="ceja" data-a style="--i:0; --acento: var(--cian)"><span class="punto"></span>Revisión manual</div>
   <h2 class="titulo" data-a style="--i:1">Revisamos 20 fotos a mano.<br><span class="c-tenue">Esto es lo que acierta cada técnica.</span></h2>
   <div class="fila mt" style="gap: 60px; align-items: center; flex: 1;">
@@ -384,15 +407,15 @@
 </section>
 
 <!-- ======================================================= 10 · FUENTES -->
-<section class="diapo" data-titulo="Más historia" data-presenta="Nelson" data-aurora="#ff9f0a,#ff453a,#0a84ff">
-  <div class="ceja" data-a style="--i:0; --acento: #ff9f0a"><span class="punto"></span>Fuentes complementarias</div>
+<section class="diapo" data-titulo="Más historia" data-presenta="Nelson" data-aurora="#64d2ff,#bf5af2,#0a84ff">
+  <div class="ceja" data-a style="--i:0; --acento: var(--cian)"><span class="punto"></span>Fuentes complementarias</div>
   <h2 class="titulo" data-a style="--i:1">110 fotos no alcanzan para aprender.<br><span class="c-tenue">13 años de historia, sí.</span></h2>
   <div class="fila mt" style="gap: 32px; flex: 1;">
     <div class="vidrio panel-grafica" data-a style="--i:2; margin-top: 0; flex: 1.6;">
       <div class="fila" style="justify-content: space-between; align-items: center;">
         <div class="leyenda">
           <span class="c-super"><i></i>Súper en Guatemala</span>
-          <span style="color: #ff9f0a"><i></i>Gasolina en la Costa del Golfo, en quetzales</span>
+          <span class="c-cian"><i></i>Gasolina en la Costa del Golfo, en quetzales</span>
         </div>
       </div>
       <div class="crece" id="g-internacional" style="margin-top: 14px;"></div>
@@ -435,7 +458,7 @@
   </div>
   <p class="pequeno" data-a style="--i:3; margin-top: 14px;">Semanas de martes a lunes, como la referencia del MEM. Solo se usa lo que se sabía al cierre de la semana. Nada del futuro.</p>
   <div class="rejilla-3 mt-s">
-    <div class="vidrio s clase paso"><div class="flecha" style="background: rgba(255,69,58,0.18); color: var(--super)">↑</div><div><h4>Sube</h4><p>Cambio de Q0.10 o más</p></div></div>
+    <div class="vidrio s clase paso"><div class="flecha" style="background: rgba(125,122,255,0.18); color: var(--sube)">↑</div><div><h4>Sube</h4><p>Cambio de Q0.10 o más</p></div></div>
     <div class="vidrio s clase paso"><div class="flecha" style="background: rgba(255,255,255,0.08); color: var(--texto-2)">→</div><div><h4>Se mantiene</h4><p>Menos de Q0.10 de diferencia</p></div></div>
     <div class="vidrio s clase paso"><div class="flecha" style="background: rgba(48,209,88,0.18); color: var(--regular)">↓</div><div><h4>Baja</h4><p>Cambio de −Q0.10 o menos</p></div></div>
   </div>
@@ -463,17 +486,17 @@
 </section>
 
 <!-- ======================================================= 12 · QUÉ MIRA -->
-<section class="diapo" data-titulo="Qué mira el modelo" data-presenta="Chuy" data-aurora="#ff9f0a,#0a84ff,#5e5ce6">
-  <div class="ceja" data-a style="--i:0; --acento: #ff9f0a"><span class="punto"></span>Qué mira el modelo</div>
+<section class="diapo" data-titulo="Qué mira el modelo" data-presenta="Chuy" data-aurora="#64d2ff,#0a84ff,#5e5ce6">
+  <div class="ceja" data-a style="--i:0; --acento: var(--cian)"><span class="punto"></span>Qué mira el modelo</div>
   <h2 class="titulo" data-a style="--i:1">Lo que más pesa<br><span class="c-tenue">tiene sentido económico.</span></h2>
   <div class="fila mt" style="gap: 70px; flex: 1;">
     <div class="vidrio crece" data-a style="--i:2; padding: 46px 50px;">
-      <div class="pequeno" style="margin-bottom: 28px;">Peso promedio de cada variable en el modelo · las 8 más importantes · <span style="color: var(--diesel)">en ámbar, las del precio internacional</span></div>
+      <div class="pequeno" style="margin-bottom: 28px;">Peso promedio de cada variable en el modelo · las 8 más importantes · <span class="c-cian">en celeste, las del precio internacional</span></div>
       <div class="barras" id="barras-pesos"></div>
     </div>
     <div class="col" style="width: 520px; gap: 18px; justify-content: center;">
       <div class="vidrio s tinte-diesel paso" style="padding: 24px 32px;">
-        <div class="cifra-s" style="color: var(--diesel)">#1 brecha</div>
+        <div class="cifra-s c-cian">#1 brecha</div>
         <div class="texto" style="margin-top: 8px;">Si el precio local quedó muy arriba del internacional, lo esperable es que baje.</div>
       </div>
       <div class="vidrio s paso" style="padding: 24px 32px;">
@@ -544,17 +567,17 @@
 </section>
 
 <!-- ======================================================= 14 · LIMITACIONES -->
-<section class="diapo" data-titulo="Limitaciones" data-presenta="Chuy" data-aurora="#ff453a,#5e5ce6,#ffd60a">
-  <div class="ceja" data-a style="--i:0; --acento: var(--super)"><span class="punto"></span>Limitaciones</div>
+<section class="diapo" data-titulo="Limitaciones" data-presenta="Chuy" data-aurora="#bf5af2,#5e5ce6,#30d158">
+  <div class="ceja" data-a style="--i:0; --acento: var(--ml-3)"><span class="punto"></span>Limitaciones</div>
   <h2 class="titulo" data-a style="--i:1">Lo que el modelo no puede ver.</h2>
   <div class="rejilla-2 mt" style="gap: 28px;">
     <div class="vidrio tarjeta" data-a style="--i:2">
-      <div class="icono" style="background: rgba(255,69,58,0.18); color: var(--super)"><svg><use href="#i-escudo"/></svg></div>
+      <div class="icono" style="background: rgba(191,90,242,0.18); color: var(--ml-3)"><svg><use href="#i-escudo"/></svg></div>
       <h3>Decisiones del Gobierno</h3>
       <p>La baja de <b>Q9.10</b> del 5 de octubre por la exención de impuestos no la anticipa ningún dato del mercado.</p>
     </div>
     <div class="vidrio tarjeta" data-a style="--i:3">
-      <div class="icono" style="background: rgba(255,214,10,0.16); color: var(--diesel)"><svg><use href="#i-bomba"/></svg></div>
+      <div class="icono" style="background: rgba(255,214,10,0.16); color: var(--amarillo)"><svg><use href="#i-bomba"/></svg></div>
       <h3>Tu estación no es el promedio</h3>
       <p>Predecimos la referencia oficial. Cada estación cobra con su propio margen y aplica el cambio a su ritmo.</p>
     </div>
@@ -625,7 +648,7 @@
       </div>
     </div>
     <div class="vidrio terminal" data-a="der" style="--i:5; width: 640px;">
-      <div class="barra-t"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span>Droplet · puerto 8001</span></div>
+      <div class="barra-t"><i style="background:rgba(255,255,255,.2)"></i><i style="background:rgba(255,255,255,.2)"></i><i style="background:rgba(255,255,255,.2)"></i><span>Droplet · puerto 8001</span></div>
       <div class="cuerpo" id="terminal-health"></div>
       <div style="padding: 0 30px 26px;" class="fila"><span class="estado-vivo" id="estado-api"><i></i><span>Conectando…</span></span></div>
     </div>
@@ -639,7 +662,7 @@
 </section>
 
 <!-- ======================================================= 17 · DEMO -->
-<section class="diapo" data-titulo="Demo en vivo" data-presenta="Rodrigo" data-aurora="#bf5af2,#0a84ff,#30d158">
+<section class="diapo" data-titulo="Demo en vivo" data-presenta="Joaquín" data-aurora="#bf5af2,#0a84ff,#30d158">
   <div class="fila" style="flex: 1; gap: 90px; align-items: center;">
     <div class="col crece">
       <div class="ceja" data-a style="--i:0; --acento: var(--ml-3)"><span class="punto"></span>Demo en vivo</div>
@@ -666,7 +689,7 @@
 </section>
 
 <!-- ======================================================= 18 · PREDICCIÓN -->
-<section class="diapo" data-titulo="Predicción en vivo" data-presenta="Rodrigo" data-aurora="#30d158,#64d2ff,#ff453a">
+<section class="diapo" data-titulo="Predicción en vivo" data-presenta="Joaquín" data-aurora="#30d158,#64d2ff,#bf5af2">
   <div class="fila" style="justify-content: space-between; align-items: flex-end;">
     <div>
       <div class="ceja" data-a style="--i:0; --acento: var(--regular)"><span class="punto"></span>Predicción en vivo · respuesta de la API</div>
@@ -678,13 +701,13 @@
   <p class="pequeno mt-s" data-a style="--i:6" id="pie-prediccion">Datos hasta la semana del 3 de noviembre. Precio de referencia vigente del MEM.</p>
   <aside class="notas">
     Esta es la respuesta real de la API, consultada en este momento. Para cada combustible: la dirección, la probabilidad y cómo se reparte entre las tres clases.
-    Esta predicción queda registrada en gold.predicciones. Cuando llegue la semana siguiente, el job completa la dirección real y si acertamos.
+    Esta predicción queda registrada en gold.predicciones. Cuando llegue la semana siguiente, el job completa la dirección real y si acertamos. Le paso a Sergio.
   </aside>
 </section>
 
 <!-- ======================================================= 19 · LECCIONES -->
-<section class="diapo" data-titulo="Lecciones aprendidas" data-presenta="Diego" data-aurora="#5e5ce6,#ffd60a,#0a84ff">
-  <div class="ceja" data-a style="--i:0; --acento: var(--diesel)"><span class="punto"></span>Lecciones aprendidas</div>
+<section class="diapo" data-titulo="Lecciones aprendidas" data-presenta="Sergio" data-aurora="#5e5ce6,#30d158,#0a84ff">
+  <div class="ceja" data-a style="--i:0; --acento: var(--cian)"><span class="punto"></span>Lecciones aprendidas</div>
   <h2 class="titulo" data-a style="--i:1">Lo que nos llevamos.</h2>
   <div class="rejilla-3 mt" style="gap: 26px;">
     <div class="vidrio leccion" data-a style="--i:2"><div class="n">01</div><h3>El ojo humano sigue siendo la referencia</h3><p>Un dígito mal leído pasa los rangos. La revisión manual corrigió nuestra propia vara de medir.</p></div>
@@ -703,7 +726,7 @@
 </section>
 
 <!-- ======================================================= 20 · CON MÁS TIEMPO -->
-<section class="diapo" data-titulo="Con más tiempo" data-presenta="Daniel" data-aurora="#0a84ff,#bf5af2,#30d158">
+<section class="diapo" data-titulo="Con más tiempo" data-presenta="Sergio" data-aurora="#0a84ff,#bf5af2,#30d158">
   <div class="ceja" data-a style="--i:0"><span class="punto"></span>Siguientes pasos</div>
   <h2 class="titulo" data-a style="--i:1">Con más tiempo y más datos.</h2>
   <div class="ruta" style="margin-top: 110px;">
@@ -726,14 +749,12 @@
 </section>
 
 <!-- ======================================================= 21 · GRACIAS -->
-<section class="diapo" data-titulo="Gracias" data-presenta="Todos" data-aurora="#ff453a,#0a84ff,#bf5af2">
+<section class="diapo" data-titulo="Gracias" data-presenta="Sergio" data-aurora="#5e5ce6,#0a84ff,#bf5af2">
   <div class="fila" style="flex: 1; align-items: center; gap: 100px;">
     <div class="col crece">
-      <div class="ceja" data-a style="--i:0; --acento: var(--diesel)"><span class="punto"></span>Equipo 01 · Gasolina GT</div>
+      <div class="ceja" data-a style="--i:0; --acento: var(--cian)"><span class="punto"></span>Equipo 01 · Gasolina GT</div>
       <div class="gracias mt-s" data-a style="--i:1">Gracias.</div>
-      <p class="sub" data-a style="--i:2">¿Preguntas? Cualquiera de nosotros puede responder.</p>
-      <div class="nombres sub" data-a style="--i:3; color: var(--texto); font-size: 30px;" id="lista-equipo-2"></div>
-      <div class="pequeno mt" data-a style="--i:4">github.com/chuy-zip/equipo-01-gasolina-gt</div>
+      <div class="pequeno mt" data-a style="--i:2">github.com/chuy-zip/equipo-01-gasolina-gt</div>
     </div>
     <div class="col centro" data-a="zoom" style="--i:3">
       <div class="qr" style="width: 400px; height: 400px;"><img src="datos/qr_docs.svg" alt="Código QR hacia la documentación de la API"></div>
@@ -741,7 +762,7 @@
     </div>
   </div>
   <aside class="notas">
-    Gracias. Quedamos atentos a sus preguntas. El QR abre la documentación interactiva de la API para que la exploren.
+    Gracias. Quedamos atentos a sus preguntas; cualquiera del equipo puede responder. El QR abre la documentación interactiva de la API para que la exploren.
   </aside>
 </section>
 
@@ -759,8 +780,8 @@
 </section>
 
 <!-- ======================================================= 23 · ANEXO B -->
-<section class="diapo" data-titulo="Anexo · Datos y API" data-presenta="Plan B" data-aurora="#f5c451,#d9925b,#0a84ff">
-  <div class="ceja" data-a style="--i:0; --acento: var(--oro)"><span class="punto"></span>Anexo · datos y API</div>
+<section class="diapo" data-titulo="Anexo · Datos y API" data-presenta="Plan B" data-aurora="#5e5ce6,#64d2ff,#0a84ff">
+  <div class="ceja" data-a style="--i:0; --acento: var(--ml-2)"><span class="punto"></span>Anexo · datos y API</div>
   <h2 class="titulo" data-a style="--i:1; font-size: 64px">Las tablas y el servicio.</h2>
   <div class="rejilla-2 mt-s" style="flex: 1; min-height: 0; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 22px;">
     <div class="captura" data-a style="--i:2" data-captura="05_silver_precios.png" data-pie="silver.precios"></div>

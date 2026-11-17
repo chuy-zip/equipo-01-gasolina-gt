@@ -93,15 +93,25 @@
       });
     });
 
-    // medidor de la portada: la aguja apunta según la probabilidad de subir menos la de bajar
+    // medidor de la portada: el marcador se ubica según la probabilidad de subir menos la de bajar
     const pm = d.prediccion.super;
     const aguja = document.getElementById("aguja");
     if (aguja) {
-      aguja.style.setProperty("--giro", `${((pm.prob_sube - pm.prob_baja) * 82).toFixed(1)}deg`);
+      aguja.style.setProperty("--giro", `${((pm.prob_sube - pm.prob_baja) * 86).toFixed(1)}deg`);
+      const color = { baja: "var(--regular)", se_mantiene: "#e5e5ea", sube: "var(--sube)" };
+      const nombre = { baja: "Baja", se_mantiene: "Igual", sube: "Sube" };
+      ["baja", "se_mantiene", "sube"].forEach((c) => {
+        document.getElementById(`tramo-${c}`).classList.toggle("activo", c === pm.prediccion);
+        document.getElementById(`etq-${c}`).classList.toggle("activo", c === pm.prediccion);
+        const p = Math.round(pm[`prob_${c}`] * 100);
+        document.getElementById(`p-${c}`).textContent = p < 1 ? "<1" : p;
+      });
       const dirEl = document.getElementById("medidor-dir");
-      dirEl.textContent = pm.prediccion === "se_mantiene" ? "Igual" : pm.prediccion[0].toUpperCase() + pm.prediccion.slice(1);
-      dirEl.className = pm.prediccion === "baja" ? "c-regular" : pm.prediccion === "sube" ? "c-super" : "c-tenue";
-      document.getElementById("medidor-prob").textContent = `${Math.round(pm.probabilidad * 100)} %`;
+      dirEl.textContent = nombre[pm.prediccion];
+      dirEl.style.setProperty("--c", color[pm.prediccion]);
+      const prob = document.getElementById("medidor-prob");
+      prob.dataset.cuenta = Math.round(pm.probabilidad * 100);
+      prob.textContent = prob.dataset.cuenta;
     }
 
     // ejemplo de respuesta en la diapositiva 4
@@ -123,7 +133,7 @@
         const p = d.prediccion[c];
         const ref = d.actual.find((x) => x.combustible === c);
         const dir = p.prediccion;
-        const color = dir === "baja" ? "var(--regular)" : dir === "sube" ? "var(--super)" : "var(--texto-2)";
+        const color = dir === "baja" ? "var(--regular)" : dir === "sube" ? "var(--sube)" : "var(--texto-2)";
         const rot = dir === "baja" ? 90 : dir === "sube" ? -90 : 0;
         const etiqueta = dir === "se_mantiene" ? "Se mantiene" : dir;
         return `<div class="vidrio pred" data-a style="--i:${3 + i}">
@@ -138,7 +148,7 @@
           <div class="dist" title="Probabilidad de cada clase">
             <span style="--w:${(p.prob_baja * 100).toFixed(1)}%; background: var(--regular)"></span>
             <span style="--w:${(p.prob_se_mantiene * 100).toFixed(1)}%; background: rgba(255,255,255,.45)"></span>
-            <span style="--w:${(p.prob_sube * 100).toFixed(1)}%; background: var(--super)"></span>
+            <span style="--w:${(p.prob_sube * 100).toFixed(1)}%; background: var(--sube)"></span>
           </div>
           <div class="ref"><span>Baja ${Math.round(p.prob_baja * 100)} · Igual ${Math.round(p.prob_se_mantiene * 100)} · Sube ${Math.round(p.prob_sube * 100)}</span><span>Hoy Q${ref ? ref.precio_referencia.toFixed(2) : "—"}</span></div>
         </div>`;
