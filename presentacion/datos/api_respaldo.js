@@ -1,0 +1,11 @@
+window.API_RESPALDO = {
+  "capturado_en": "2026-11-17T00:41:41Z",
+  "health": {"status":"ok","tablas":{"referencia_actual":3,"precio_semanal":2157,"metricas_modelo":1,"predicciones":3},"exportado_en":"2026-11-15T22:53:12+00:00","version_modelo":"local"},
+  "actual": [{"combustible":"diesel","fecha_referencia":"2026-11-10","precio_referencia":41.01,"limite_normal":42.01,"tipo_cambio":7.63846,"regimen_fiscal":"exento","proximo_cambio":"2026-11-16"},{"combustible":"regular","fecha_referencia":"2026-11-10","precio_referencia":29.98,"limite_normal":30.98,"tipo_cambio":7.63846,"regimen_fiscal":"exento","proximo_cambio":"2026-11-16"},{"combustible":"super","fecha_referencia":"2026-11-10","precio_referencia":32.49,"limite_normal":33.49,"tipo_cambio":7.63846,"regimen_fiscal":"exento","proximo_cambio":"2026-11-16"}],
+  "metricas": {"version_modelo":"local","entrenado_en":"2026-11-15T22:53:12.147949+00:00","inicio_prueba":"2024-11-05","filas_entrenamiento":1818,"filas_prueba":312,"supera_linea_base":true,"modelo":{"balanced_accuracy":0.5482369572175397,"f1_macro":0.5476175434115874,"direccion_con_movimiento":0.7380952380952381},"linea_base":{"balanced_accuracy":0.45811521272686323,"f1_macro":0.45808905115708715,"direccion_con_movimiento":0.64}},
+  "prediccion": {
+    "super": {"semana":"2026-11-03","semana_objetivo":"2026-11-10","combustible":"super","prediccion":"baja","probabilidad":0.9358270313628543,"prob_sube":0.003038808547247874,"prob_baja":0.9358270313628543,"prob_se_mantiene":0.06113416008989772,"version_modelo":"local","predicho_en":"2026-11-15T22:53:12.147949+00:00"},
+    "regular": {"semana":"2026-11-03","semana_objetivo":"2026-11-10","combustible":"regular","prediccion":"baja","probabilidad":0.927670725051124,"prob_sube":0.0046289675804817455,"prob_baja":0.927670725051124,"prob_se_mantiene":0.06770030736839426,"version_modelo":"local","predicho_en":"2026-11-15T22:53:12.147949+00:00"},
+    "diesel": {"semana":"2026-11-03","semana_objetivo":"2026-11-10","combustible":"diesel","prediccion":"baja","probabilidad":0.9176024700086302,"prob_sube":0.0032939165140374468,"prob_baja":0.9176024700086302,"prob_se_mantiene":0.07910361347733247,"version_modelo":"local","predicho_en":"2026-11-15T22:53:12.147949+00:00"},
+  }
+};

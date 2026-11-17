@@ -52,7 +52,7 @@ flowchart LR
 | `api/` | `api/` | FastAPI en Docker con el modelo y la copia de oro adentro. Ver [api/README.md](api/README.md), que también justifica Docker |
 | `docs/arquitectura.png` y su fuente editable | Por hacer | |
 | `docs/informe.pdf` | [Informe técnico](docs/informe.pdf) | Fuente Markdown, DOCX y regeneración en [informe/](informe/README.md) |
-| `presentacion/` | Por hacer | |
+| `presentacion/` | [Presentación web y PDF](presentacion/README.md) | Diapositivas animadas con datos reales y la API en vivo. El PDF se genera desde la misma fuente |
 
 ## Uso local
 
