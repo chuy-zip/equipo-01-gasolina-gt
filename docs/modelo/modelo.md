@@ -2,6 +2,20 @@
 
 El caso de uso tiene dos preguntas distintas. Cada una se resuelve con el método que mejor le queda.
 
+## Arquitectura del modelo
+
+![Arquitectura del modelo](arquitectura_modelo.png)
+
+1. **Fuentes:** el precio oficial del MEM, el precio internacional de la EIA y los precios de las fotos, todos desde plata.
+2. **Variables:** `30_gold` las junta en `gold.features_modelo`, una fila por semana y combustible. Son 17 variables: el combustible, 10 del MEM, 4 de la EIA y 2 de las fotos. La etiqueta es la dirección del precio la semana siguiente.
+3. **Modelo:** `40_entrenamiento` prepara las variables, entrena una regresión logística de 3 clases y la evalúa con las últimas 104 semanas contra la línea base del enunciado.
+4. **Registro:** el experimento queda en MLflow y el modelo final en Unity Catalog con el alias `champion`.
+5. **Predicción:** `50_predicciones` aplica el `champion` a la semana más reciente. La API lleva el mismo modelo.
+
+La fuente editable es [arquitectura_modelo.mmd](arquitectura_modelo.mmd). También está en [SVG](arquitectura_modelo.svg). Para regenerar la imagen: `npx -y @mermaid-js/mermaid-cli -i docs/modelo/arquitectura_modelo.mmd -o docs/modelo/arquitectura_modelo.png -b white -s 2`.
+
+**Versión vigente:** la 4, entrenada el 2026-11-16 con MEM, EIA y fotos. Balanced accuracy de 0.564 contra 0.458 de la línea base.
+
 ## "¿Es un buen precio?"
 
 Se responde comparando el precio del usuario contra la referencia oficial del mismo día y combustible. El resultado es la diferencia en quetzales y si cae dentro del rango normal entre estaciones.
