@@ -165,7 +165,9 @@ CREATE TABLE IF NOT EXISTS ${catalogo}.${esquema_gold}.features_modelo (
   intl_cambio_3 DOUBLE COMMENT 'Cambio del precio internacional de hace 3 semanas',
   brecha_vs_8 DOUBLE COMMENT 'Precio local menos internacional, contra su promedio de 8 semanas. Positivo sugiere baja',
   cambio_siguiente DOUBLE COMMENT 'Cambio de precio de la semana siguiente. Nulo en la semana actual',
-  etiqueta STRING COMMENT 'sube, baja o se_mantiene con umbral de Q0.10. Nula en la semana actual, que es la que se predice'
+  etiqueta STRING COMMENT 'sube, baja o se_mantiene con umbral de Q0.10. Nula en la semana actual, que es la que se predice',
+  foto_disponible INT COMMENT '1 si hubo al menos una foto con precio válido de ese combustible en la semana, 0 si no',
+  foto_brecha DOUBLE COMMENT 'Precio promedio de las fotos de la semana menos el precio oficial, en quetzales. 0 si no hubo foto'
 )
 COMMENT 'Variables y etiqueta del modelo de tendencia, una fila por semana y combustible. Es la tabla features_modelo del enunciado'
 LOCATION '${ruta_gold}/features_modelo'

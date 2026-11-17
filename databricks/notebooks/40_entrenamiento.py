@@ -65,7 +65,7 @@ print(f"{len(datos)} filas con etiqueta, de {datos['semana'].min()} a {datos['se
 
 # COMMAND ----------
 
-with mlflow.start_run(run_name="logistica_mem_eia") as corrida:
+with mlflow.start_run(run_name="logistica_mem_eia_fotos") as corrida:
     _, resultado = modelo.evaluar(semanales)
     mlflow.log_metrics({k: v for k, v in resultado.items() if isinstance(v, float)})
     mlflow.log_params(
@@ -79,7 +79,7 @@ with mlflow.start_run(run_name="logistica_mem_eia") as corrida:
             "variables": ",".join(features.VARIABLES),
         }
     )
-    mlflow.set_tags({"huella_datos": huella, "modelo": NOMBRE_MODELO, "fuentes": "mem,eia"})
+    mlflow.set_tags({"huella_datos": huella, "modelo": NOMBRE_MODELO, "fuentes": "mem,eia,fotos"})
 
     # El modelo final aprende de todas las semanas. Las métricas de arriba vienen de la evaluación con el pasado.
     final = modelo.construir_modelo().fit(datos[features.VARIABLES], datos["etiqueta"])

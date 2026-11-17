@@ -70,7 +70,8 @@ diarios["n_fotos"] = diarios["n_fotos"].fillna(0).astype("int32")
 
 semanal = features.precio_semanal(diarios, precios_fotos)
 variacion = features.variacion_semanal(semanal)
-modelo_features = features.features_modelo(diarios, internacionales)
+# Las fotos también son variables del modelo: si hubo foto en la semana y su diferencia con el precio oficial.
+modelo_features = features.features_modelo(diarios, internacionales, precios_fotos)
 referencia = features.referencia_actual(diarios)
 
 # COMMAND ----------

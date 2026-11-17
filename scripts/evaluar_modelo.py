@@ -5,6 +5,7 @@ Uso, desde la raíz del repo y con el paquete instalado (pip install -e .):
     python scripts/evaluar_modelo.py
 
 Sirve para probar cambios en las variables o en el modelo antes de llevarlos al pipeline.
+No tiene las fotos, que solo están en Databricks: las variables de fotos quedan en 0.
 """
 
 from pathlib import Path

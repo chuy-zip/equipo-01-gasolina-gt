@@ -219,6 +219,7 @@ Las dos fuentes van separadas: el precio oficial es un promedio nacional, y el d
 | intl_cambio_1 a intl_cambio_3 | Cambio del precio internacional en quetzales en las 3 semanas anteriores |
 | brecha_vs_8 | Precio local menos internacional, comparado con su promedio de 8 semanas |
 | cambio_siguiente, etiqueta | Cambio de precio de la semana siguiente y su dirección: `sube`, `baja` o `se_mantiene`. La última semana no tiene etiqueta |
+| foto_disponible, foto_brecha | Desde `silver.precios`: 1 si hubo foto del combustible en la semana, y precio promedio de las fotos menos el precio oficial. 0 si no hubo foto. Se agregaron el 2026-11-16 con `ALTER TABLE ... ADD COLUMNS`, por eso van al final |
 
 El precio internacional de cada semana es el promedio de los 7 días anteriores a su cierre, el lunes, para usar solo lo que ya se sabía ese día.
 

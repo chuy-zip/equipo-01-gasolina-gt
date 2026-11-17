@@ -45,8 +45,14 @@ VARIABLES_NUMERICAS = [
     "intl_cambio_2",
     "intl_cambio_3",
     "brecha_vs_8",
+    "foto_disponible",
+    "foto_brecha",
 ]
 VARIABLES = ["combustible", *VARIABLES_NUMERICAS]
+
+# Variables que salen de las fotos. Se agregan después de armar las demás, porque casi todas las semanas
+# no tienen foto. En esas semanas valen 0 y la fila no se descarta.
+VARIABLES_FOTOS = ["foto_disponible", "foto_brecha"]
 
 
 def etiquetar(cambio: pd.Series) -> pd.Series:
@@ -101,12 +107,29 @@ def _internacional_antes_del_lunes(precios_internacionales: pd.DataFrame, lunes:
     return diario.rolling(7, min_periods=3).mean().shift(1).reindex(lunes)
 
 
-def features_modelo(diarios: pd.DataFrame, precios_internacionales: pd.DataFrame) -> pd.DataFrame:
+def variables_fotos(precios_fotos: pd.DataFrame | None) -> pd.DataFrame:
+    """Precio promedio de las fotos por semana y combustible. Vacío si no hay fotos."""
+    columnas = ["semana", "combustible", "precio_fotos"]
+    if precios_fotos is None or len(precios_fotos) == 0:
+        return pd.DataFrame(columns=columnas)
+    fotos = precios_fotos.assign(
+        semana=inicio_de_semana(precios_fotos["fecha"]).to_numpy(),
+        precio_fotos=pd.to_numeric(precios_fotos["precio_q_galon"]).astype(float),
+    )
+    return fotos.groupby(["semana", "combustible"], as_index=False)["precio_fotos"].mean()[columnas]
+
+
+def features_modelo(
+    diarios: pd.DataFrame, precios_internacionales: pd.DataFrame, precios_fotos: pd.DataFrame | None = None
+) -> pd.DataFrame:
     """Una fila por semana y combustible con las variables y la etiqueta. Es `gold.features_modelo`.
 
     La fila de una semana describe lo que se sabía al cerrar esa semana, el lunes. La etiqueta es
     la dirección del cambio de precio de la semana siguiente. La semana actual no tiene etiqueta.
     `semana` es el martes de inicio.
+
+    Las fotos de esa semana dan dos variables: `foto_disponible`, 1 si hubo foto de ese combustible,
+    y `foto_brecha`, el precio promedio de las fotos menos el precio oficial. Sin foto, las dos valen 0.
     """
     ancho = diarios.pivot(index="fecha", columns="combustible", values="precio_oficial")
     ancho.index = pd.to_datetime(ancho.index)
@@ -150,8 +173,14 @@ def features_modelo(diarios: pd.DataFrame, precios_internacionales: pd.DataFrame
         partes.append(f)
 
     tabla = pd.concat(partes)
-    tabla = tabla.dropna(subset=VARIABLES_NUMERICAS)
+    sin_fotos = [v for v in VARIABLES_NUMERICAS if v not in VARIABLES_FOTOS]
+    tabla = tabla.dropna(subset=sin_fotos)
     tabla.insert(0, "semana", (tabla.index - pd.Timedelta(days=6)).date)
+
+    tabla = tabla.reset_index(drop=True).merge(variables_fotos(precios_fotos), on=["semana", "combustible"], how="left")
+    tabla["foto_disponible"] = tabla["precio_fotos"].notna().astype("int32")
+    tabla["foto_brecha"] = (tabla["precio_fotos"] - tabla["precio"]).fillna(0.0).round(4)
+    tabla = tabla.drop(columns="precio_fotos")
     return tabla.sort_values(["semana", "combustible"]).reset_index(drop=True)
 
 
