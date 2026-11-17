@@ -21,10 +21,10 @@ Puntos de la rúbrica y estado documentado al 2026-11-15:
 | Capa oro: precio semanal, variación, etiqueta de dirección y comentarios | 10 | Hecho. `gold.precio_semanal` tiene filas del MEM y de fotos, según las corridas de desarrollo del 2026-11-14 |
 | Modelo: validación temporal, comparación con la línea base y MLflow | 10 | Hecho. 0.55 contra 0.46 de la línea base |
 | Clusters y job: cómputo, job encadenado, programación y alertas | 10 | Hecho, salvo confirmar con el catedrático la equivalencia con serverless |
-| API en el Droplet | 20 | Desplegada en `http://157.230.171.204:8001`. Pendiente: el 2026-11-16 `/health` respondía `version_modelo: local`, así que falta subir la imagen con la versión 4 |
+| API en el Droplet | 20 | Desplegada en `http://157.230.171.204:8001`. Desde el 2026-11-17 `/health` responde `version_modelo: 4` |
 | Repositorio y README | 10 | Parcial. Faltan el diagrama exportado, la presentación y commits de todos |
 | Informe técnico | 5 | Redactado el 2026-11-16: `informe/informe.md`, versión DOCX y PDF de cinco páginas en `docs/informe.pdf`. Pendiente de revisión del equipo |
-| Presentación y demo | 10 | Presentación en `presentacion/`. Anexo con 7 de 8 capturas. Pendiente: `08_api_swagger.png`, después de subir la versión 4 a la API |
+| Presentación y demo | 10 | Presentación en `presentacion/`. Anexo con las 8 capturas, incluida `08_api_swagger.png` |
 
 ## Decisiones tomadas
 
@@ -99,11 +99,11 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 4 | Script que descarga el modelo `champion` y la copia de oro: `scripts/exportar_para_api.py` | Ricardo | Hecho y probado contra Databricks el 2026-11-13. Verificó que el modelo descargado predice lo mismo que `gold.predicciones` |
 | 4 | API local con los endpoints del enunciado, con el modelo empaquetado | Rodrigo | Hecho e integrado en `main` por el PR #22. FastAPI en `api/`, con tests. La prueba local documentada usó `champion` y coincidió con `gold.predicciones` |
 | 4 | Generación local de artefactos para la API sin Databricks: `scripts/exportar_local.py` | | Integrada en `main` por el PR #23. Entrena un modelo local con MEM y EIA; no incorpora los precios de fotos. No hay evidencia de que se haya usado para desplegar |
-| 4 | Imagen de Docker subida al Droplet, en el puerto del equipo | | Desplegada. El 2026-11-16 `/health` respondía `version_modelo: local`. Pendiente: correr `scripts/exportar_para_api.py`, subir la imagen con la versión 4 y revisar que `/health` diga `"4"` |
+| 4 | Imagen de Docker subida al Droplet, en el puerto del equipo | | Hecho el 2026-11-17. Se corrió `scripts/exportar_para_api.py` (versión 4, la predicción coincide con `gold.predicciones`), se construyó la imagen para `linux/amd64` y se subió al Droplet. `/health` dice `"version_modelo":"4"` |
 | 4 | Pruebas de usuario final con `curl` o Postman | Rodrigo | Hecho. `tests/consultas_api.sh` |
 | 5 | Diagrama de arquitectura exportado y su fuente editable | | Pendiente |
 | 5 | Informe técnico de máximo 5 páginas | | Redactado en `informe/informe.md`, con DOCX y PDF generados mediante LibreOffice. PDF de entrega: `docs/informe.pdf` (cinco páginas). Pendiente de revisión del equipo |
-| 5 | Presentación, resumen de una página y demo | | Presentación y PDF en `presentacion/`. Pendiente: quien suba la versión 4 a la API agrega `presentacion/capturas/08_api_swagger.png` y vuelve a exportar el PDF |
+| 5 | Presentación, resumen de una página y demo | | Hecho. Presentación y PDF en `presentacion/`, con las 8 capturas del anexo |
 | Extra | CI/CD hacia el Droplet o pruebas automatizadas de la API | | Opcional |
 
 ## Riesgos
@@ -140,3 +140,4 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 2026-11-15 | Se integraron los PR #20, #21, #22 y #23 en `main`. El #23 añadió `scripts/exportar_local.py` como alternativa para generar artefactos desde MEM y EIA sin Databricks. El equipo confirmó que la API se desplegó en el Droplet; falta registrar qué artefactos usa y una prueba pública |
 | 2026-11-16 | Variables de fotos en el modelo. Columnas agregadas a `gold.features_modelo` con la CLI. `exportar_local.py` queda marcado como copia de prueba sin fotos, que no se despliega |
 | 2026-11-16 | Job con las fotos en el modelo: versión 4 como `champion`, 0.564 contra 0.458 de la línea base. Diagrama de arquitectura del modelo en `docs/modelo/`. Imagen de la API reconstruida con la versión 4, falta subirla al Droplet |
+| 2026-11-17 | Versión 4 desplegada en el Droplet. La imagen se construyó con `--platform linux/amd64`: una imagen arm64 hecha en un Mac con Apple Silicon no arranca en el Droplet (`exec format error`). Captura `08_api_swagger.png` y PDF de la presentación actualizados |
