@@ -21,6 +21,10 @@ Formato para todas:
 | `07_gold_predicciones.png` | Filas de la predicción más reciente, con probabilidad y versión | SQL Editor: `SELECT * FROM equipo_01.gold.predicciones ORDER BY semana DESC LIMIT 6` |
 | `08_api_swagger.png` | Swagger de la API pública con los 5 endpoints | <http://157.230.171.204:8001/docs> |
 
+## Pendiente
+
+Falta `08_api_swagger.png`. La toma quien suba la versión 4 del modelo a la API, después de revisar que `/health` diga `"version_modelo":"4"`. Las otras 7 se tomaron el 2026-11-16, con la versión 4 como `champion`, y se recortaron para quitar correos.
+
 Después de agregar las capturas, volver a exportar el PDF:
 
 ```

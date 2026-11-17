@@ -21,10 +21,10 @@ Puntos de la rúbrica y estado documentado al 2026-11-15:
 | Capa oro: precio semanal, variación, etiqueta de dirección y comentarios | 10 | Hecho. `gold.precio_semanal` tiene filas del MEM y de fotos, según las corridas de desarrollo del 2026-11-14 |
 | Modelo: validación temporal, comparación con la línea base y MLflow | 10 | Hecho. 0.55 contra 0.46 de la línea base |
 | Clusters y job: cómputo, job encadenado, programación y alertas | 10 | Hecho, salvo confirmar con el catedrático la equivalencia con serverless |
-| API en el Droplet | 20 | API hecha y probada en local con Docker. Despliegue confirmado por el equipo el 2026-11-15. Falta registrar URL y prueba pública en el repo |
+| API en el Droplet | 20 | Desplegada en `http://157.230.171.204:8001`. Pendiente: el 2026-11-16 `/health` respondía `version_modelo: local`, así que falta subir la imagen con la versión 4 |
 | Repositorio y README | 10 | Parcial. Faltan el diagrama exportado, la presentación y commits de todos |
 | Informe técnico | 5 | Redactado el 2026-11-16: `informe/informe.md`, versión DOCX y PDF de cinco páginas en `docs/informe.pdf`. Pendiente de revisión del equipo |
-| Presentación y demo | 10 | Pendiente |
+| Presentación y demo | 10 | Presentación en `presentacion/`. Anexo con 7 de 8 capturas. Pendiente: `08_api_swagger.png`, después de subir la versión 4 a la API |
 
 ## Decisiones tomadas
 
@@ -99,11 +99,11 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 4 | Script que descarga el modelo `champion` y la copia de oro: `scripts/exportar_para_api.py` | Ricardo | Hecho y probado contra Databricks el 2026-11-13. Verificó que el modelo descargado predice lo mismo que `gold.predicciones` |
 | 4 | API local con los endpoints del enunciado, con el modelo empaquetado | Rodrigo | Hecho e integrado en `main` por el PR #22. FastAPI en `api/`, con tests. La prueba local documentada usó `champion` y coincidió con `gold.predicciones` |
 | 4 | Generación local de artefactos para la API sin Databricks: `scripts/exportar_local.py` | | Integrada en `main` por el PR #23. Entrena un modelo local con MEM y EIA; no incorpora los precios de fotos. No hay evidencia de que se haya usado para desplegar |
-| 4 | Imagen de Docker subida al Droplet, en el puerto del equipo | | Despliegue confirmado por el equipo el 2026-11-15. Falta documentar respuesta pública y origen de los artefactos |
+| 4 | Imagen de Docker subida al Droplet, en el puerto del equipo | | Desplegada. El 2026-11-16 `/health` respondía `version_modelo: local`. Pendiente: correr `scripts/exportar_para_api.py`, subir la imagen con la versión 4 y revisar que `/health` diga `"4"` |
 | 4 | Pruebas de usuario final con `curl` o Postman | Rodrigo | Hecho. `tests/consultas_api.sh` |
 | 5 | Diagrama de arquitectura exportado y su fuente editable | | Pendiente |
 | 5 | Informe técnico de máximo 5 páginas | | Redactado en `informe/informe.md`, con DOCX y PDF generados mediante LibreOffice. PDF de entrega: `docs/informe.pdf` (cinco páginas). Pendiente de revisión del equipo |
-| 5 | Presentación, resumen de una página y demo | | Pendiente |
+| 5 | Presentación, resumen de una página y demo | | Presentación y PDF en `presentacion/`. Pendiente: quien suba la versión 4 a la API agrega `presentacion/capturas/08_api_swagger.png` y vuelve a exportar el PDF |
 | Extra | CI/CD hacia el Droplet o pruebas automatizadas de la API | | Opcional |
 
 ## Riesgos
