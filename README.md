@@ -16,17 +16,17 @@ flowchart LR
     FOTOS["Fotos de precios<br/>bucket S3"] --> B["Bronce"]
     MEM["Excel del MEM<br/>data/mem"] --> B
     EIA["Precios de la EIA<br/>data/eia"] --> B
-    B --> P["Plata"] --> O["Oro"]
+    B --> P["Plata<br/>fotos leídas con Llama 4 Maverick"] --> O["Oro"]
     O --> M["Modelo en MLflow"]
     M --> O
     M -- "se descarga" --> API["API en Docker<br/>Droplet"]
     O -- "copia de oro" --> API
 ```
 
-1. **Fuente principal: las fotos de precios** que comparte el catedrático. Databricks las lee desde S3 por una external location y las convierte en precios estructurados. Cada capa vive en su bucket de S3, como tablas externas de Unity Catalog dentro del prefijo `equipo-01/`.
+1. **Fuente principal: las fotos de precios** que comparte el catedrático. Databricks las lee desde S3 por una external location y un modelo de visión, Llama 4 Maverick, las convierte en precios estructurados. Cada capa vive en su bucket de S3, como tablas externas de Unity Catalog dentro del prefijo `equipo-01/`.
 2. **Fuentes complementarias,** que el enunciado permite para tener más historia: el Excel de precios del MEM, desde 2013, y el precio internacional de la gasolina y el diésel publicado por la EIA. Se versionan en `data/` y cada cambio pasa un test de "no empeorar".
-3. **El job `equipo-01-pipeline`** lleva los datos de bronce a oro, entrena el modelo, lo registra en MLflow y guarda la predicción de la semana siguiente en `gold.predicciones`. Corre cada martes y avisa por correo si falla.
-4. **La API** se construyó y se probó en local con el modelo `champion` y una copia de las tablas de oro, descargados de Databricks. El equipo confirmó que la API ya se desplegó en Docker en el Droplet. El repositorio aún no registra la URL pública ni el origen de los artefactos de esa imagen.
+3. **El job `equipo-01-pipeline`** lleva los datos de bronce a oro y junta las tres fuentes en las variables del modelo. Las fotos aportan dos: si hubo foto esa semana y la diferencia entre el precio de las fotos y el oficial. Después entrena el modelo, lo registra en MLflow y guarda la predicción de la semana siguiente en `gold.predicciones`. Corre cada martes y avisa por correo si falla.
+4. **La API** corre en Docker en el Droplet de DigitalOcean, en <http://157.230.171.204:8001/docs>. La imagen lleva el modelo `champion` y una copia de las tablas de oro, descargados de Databricks. `GET /health` muestra la versión del modelo y la fecha de la copia.
 
 ## Estructura
 
@@ -40,6 +40,9 @@ flowchart LR
 | `scripts/` | Actualizar la EIA, evaluar el modelo en local y descargar el modelo y la copia de oro para la API |
 | `data/` | Excel del MEM y archivos de la EIA |
 | `infra/sql/` | Catálogo, esquemas y volumen de Unity Catalog |
+| `api/` | API en FastAPI y Docker. Ver [api/README.md](api/README.md) |
+| `informe/` | Fuente del informe técnico y cómo regenerarlo |
+| `presentacion/` | Presentación web para el jurado y su PDF |
 | `.github/workflows/` | Plan del bundle y tests en cada PR. Despliegue y creación de tablas al hacer merge |
 | `docs/` | Documentación, enunciado y diagramas |
 
@@ -50,7 +53,7 @@ flowchart LR
 | `pipelines/01_bronze.py`, `02_silver.py`, `03_gold.py` | `databricks/notebooks/`, con prefijos 1x para bronce, 2x para plata, 3x a 5x para oro | Un notebook por fuente y por paso. Cada tarea se puede probar y volver a correr por separado |
 | `pipelines/job.json` | `resources/pipeline.yml` | El job se define como código con un bundle de Databricks y lo despliega el CI. Ver [ci_cd.md](docs/infraestructura/ci_cd.md) |
 | `api/` | `api/` | FastAPI en Docker con el modelo y la copia de oro adentro. Ver [api/README.md](api/README.md), que también justifica Docker |
-| `docs/arquitectura.png` y su fuente editable | Por hacer | |
+| `docs/arquitectura.png` y su fuente editable | Diagrama del modelo en [docs/modelo/](docs/modelo/arquitectura_modelo.png), con su fuente `.mmd`. El de toda la arquitectura está por hacer | |
 | `docs/informe.pdf` | [Informe técnico](docs/informe.pdf) | Fuente Markdown, DOCX y regeneración en [informe/](informe/README.md) |
 | `presentacion/` | [Presentación web y PDF](presentacion/README.md) | Diapositivas animadas con datos reales y la API en vivo. El PDF se genera desde la misma fuente |
 
