@@ -22,4 +22,16 @@ Editar el Markdown y regenerar mantiene los tres entregables sincronizados. Los 
 
 ## Alcance de las cifras
 
-La métrica de extracción procede de la ejecución compartida por Nelson (26/44); las métricas predictivas proceden de la evaluación histórica documentada en `docs/modelo/modelo.md`. El informe no presenta un nuevo entrenamiento ni atribuye fotografías a corridas concretas a partir de capturas agregadas. Las capturas compartidas en la conversación no están incrustadas en los archivos.
+Versión 2, del 16 de noviembre de 2026. Cada cifra sale de una de estas fuentes:
+
+| Cifras | Fuente |
+|---|---|
+| Exactitud de extracción, 26 de 44 | Ejecución posterior a la revisión manual del 2026-11-15 |
+| Precios y rechazos en plata, 266 y 211 | `presentacion/capturas/05_silver_precios.png` y `06_silver_rechazos.png` |
+| Métricas del modelo v4 y de la línea base | Corrida `logistica_mem_eia_fotos` en MLflow, `presentacion/capturas/03_mlflow_experimento.png` |
+| Aporte de las fotos, bootstrap y permutación | `docs/modelo/modelo.md`, sección "Efecto de las fotos" |
+| Corridas del job y duración por tarea | `presentacion/capturas/01_job_historial.png` y `02_job_grafo.png` |
+| Predicción de la semana del 2026-11-10 | `presentacion/capturas/07_gold_predicciones.png` |
+| Versión del modelo en la API | Consulta a `/health` y `/modelo/metricas` de la API pública el 2026-11-16 |
+
+Si se despliega el `champion` v4 en el Droplet, hay que actualizar el párrafo **API** de la sección 4.
