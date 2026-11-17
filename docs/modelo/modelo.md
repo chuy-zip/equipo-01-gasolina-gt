@@ -37,13 +37,34 @@ Antes de entrenar hay que confirmar con los datos qué día de la semana se toma
 
 ## Datos de entrenamiento
 
-1. **Fuente:** `gold.features_modelo`, construida a partir del Excel del MEM.
+1. **Fuente:** `gold.features_modelo`. Junta las tres fuentes del pipeline: el Excel del MEM, el precio internacional de la EIA y los precios leídos de las fotos en `silver.precios`.
 2. **Granularidad:** una fila por semana y combustible.
 3. **Etiqueta:** dirección del cambio entre esta semana y la siguiente. Un cambio menor a Q0.10 cuenta como "se mantiene". El umbral se revisa con los datos.
 4. **Variables candidatas:** cambios de las 1 a 4 semanas anteriores, tendencia de 4 y 8 semanas, cambio del tipo de cambio, régimen fiscal y mes.
 5. **Variables del precio internacional,** de la EIA y convertidas a quetzales con el tipo de cambio:
    1. Cambio del precio internacional en las 3 semanas anteriores.
    2. Brecha: precio local menos internacional, comparada con su promedio de 8 semanas. Si el precio local quedó muy arriba del internacional, lo esperable es que baje.
+6. **Variables de las fotos,** desde `silver.precios`:
+   1. `foto_disponible`: 1 si hubo al menos una foto con precio válido de ese combustible en la semana.
+   2. `foto_brecha`: precio promedio de las fotos de la semana menos el precio oficial. Es lo que cobra la gasolinera contra la referencia.
+   3. Las semanas sin foto valen 0 en las dos y no se descartan. Así el modelo sigue entrenando con toda la historia del MEM.
+
+### Efecto de las fotos (2026-11-16)
+
+Misma partición temporal, prueba desde el 5 de noviembre de 2024. 147 de las 312 filas de prueba tienen foto.
+
+| Variables | Balanced accuracy |
+|---|---|
+| MEM y EIA | 0.548 |
+| MEM, EIA y fotos | 0.564 |
+| Línea base del enunciado | 0.458 |
+
+Para saber si la mejora es real o ruido se hicieron dos pruebas de Monte Carlo:
+
+1. **Bootstrap por semanas,** 2,000 remuestreos: mejora de +0.016, con intervalo de 95 % de -0.023 a +0.054. En 81 % de los remuestreos el modelo con fotos es mejor.
+2. **Prueba de permutación,** 200 corridas: se barajan las variables de fotos entre semanas y se reentrena. Solo 2 % de las corridas igualan la mejora, así que p = 0.02.
+
+Conclusión: las fotos aportan información real, pero con tan pocas semanas la mejora es pequeña y su intervalo incluye el cero.
 
 ## Cómo se evalúa
 

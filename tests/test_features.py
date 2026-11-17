@@ -85,6 +85,37 @@ def test_features_no_usa_el_precio_internacional_del_mismo_lunes():
     assert fila(normal)["intl_cambio_1"] == pytest.approx(fila(alterado)["intl_cambio_1"])
 
 
+def test_features_junta_mem_eia_y_precios_de_las_fotos():
+    precios = [30.0] * 12
+    diarios = features.precios_diarios(oficiales(lunes_con_precios(precios)))
+    # Dos fotos de súper en la semana del martes 24 de febrero, que cierra el lunes 2 de marzo, y una de diésel el lunes.
+    fotos = pd.DataFrame({
+        "fecha": [dt.date(2026, 2, 25), dt.date(2026, 2, 27), dt.date(2026, 3, 2)],
+        "combustible": ["super", "super", "diesel"],
+        "precio_q_galon": [31.0, 32.0, 29.5],
+    })
+    semanales = features.features_modelo(diarios, internacionales("2025-12-01", 120), fotos)
+    fila = semanales.set_index(["semana", "combustible"])
+    semana = dt.date(2026, 2, 24)
+
+    assert fila.loc[(semana, "super"), "foto_disponible"] == 1
+    assert fila.loc[(semana, "super"), "foto_brecha"] == pytest.approx(1.5)  # promedio 31.5 contra 30
+    assert fila.loc[(semana, "diesel"), "foto_brecha"] == pytest.approx(-0.5)
+    assert fila.loc[(semana, "regular"), "foto_disponible"] == 0
+    assert fila.loc[(semana, "regular"), "foto_brecha"] == 0.0
+    # Las semanas sin fotos no se descartan: hay las mismas filas que sin fotos.
+    assert len(semanales) == len(features.features_modelo(diarios, internacionales("2025-12-01", 120)))
+    # Las variables de fotos son entrada del modelo.
+    assert {"foto_disponible", "foto_brecha"} <= set(modelo.VARIABLES)
+
+
+def test_features_sin_fotos_deja_las_variables_en_cero():
+    diarios = features.precios_diarios(oficiales(lunes_con_precios([30.0] * 12)))
+    semanales = features.features_modelo(diarios, internacionales("2025-12-01", 120), None)
+    assert (semanales["foto_disponible"] == 0).all()
+    assert (semanales["foto_brecha"] == 0).all()
+
+
 def test_referencia_actual_toma_el_ultimo_precio_y_el_proximo_lunes():
     diarios = features.precios_diarios(oficiales({"2026-11-09": 32.49, "2026-11-11": 32.0}))
     referencia = features.referencia_actual(diarios).set_index("combustible")

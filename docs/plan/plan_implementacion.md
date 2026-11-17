@@ -66,6 +66,7 @@ Puntos de la rúbrica y estado documentado al 2026-11-15:
 | 2026-11-13 | **La API se construye en local** con el modelo `champion` y una copia de oro descargados de Databricks, se empaqueta en Docker y se sube al Droplet a mano | Acordado con el catedrático. Sin escritura en S3, la API no puede leer oro desde ahí |
 | 2026-11-13 | El job corre cada martes a las 8:00 y avisa por correo si falla | El enunciado pide programación o disparo por fotos, y una alerta. El MEM publica los martes |
 | 2026-11-13 | El job mantiene una tarea por fuente y por paso, en lugar de 3 tareas | Sigue el orden bronce, plata y oro. Cada tarea se prueba por separado. Se confirma con el catedrático |
+| 2026-11-16 | Las fotos son variables del modelo: `foto_disponible` y `foto_brecha` en `gold.features_modelo` | El pipeline debe juntar las fuentes externas con lo que sale de las fotos. Balanced accuracy de 0.548 a 0.564. Prueba de permutación con p = 0.02. Ver [modelo.md](../modelo/modelo.md) |
 | 2026-11-14 | Los precios de las fotos se extraen con Llama 4 Maverick, servido en el workspace. RapidOCR queda como línea base | En las mismas 20 fotos acertó cerca de 70 % contra 10 % del OCR. Es gratis en Free Edition y las fotos no salen de Databricks. Ver [fuentes_de_datos.md](../datos/fuentes_de_datos.md) |
 
 ## Decisiones pendientes
@@ -137,3 +138,4 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 2026-11-14 | Fotos a plata con Llama 4 Maverick y 9 motivos de rechazo. 110 fotos procesadas y unos 260 precios válidos. Revisión manual de 20 fotos: cerca de 70 % correcto. OCR como línea base: 10 % |
 | 2026-11-14 | API en FastAPI con los 5 endpoints, paginación y `/docs`. Imagen de Docker con el modelo versión 3 y la copia de oro. Probada en local: la predicción coincide con Databricks en los tres combustibles |
 | 2026-11-15 | Se integraron los PR #20, #21, #22 y #23 en `main`. El #23 añadió `scripts/exportar_local.py` como alternativa para generar artefactos desde MEM y EIA sin Databricks. El equipo confirmó que la API se desplegó en el Droplet; falta registrar qué artefactos usa y una prueba pública |
+| 2026-11-16 | Variables de fotos en el modelo. Columnas agregadas a `gold.features_modelo` con la CLI. `exportar_local.py` queda marcado como copia de prueba sin fotos, que no se despliega |

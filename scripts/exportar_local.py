@@ -1,8 +1,12 @@
 """Genera la copia de oro de la API desde los archivos de data/, sin Databricks.
 
 Usa el mismo código de `gas_price` que el pipeline, pero entrena el modelo en local y no usa las
-fotos. Sirve cuando no hay acceso a Databricks. El manifiesto queda con `origen: local`.
-Para la copia oficial usar `scripts/exportar_para_api.py`.
+fotos: las variables `foto_disponible` y `foto_brecha` quedan en 0, porque las fotos solo están en
+Databricks. Sirve para probar la API cuando no hay acceso a Databricks. El manifiesto queda con
+`origen: local`.
+
+NO usar para desplegar en el Droplet. La copia oficial sale de `scripts/exportar_para_api.py`,
+con el modelo `champion` entrenado con MEM, EIA y fotos.
 
     pip install -e . pyarrow cloudpickle
     python scripts/exportar_local.py
@@ -37,6 +41,8 @@ def cargar_precios_internacionales() -> pd.DataFrame:
 
 
 def main() -> None:
+    print("AVISO: copia local sin fotos y con un modelo entrenado aquí. No usar para el Droplet.")
+    print("Para desplegar, usar scripts/exportar_para_api.py.")
     diarios = features.precios_diarios(cargar_precios_oficiales())
     semanales = features.features_modelo(diarios, cargar_precios_internacionales())
     ahora = pd.Timestamp.now(tz="UTC")
@@ -71,6 +77,7 @@ def main() -> None:
 
     manifiesto = {
         "origen": "local",
+        "aviso": "Sin fotos. No usar para el Droplet. Usar scripts/exportar_para_api.py",
         "modelo": "local",
         "semana_mas_reciente": str(semanales["semana"].max()),
         "exportado_en": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
