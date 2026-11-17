@@ -48,7 +48,8 @@
       ]);
       const prediccion = {};
       COMBUSTIBLES.forEach((c, i) => (prediccion[c] = preds[i]));
-      estado.datos = { health, actual, metricas, prediccion };
+      // /precios/actual responde { nota, datos: [...] }
+      estado.datos = { health, actual: actual.datos || actual, metricas, prediccion };
       estado.modo = "vivo";
     } catch (e) {
       estado.datos = R;
@@ -108,7 +109,7 @@
     const ej = document.getElementById("json-ejemplo");
     if (ej) {
       ej.innerHTML = jsonColor({
-        semana: ps.semana_objetivo,
+        semana: ps.semana,
         combustible: ps.combustible,
         prediccion: ps.prediccion,
         probabilidad: Math.round(ps.probabilidad * 100) / 100,
@@ -143,11 +144,11 @@
         </div>`;
       }).join("");
       const sem = document.getElementById("semana-objetivo");
-      if (sem) sem.textContent = fmtFecha(ps.semana_objetivo);
+      if (sem) sem.textContent = fmtFecha(ps.semana);
       const pie = document.getElementById("pie-prediccion");
       if (pie) {
         const ref = d.actual[0];
-        pie.textContent = `Con datos hasta la semana del ${fmtFecha(ps.semana)}. Referencia vigente del MEM del ${fmtFecha(ref.fecha_referencia)}; próximo cambio esperado el ${fmtFecha(ref.proximo_cambio)}.`;
+        pie.textContent = `Con datos hasta la semana del ${fmtFecha(ps.semana_datos)}. Referencia vigente del MEM del ${fmtFecha(ref.fecha_referencia)}; próximo cambio esperado el ${fmtFecha(ref.proximo_cambio)}.`;
       }
     }
     document.dispatchEvent(new CustomEvent("api-lista", { detail: estado }));
@@ -161,10 +162,10 @@
     const comando = "curl 157.230.171.204:8001/health";
     const h = (estado.datos || R).health;
     const salida = jsonColor({
-      status: h.status,
-      exportado_en: h.exportado_en.slice(0, 16).replace("T", " "),
-      precio_semanal: h.tablas.precio_semanal,
-      predicciones: h.tablas.predicciones,
+      estado: h.estado,
+      version_modelo: h.version_modelo,
+      datos_exportados_en: h.datos_exportados_en.slice(0, 16).replace("T", " "),
+      semana_mas_reciente: h.semana_mas_reciente,
     });
     let i = 0;
     const tecla = () => {

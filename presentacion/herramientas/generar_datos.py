@@ -3,9 +3,14 @@
 Uso, desde la raíz del repo con el paquete instalado (pip install -e .):
 
     python presentacion/herramientas/generar_datos.py
+
+Las fotos solo están en Databricks. Este script trae su precio semanal de la API pública
+(`/precios?fuente=fotos`), así el modelo local usa las mismas 17 variables que el `champion`.
+Sin red, entrena sin fotos y lo avisa.
 """
 
 import json
+import urllib.request
 from pathlib import Path
 
 import numpy as np
@@ -18,6 +23,29 @@ RAIZ = Path(__file__).resolve().parents[2]
 DATOS = RAIZ / "data"
 SALIDA = RAIZ / "presentacion" / "datos" / "datos.js"
 CLASES = ["baja", "se_mantiene", "sube"]
+API = "http://157.230.171.204:8001"
+
+
+def precios_fotos() -> pd.DataFrame | None:
+    """Precio promedio semanal de las fotos, desde la API. Una fila por semana y combustible."""
+    filas, offset = [], 0
+    try:
+        while True:
+            url = f"{API}/precios?fuente=fotos&limit=500&offset={offset}"
+            with urllib.request.urlopen(url, timeout=15) as r:
+                pagina = json.load(r)
+            filas += pagina["datos"]
+            offset += len(pagina["datos"])
+            if not pagina["datos"] or offset >= pagina["total"]:
+                break
+    except OSError as e:
+        print(f"AVISO: sin precios de fotos ({e}). Las métricas no van a coincidir con el champion.")
+        return None
+    fotos = pd.DataFrame(filas)
+    return pd.DataFrame(
+        {"fecha": pd.to_datetime(fotos["semana"]), "combustible": fotos["combustible"],
+         "precio_q_galon": fotos["precio_promedio"]}
+    )
 
 
 def main() -> None:
@@ -31,7 +59,7 @@ def main() -> None:
     internacionales = pd.concat(partes, ignore_index=True)
 
     diarios = features.precios_diarios(oficiales)
-    semanales = features.features_modelo(diarios, internacionales)
+    semanales = features.features_modelo(diarios, internacionales, precios_fotos())
 
     # Serie semanal: precio de cierre por combustible
     serie = (

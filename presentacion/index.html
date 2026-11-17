@@ -445,18 +445,19 @@
       <div class="texto" style="margin-top: 6px;"><b>Regresión logística</b> con clases balanceadas. Más estable que Gradient Boosting en nuestras pruebas.</div>
     </div>
     <div class="crece">
-      <div class="pequeno" style="margin-bottom: 12px;">16 variables por semana y combustible</div>
+      <div class="pequeno" style="margin-bottom: 12px;">17 variables por semana y combustible · <span style="color: var(--cian)">EIA</span> · <span style="color: var(--regular)">fotos</span></div>
       <div class="chips">
         <span class="chip">combustible</span><span class="chip">cambio_l1…l4</span><span class="chip">tendencia_4</span><span class="chip">tendencia_8</span>
         <span class="chip">tipo_cambio_cambio</span><span class="chip">mes</span><span class="chip">otro_super_l1</span><span class="chip">otro_regular_l1</span><span class="chip">otro_diesel_l1</span>
         <span class="chip fuerte">intl_cambio_1…3</span><span class="chip fuerte">brecha_vs_8</span>
+        <span class="chip foto">foto_disponible</span><span class="chip foto">foto_brecha</span>
       </div>
     </div>
   </div>
   <aside class="notas">
     El modelo responde una de tres cosas: sube, se mantiene o baja. Usamos un umbral de 10 centavos.
     Las semanas van de martes a lunes, igual que el MEM. Con los datos hasta el lunes predecimos la semana siguiente. Nunca usamos información del futuro.
-    Elegimos regresión logística: es estable, explicable y entrega una probabilidad. Las variables en azul son las del precio internacional.
+    Elegimos regresión logística: es estable, explicable y entrega una probabilidad. Las variables en azul son las del precio internacional. Las dos en verde salen de las fotos: si hubo foto esa semana y cuánto se aleja su precio del oficial. Las semanas sin foto valen cero y no se descartan.
     Tiempo objetivo: 35 segundos.
   </aside>
 </section>
@@ -470,20 +471,24 @@
       <div class="pequeno" style="margin-bottom: 28px;">Peso promedio de cada variable en el modelo · las 8 más importantes · <span style="color: var(--diesel)">en ámbar, las del precio internacional</span></div>
       <div class="barras" id="barras-pesos"></div>
     </div>
-    <div class="col" style="width: 520px; gap: 22px; justify-content: center;">
-      <div class="vidrio s tinte-diesel paso" style="padding: 30px 34px;">
+    <div class="col" style="width: 520px; gap: 18px; justify-content: center;">
+      <div class="vidrio s tinte-diesel paso" style="padding: 24px 32px;">
         <div class="cifra-s" style="color: var(--diesel)">#1 brecha</div>
-        <div class="texto" style="margin-top: 12px;">Si el precio local quedó muy por encima del internacional, lo esperable es que baje.</div>
+        <div class="texto" style="margin-top: 8px;">Si el precio local quedó muy arriba del internacional, lo esperable es que baje.</div>
       </div>
-      <div class="vidrio s paso" style="padding: 30px 34px;">
+      <div class="vidrio s paso" style="padding: 24px 32px;">
         <div class="cifra-s">Sin la EIA</div>
-        <div class="texto" style="margin-top: 12px;">Con solo el MEM, ningún modelo le ganó a “repetir la semana pasada”. El precio internacional fue la diferencia.</div>
+        <div class="texto" style="margin-top: 8px;">Con solo el MEM, ningún modelo le ganó a la regla simple. El precio internacional cambió eso.</div>
+      </div>
+      <div class="vidrio s tinte-regular paso" style="padding: 24px 32px;">
+        <div class="cifra-s" style="color: var(--regular)">+ fotos</div>
+        <div class="texto" style="margin-top: 8px;">Suben la exactitud de 0.548 a 0.564. Prueba de permutación: p = 0.02.</div>
       </div>
     </div>
   </div>
   <aside class="notas">
     Estas son las variables que más pesan. La primera es la brecha entre el precio local y el internacional. Si en Guatemala el precio quedó muy arriba del internacional, lo normal es que baje. Tiene sentido económico.
-    Y un hallazgo importante: con solo los datos del MEM ningún modelo le ganaba a la regla simple. El precio internacional fue lo que hizo la diferencia.
+    Y un hallazgo importante: con solo los datos del MEM ningún modelo le ganaba a la regla simple. El precio internacional fue lo que hizo la diferencia. Las fotos también aportan: con ellas subimos de 0.548 a 0.564. Para saber si era ruido barajamos las fotos entre semanas 200 veces, y solo 2 % de las corridas igualó la mejora.
     Tiempo objetivo: 30 segundos.
   </aside>
 </section>
@@ -498,7 +503,7 @@
         <div class="metrica-fila" data-a style="--i:2">
           <div class="cab"><span><b>Exactitud balanceada</b></span><span class="pequeno">Azar con 3 clases: 0.33</span></div>
           <div class="rieles">
-            <div class="riel-m"><div class="r modelo" style="--w: 54.8%">0.55</div></div>
+            <div class="riel-m"><div class="r modelo" style="--w: 56.4%">0.56</div></div>
             <div class="riel-m"><div class="r base" style="--w: 45.8%">0.46</div></div>
             <div class="azar" style="left: 33.3%"><span>azar</span></div>
           </div>
@@ -506,14 +511,14 @@
         <div class="metrica-fila" data-a style="--i:3">
           <div class="cab"><span><b>F1 macro</b></span></div>
           <div class="rieles">
-            <div class="riel-m"><div class="r modelo" style="--w: 54.8%">0.55</div></div>
+            <div class="riel-m"><div class="r modelo" style="--w: 56.1%">0.56</div></div>
             <div class="riel-m"><div class="r base" style="--w: 45.8%">0.46</div></div>
           </div>
         </div>
         <div class="metrica-fila" data-a style="--i:4">
           <div class="cab"><span><b>Acierta la dirección</b> cuando hay movimiento</span></div>
           <div class="rieles">
-            <div class="riel-m"><div class="r modelo" style="--w: 73.8%">74 %</div></div>
+            <div class="riel-m"><div class="r modelo" style="--w: 73.6%">74 %</div></div>
             <div class="riel-m"><div class="r base" style="--w: 64%">64 %</div></div>
           </div>
         </div>
@@ -533,7 +538,7 @@
   <aside class="notas">
     Lo importante: evaluamos con semanas que el modelo nunca vio. Entrenamos hasta noviembre de 2024 y probamos en los dos años siguientes.
     La línea base es la que pide el enunciado: repetir la dirección de la semana pasada.
-    En exactitud balanceada sacamos 0.55 contra 0.46. El azar daría 0.33. Cuando el precio sí se mueve, acertamos la dirección 74 % de las veces contra 64 %.
+    En exactitud balanceada sacamos 0.56 contra 0.46. Es la versión 4 del modelo, la que está en producción. El azar daría 0.33. Cuando el precio sí se mueve, acertamos la dirección 74 % de las veces contra 64 %.
     En la matriz, la diagonal son los aciertos. Tiempo objetivo: 40 segundos.
   </aside>
 </section>
@@ -556,18 +561,18 @@
     <div class="vidrio tarjeta" data-a style="--i:4">
       <div class="icono" style="background: rgba(10,132,255,0.2); color: var(--cian)"><svg><use href="#i-camara"/></svg></div>
       <h3>Fotos con cobertura irregular</h3>
-      <p>Las fotos llegan a oro, pero todavía no entrenan el modelo: no hay suficientes semanas seguidas.</p>
+      <p>Ya entrenan el modelo, pero solo 147 de las 312 filas de prueba tienen foto. Su mejora es real y pequeña: el intervalo aún toca el cero.</p>
     </div>
     <div class="vidrio tarjeta" data-a style="--i:5">
       <div class="icono" style="background: rgba(191,90,242,0.2); color: var(--ml-3)"><svg><use href="#i-cerebro"/></svg></div>
       <h3>Margen modesto</h3>
-      <p>Nueve puntos sobre la línea base, sin intervalos de confianza todavía. Las predicciones semanales se acumulan para medirlo.</p>
+      <p>Once puntos sobre la línea base en dos años de prueba. Las predicciones semanales se acumulan para medirlo con semanas nuevas.</p>
     </div>
   </div>
   <aside class="notas">
     Queremos ser honestos con lo que no puede hacer.
     No puede anticipar decisiones del Gobierno, como la exención de octubre. Predice la referencia oficial, no el precio de tu estación.
-    Las fotos todavía no entrenan el modelo porque su cobertura es irregular. Y la mejora es real pero modesta. Por eso guardamos cada predicción semanal con su resultado real. Le paso a Joaquín.
+    Las fotos ya son parte del modelo, pero menos de la mitad de las semanas de prueba tiene foto, así que su aporte todavía es chico. Y la mejora sobre la línea base es real pero modesta. Por eso guardamos cada predicción semanal con su resultado real. Le paso a Joaquín.
     Tiempo objetivo: 25 segundos.
   </aside>
 </section>
@@ -744,7 +749,7 @@
 <section class="diapo" data-titulo="Anexo · Databricks" data-presenta="Plan B" data-aurora="#5e5ce6,#0a84ff,#64d2ff">
   <div class="ceja" data-a style="--i:0"><span class="punto"></span>Anexo · evidencia en Databricks</div>
   <h2 class="titulo" data-a style="--i:1; font-size: 64px">El pipeline en ejecución.</h2>
-  <div class="rejilla-2 mt-s" style="flex: 1; grid-template-rows: 1fr 1fr; gap: 22px;">
+  <div class="rejilla-2 mt-s" style="flex: 1; min-height: 0; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 22px;">
     <div class="captura" data-a style="--i:2" data-captura="01_job_historial.png" data-pie="Historial de corridas del job"></div>
     <div class="captura" data-a style="--i:3" data-captura="02_job_grafo.png" data-pie="Grafo de tareas y duración"></div>
     <div class="captura" data-a style="--i:4" data-captura="03_mlflow_experimento.png" data-pie="Experimento en MLflow"></div>
@@ -756,8 +761,8 @@
 <!-- ======================================================= 23 · ANEXO B -->
 <section class="diapo" data-titulo="Anexo · Datos y API" data-presenta="Plan B" data-aurora="#f5c451,#d9925b,#0a84ff">
   <div class="ceja" data-a style="--i:0; --acento: var(--oro)"><span class="punto"></span>Anexo · datos y API</div>
-  <h2 class="titulo" data-a style="--i:1">Las tablas y el servicio.</h2>
-  <div class="rejilla-2 mt-s" style="flex: 1; grid-template-rows: 1fr 1fr; gap: 22px;">
+  <h2 class="titulo" data-a style="--i:1; font-size: 64px">Las tablas y el servicio.</h2>
+  <div class="rejilla-2 mt-s" style="flex: 1; min-height: 0; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 22px;">
     <div class="captura" data-a style="--i:2" data-captura="05_silver_precios.png" data-pie="silver.precios"></div>
     <div class="captura" data-a style="--i:3" data-captura="06_silver_rechazos.png" data-pie="silver.precios_rejected por motivo"></div>
     <div class="captura" data-a style="--i:4" data-captura="07_gold_predicciones.png" data-pie="gold.predicciones"></div>
