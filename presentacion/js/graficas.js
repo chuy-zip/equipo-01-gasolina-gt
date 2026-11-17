@@ -4,7 +4,7 @@
 
   const D = window.DATOS;
   const NS = "http://www.w3.org/2000/svg";
-  const COLORES = { super: "#ff453a", regular: "#30d158", diesel: "#ffd60a" };
+  const COLORES = { super: "#bf5af2", regular: "#30d158", diesel: "#64d2ff" };
   const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
   const fecha = (s) => new Date(s + "T12:00:00");
@@ -60,8 +60,8 @@
 
     const defs = nodo("defs", {}, el);
     const grad = nodo("linearGradient", { id: "area-super", x1: 0, x2: 0, y1: 0, y2: 1 }, defs);
-    nodo("stop", { offset: 0, "stop-color": "#ff453a", "stop-opacity": 0.22 }, grad);
-    nodo("stop", { offset: 1, "stop-color": "#ff453a", "stop-opacity": 0 }, grad);
+    nodo("stop", { offset: 0, "stop-color": "#bf5af2", "stop-opacity": 0.22 }, grad);
+    nodo("stop", { offset: 1, "stop-color": "#bf5af2", "stop-opacity": 0 }, grad);
 
     for (const v of [20, 30, 40]) {
       nodo("line", { x1: m.i, x2: W - m.d, y1: Y(v), y2: Y(v), class: "guia" }, el);
@@ -131,7 +131,7 @@
       const fin = ancla === "end" ? tx + 10 : tx - 10;
       nodo("path", { d: `M${x},${y} L${fin},${ty - 6}`, stroke: "rgba(255,255,255,0.35)", "stroke-width": 1.5, fill: "none" }, g);
     }
-    if (pulso) nodo("circle", { cx: x, cy: y, r: 7, fill: "#ff453a", class: "pulso" }, g);
+    if (pulso) nodo("circle", { cx: x, cy: y, r: 7, fill: "#bf5af2", class: "pulso" }, g);
     nodo("circle", { cx: x, cy: y, r: 6.5, fill: "#0a0c12", stroke: "#fff", "stroke-width": 2.5 }, g);
     texto(g, tx, ty, titulo, { "text-anchor": ancla, class: "nota-grafica" });
     texto(g, tx, ty + 24, detalle, { "text-anchor": ancla, style: "font-size: 16px" });
@@ -177,18 +177,18 @@
       abajo.unshift([X(i), Y(intl[i])]);
     }
     if (arriba.length) {
-      nodo("path", { d: rutaDe(arriba) + rutaDe(abajo).replace(/^M/, "L") + "Z", fill: "rgba(255,159,10,0.10)", class: "area" }, el);
+      nodo("path", { d: rutaDe(arriba) + rutaDe(abajo).replace(/^M/, "L") + "Z", fill: "rgba(100,210,255,0.10)", class: "area" }, el);
     }
-    const pI = nodo("path", { d: rutaDe(intl.map((v, i) => (v == null ? null : [X(i), Y(v)]))), class: "linea trazo", stroke: "#ff9f0a", "stroke-width": 2.4 }, el);
+    const pI = nodo("path", { d: rutaDe(intl.map((v, i) => (v == null ? null : [X(i), Y(v)]))), class: "linea trazo", stroke: "#64d2ff", "stroke-width": 2.4 }, el);
     pI.style.setProperty("--retardo", "0.4s");
-    const pL = nodo("path", { d: rutaDe(loc.map((v, i) => (v == null ? null : [X(i), Y(v)]))), class: "linea trazo", stroke: "#ff453a", "stroke-width": 3.2 }, el);
+    const pL = nodo("path", { d: rutaDe(loc.map((v, i) => (v == null ? null : [X(i), Y(v)]))), class: "linea trazo", stroke: "#bf5af2", "stroke-width": 3.2 }, el);
     pL.style.setProperty("--retardo", "0.7s");
     const notas = nodo("g", { class: "area" }, el);
     const mid = Math.round(n * 0.62);
     if (loc[mid] != null && intl[mid] != null) {
       const y0 = Y(loc[mid]), y1 = Y(intl[mid]);
-      nodo("line", { x1: X(mid), x2: X(mid), y1: y0 + 6, y2: y1 - 6, stroke: "#ffd60a", "stroke-width": 2, "stroke-dasharray": "3 5" }, notas);
-      texto(notas, X(mid) + 14, (y0 + y1) / 2 + 6, "brecha", { class: "nota-grafica", style: "fill:#ffd60a; font-size:18px" });
+      nodo("line", { x1: X(mid), x2: X(mid), y1: y0 + 6, y2: y1 - 6, stroke: "rgba(255,255,255,0.55)", "stroke-width": 2, "stroke-dasharray": "3 5" }, notas);
+      texto(notas, X(mid) + 14, (y0 + y1) / 2 + 6, "brecha", { class: "nota-grafica", style: "fill:rgba(245,245,247,0.8); font-size:18px" });
     }
 
     contenedor.innerHTML = "";

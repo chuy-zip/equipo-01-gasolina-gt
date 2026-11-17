@@ -14,9 +14,14 @@
   --linea-2: rgba(255, 255, 255, 0.18);
 
   /* Combustibles */
-  --super: #ff453a;
+  --super: #bf5af2;
   --regular: #30d158;
-  --diesel: #ffd60a;
+  --diesel: #64d2ff;
+  /* Dirección del precio */
+  --baja: #30d158;
+  --sube: #7d7aff;
+  /* Amarillo: solo para íconos, nunca en texto, fondos ni decoración */
+  --amarillo: #ffd60a;
   /* Aprendizaje automático */
   --ml: #0a84ff;
   --ml-2: #5e5ce6;
@@ -71,7 +76,7 @@ html, body {
 }
 .aurora.a1 { background: var(--a1, var(--ml)); top: -28vmax; left: -18vmax; animation: deriva1 38s ease-in-out infinite alternate; }
 .aurora.a2 { background: var(--a2, var(--ml-3)); bottom: -32vmax; right: -20vmax; animation: deriva2 44s ease-in-out infinite alternate; }
-.aurora.a3 { background: var(--a3, var(--super)); top: 30%; left: 40%; width: 40vmax; height: 40vmax; opacity: 0.16; animation: deriva3 52s ease-in-out infinite alternate; }
+.aurora.a3 { background: var(--a3, var(--ml-3)); top: 30%; left: 40%; width: 40vmax; height: 40vmax; opacity: 0.16; animation: deriva3 52s ease-in-out infinite alternate; }
 @keyframes deriva1 { to { transform: translate(14vmax, 10vmax) scale(1.08); } }
 @keyframes deriva2 { to { transform: translate(-12vmax, -8vmax) scale(0.94); } }
 @keyframes deriva3 { to { transform: translate(-18vmax, 6vmax) scale(1.15); } }
@@ -221,8 +226,8 @@ b, strong { color: var(--texto); font-weight: 650; }
   background-clip: text;
   color: transparent;
 }
-.degradado-fuego {
-  background: linear-gradient(100deg, var(--diesel) 0%, #ff9f0a 40%, var(--super) 85%);
+.degradado-frio {
+  background: linear-gradient(100deg, #64d2ff 0%, #0a84ff 45%, #bf5af2 90%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -232,6 +237,7 @@ b, strong { color: var(--texto); font-weight: 650; }
 .c-diesel { color: var(--diesel); }
 .c-ml { color: var(--cian); }
 .c-tenue { color: var(--texto-3); }
+.c-cian { color: var(--cian); }
 
 /* --------------------------------------------------------------------------
    Vidrio líquido
@@ -280,9 +286,9 @@ b, strong { color: var(--texto); font-weight: 650; }
 }
 .vidrio.s { border-radius: var(--radio-s); }
 .vidrio.tinte-ml { background: linear-gradient(180deg, rgba(10,132,255,0.16), rgba(94,92,230,0.06)); }
-.vidrio.tinte-super { background: linear-gradient(180deg, rgba(255,69,58,0.16), rgba(255,69,58,0.04)); }
+.vidrio.tinte-super { background: linear-gradient(180deg, rgba(191,90,242,0.16), rgba(191,90,242,0.04)); }
 .vidrio.tinte-regular { background: linear-gradient(180deg, rgba(48,209,88,0.15), rgba(48,209,88,0.04)); }
-.vidrio.tinte-diesel { background: linear-gradient(180deg, rgba(255,214,10,0.14), rgba(255,214,10,0.035)); }
+.vidrio.tinte-diesel { background: linear-gradient(180deg, rgba(100,210,255,0.14), rgba(100,210,255,0.035)); }
 
 .pastilla {
   display: inline-flex;
@@ -354,7 +360,7 @@ b, strong { color: var(--texto); font-weight: 650; }
   display: block;
   height: 100%;
   width: var(--p, 0%);
-  background: linear-gradient(90deg, var(--diesel), var(--super) 35%, var(--ml-3) 70%, var(--ml));
+  background: linear-gradient(90deg, var(--cian), var(--ml) 35%, var(--ml-2) 70%, var(--ml-3));
   box-shadow: 0 0 16px rgba(10,132,255,0.7);
   transition: width 0.8s var(--resorte);
 }
@@ -454,12 +460,28 @@ body.vista-general .escenario { transition: transform 0.8s var(--resorte); }
 .chip-precio .valor small { font-size: 26px; color: var(--texto-3); font-weight: 600; margin-right: 4px; }
 .portada .equipo { position: absolute; left: 140px; bottom: 120px; }
 .portada .equipo .nombres { font-size: 24px; color: var(--texto-2); margin-top: 10px; letter-spacing: -0.005em; }
-.medidor { position: absolute; right: 140px; top: 150px; width: 600px; padding: 40px 40px 34px; }
+.medidor { position: absolute; right: 140px; top: 150px; width: 600px; padding: 34px 40px 30px; }
+.medidor-cab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+.medidor-titulo { font-size: 22px; font-weight: 650; letter-spacing: -0.01em; }
 .medidor svg { width: 100%; display: block; overflow: visible; }
-.medidor .aguja { transform-origin: 260px 270px; transform: rotate(0deg); transition: transform 2.4s var(--resorte-rebote) 0.9s; }
-.diapo.activa .medidor .aguja { transform: rotate(var(--giro)); }
-.medidor-pie { display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--linea); }
-.medidor-valor { font-size: 40px; font-weight: 750; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.medidor .tramo path { fill: none; stroke: var(--c); stroke-width: 16; stroke-linecap: round; }
+.medidor .tramo { opacity: 0.2; transition: opacity 0.9s var(--resorte) 1.9s; }
+.medidor .tramo .halo { stroke-width: 22; filter: url(#brillo-medidor); opacity: 0; transition: opacity 0.9s var(--resorte) 1.9s; }
+.diapo.activa .medidor .tramo.activo { opacity: 1; }
+.diapo.activa .medidor .tramo.activo .halo { opacity: 0.55; }
+.medidor .etiqueta { fill: var(--texto-3); font-size: 15px; font-weight: 650; letter-spacing: 0.14em; text-transform: uppercase; transition: fill 0.9s var(--resorte) 1.9s; }
+.diapo.activa .medidor .etiqueta.activo { fill: var(--c); }
+.medidor .marcador { transform-origin: 260px 250px; transform: rotate(0deg); transition: transform 2.2s var(--resorte-rebote) 0.9s; }
+.diapo.activa .medidor .marcador { transform: rotate(var(--giro)); }
+.medidor .lectura-dir { fill: var(--c); font-size: 26px; font-weight: 650; letter-spacing: 0.12em; text-transform: uppercase; }
+.medidor .lectura-num { fill: var(--texto); font-size: 96px; font-weight: 750; letter-spacing: -0.045em; font-variant-numeric: tabular-nums; }
+.medidor .lectura-num .pct { fill: var(--texto-3); font-size: 44px; font-weight: 600; letter-spacing: 0; }
+.medidor-pie { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--linea); }
+.medidor-probs { display: flex; gap: 22px; font-size: 18px; color: var(--texto-2); font-variant-numeric: tabular-nums; }
+.medidor-probs span { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.medidor-probs i { width: 8px; height: 8px; border-radius: 50%; }
+.medidor-probs b { color: var(--texto); font-weight: 650; }
+.medidor-probs b::after { content: " %"; color: var(--texto-3); font-weight: 500; }
 
 /* Gráficas SVG --------------------------------------------------------- */
 .grafica { width: 100%; height: 100%; overflow: visible; }
@@ -532,7 +554,7 @@ body.vista-general .escenario { transition: transform 0.8s var(--resorte); }
 .capa .lema { font-size: 25px; color: var(--texto-2); margin-top: 10px; }
 .capa ul { list-style: none; margin-top: 30px; display: flex; flex-direction: column; gap: 14px; }
 .capa li { font-size: 21px; color: var(--texto-2); padding-left: 26px; position: relative; line-height: 1.35; }
-.capa:nth-child(1) { --brillo: #d9925b; } .capa:nth-child(2) { --brillo: #c7ced8; } .capa:nth-child(3) { --brillo: #f5c451; }
+.capa:nth-child(1) { --brillo: #64d2ff; } .capa:nth-child(2) { --brillo: #c7ced8; } .capa:nth-child(3) { --brillo: #bf5af2; }
 .capa li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px; height: 8px; border-radius: 50%; background: var(--brillo); }
 .capa .dato { margin-top: auto; padding-top: 30px; border-top: 1px solid var(--linea); display: flex; align-items: center; gap: 18px; min-height: 120px; }
 .metal.bronce { background: linear-gradient(145deg, #f1b98a, #b06a35 60%, #7c4520); --brillo: rgba(217,146,91,0.55); }
@@ -564,7 +586,7 @@ body.vista-general .escenario { transition: transform 0.8s var(--resorte); }
   color: var(--texto-2);
 }
 .json .k { color: var(--cian); }
-.json .s { color: #ffb86b; }
+.json .s { color: #d0a8ff; }
 .json .n { color: #b8f397; }
 .json .p { color: var(--texto-3); }
 
@@ -605,6 +627,7 @@ body.vista-general .escenario { transition: transform 0.8s var(--resorte); }
 .chips { display: flex; flex-wrap: wrap; gap: 12px; }
 .chip { font-family: var(--mono); font-size: 18px; padding: 9px 14px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid var(--linea); color: var(--texto-2); }
 .chip.fuerte { background: rgba(10,132,255,0.16); border-color: rgba(10,132,255,0.45); color: #fff; }
+.chip.foto { background: rgba(48,209,88,0.14); border-color: rgba(48,209,88,0.45); color: #fff; }
 
 /* Barras horizontales (pesos) ----------------------------------------- */
 .barras { display: flex; flex-direction: column; gap: 16px; }
@@ -613,12 +636,12 @@ body.vista-general .escenario { transition: transform 0.8s var(--resorte); }
 .barra .riel { height: 26px; border-radius: 13px; background: rgba(255,255,255,0.05); overflow: hidden; }
 .barra .relleno {
   height: 100%; width: 0; border-radius: 13px;
-  background: linear-gradient(90deg, var(--ml-2), var(--cian));
-  box-shadow: 0 0 20px rgba(100,210,255,0.35);
+  background: linear-gradient(90deg, var(--ml-2), var(--ml-3));
+  box-shadow: 0 0 20px rgba(191,90,242,0.3);
   transition: width 1.6s var(--resorte);
   transition-delay: calc(var(--i, 0) * 80ms + 500ms);
 }
-.barra.intl .relleno { background: linear-gradient(90deg, #ff9f0a, var(--diesel)); box-shadow: 0 0 20px rgba(255,214,10,0.3); }
+.barra.intl .relleno { background: linear-gradient(90deg, var(--ml), var(--cian)); box-shadow: 0 0 20px rgba(100,210,255,0.3); }
 .diapo.activa .barra .relleno { width: var(--w); }
 .barra .valor { font-variant-numeric: tabular-nums; color: var(--texto-3); font-size: 19px; }
 
@@ -632,8 +655,8 @@ body.vista-general .escenario { transition: transform 0.8s var(--resorte); }
 .riel-m .r.base { background: rgba(255,255,255,0.16); color: var(--texto); }
 .diapo.activa .riel-m .r { width: var(--w); }
 .riel-m .r.base { transition-delay: 0.35s; }
-.azar { position: absolute; top: -10px; bottom: -10px; width: 0; border-left: 2px dashed rgba(255,214,10,0.7); }
-.azar span { position: absolute; top: -30px; left: -40px; width: 80px; text-align: center; font-size: 15px; color: var(--diesel); white-space: nowrap; }
+.azar { position: absolute; top: -10px; bottom: -10px; width: 0; border-left: 2px dashed rgba(255,255,255,0.5); }
+.azar span { position: absolute; top: -30px; left: -40px; width: 80px; text-align: center; font-size: 15px; color: var(--texto-2); white-space: nowrap; }
 
 /* Matriz de confusión ------------------------------------------------ */
 .matriz { display: grid; grid-template-columns: 150px repeat(3, 1fr); gap: 8px; font-size: 19px; }
@@ -685,7 +708,7 @@ body.vista-general .escenario { transition: transform 0.8s var(--resorte); }
 .estado-vivo { white-space: nowrap; display: inline-flex; align-items: center; gap: 10px; font-size: 19px; color: var(--texto-2); }
 .estado-vivo i { width: 12px; height: 12px; border-radius: 50%; background: var(--texto-3); }
 .estado-vivo.ok i { background: var(--regular); box-shadow: 0 0 0 0 rgba(48,209,88,0.6); animation: latido 2s infinite; }
-.estado-vivo.respaldo i { background: var(--diesel); }
+.estado-vivo.respaldo i { background: var(--amarillo); }
 @keyframes latido { 0% { box-shadow: 0 0 0 0 rgba(48,209,88,0.6); } 70% { box-shadow: 0 0 0 14px rgba(48,209,88,0); } 100% { box-shadow: 0 0 0 0 rgba(48,209,88,0); } }
 
 /* Predicción --------------------------------------------------------- */
@@ -705,8 +728,9 @@ body.vista-general .escenario { transition: transform 0.8s var(--resorte); }
 .qr img { display: block; width: 100%; height: 100%; }
 
 /* Capturas ------------------------------------------------------------ */
-.captura { position: relative; border-radius: 22px; overflow: hidden; background: rgba(255,255,255,0.03); border: 1px solid var(--linea); display: grid; place-items: center; }
-.captura img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.captura { position: relative; min-width: 0; min-height: 0; border-radius: 22px; overflow: hidden; background: rgba(255,255,255,0.03); border: 1px solid var(--linea); display: grid; place-items: center; }
+/* La imagen no define el tamaño del recuadro: así la rejilla no se sale de la diapositiva */
+.captura img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
 .captura .falta { padding: 30px; text-align: center; color: var(--texto-3); font-size: 19px; line-height: 1.5; }
 .captura .falta code { font-family: var(--mono); color: var(--texto-2); font-size: 17px; display: block; margin-top: 8px; }
 .captura .pie { position: absolute; left: 14px; bottom: 14px; padding: 6px 12px; border-radius: 10px; font-size: 15px; background: rgba(0,0,0,0.55); backdrop-filter: blur(10px); color: var(--texto-2); }
@@ -751,7 +775,7 @@ body.modo-pdf .diapo::before {
   background:
     radial-gradient(60% 70% at 8% 0%, rgba(10,132,255,0.28), transparent 70%),
     radial-gradient(55% 65% at 100% 100%, rgba(191,90,242,0.24), transparent 70%),
-    radial-gradient(40% 50% at 60% 50%, rgba(255,69,58,0.08), transparent 70%),
+    radial-gradient(40% 50% at 60% 50%, rgba(191,90,242,0.08), transparent 70%),
     var(--fondo);
 }
 body.modo-pdf .diapo:last-of-type { page-break-after: auto; break-after: auto; }

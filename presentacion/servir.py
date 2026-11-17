@@ -4,13 +4,17 @@ La API no envía encabezados CORS, así que una página abierta desde otro orige
 consultarla. Este servidor resuelve eso sin tocar la API: la página pide /api/health y
 el servidor lo reenvía a http://157.230.171.204:8001/health.
 
-Uso, desde la raíz del repo y sin dependencias externas:
+Uso, desde cualquier carpeta y sin dependencias externas:
 
-    python presentacion/servir.py            # puerto 8080
-    python presentacion/servir.py 9000       # otro puerto
+    python3 presentacion/servir.py            # puerto 8080, o el siguiente libre
+    python3 presentacion/servir.py 9000       # otro puerto
+
+También se puede abrir con doble clic: Presentar.command en macOS o presentar.bat en Windows.
 """
 
+import errno
 import http.server
+import json
 import socketserver
 import sys
 import urllib.error
@@ -67,11 +71,35 @@ class Servidor(socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True
 
 
+def revisar_api() -> str:
+    try:
+        with urllib.request.urlopen(API + "/health", timeout=4) as r:
+            h = json.load(r)
+        return f"en vivo, modelo versión {h.get('version_modelo', '?')}"
+    except Exception:
+        return "sin conexión: las diapositivas usarán la última respuesta guardada"
+
+
+def abrir_servidor(puerto: int) -> "Servidor":
+    for p in range(puerto, puerto + 20):
+        try:
+            return Servidor(("127.0.0.1", p), Manejador)
+        except OSError as e:
+            if e.errno != errno.EADDRINUSE:
+                raise
+    sys.exit(f"No hay puertos libres entre {puerto} y {puerto + 19}.")
+
+
 if __name__ == "__main__":
     PUERTO = next((int(a) for a in sys.argv[1:] if a.isdigit()), 8080)
-    with Servidor(("127.0.0.1", PUERTO), Manejador) as servidor:
-        url = f"http://localhost:{PUERTO}/"
-        print(f"Presentación en {url}  ·  vista del presentador: tecla P  ·  Ctrl+C para salir")
+    with abrir_servidor(PUERTO) as servidor:
+        url = f"http://localhost:{servidor.server_address[1]}/"
+        print()
+        print(f"  Presentación:  {url}")
+        print(f"  API:           {revisar_api()}")
+        print("  Teclas:        F pantalla completa · P vista del presentador · O vista general")
+        print("  Para salir:    Ctrl+C")
+        print()
         if "--sin-navegador" not in sys.argv:
             webbrowser.open(url)
         try:
