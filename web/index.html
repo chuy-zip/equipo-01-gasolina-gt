@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gasolina GT</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #fff; --text: #14181f; --muted: #5d6675; --border: #e1e5eb;
+    --up: #c0392b; --down: #1f8a4c; --flat: #8a6d1f; --accent: #2457c5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1218; --card: #181d26; --text: #e8ebf0; --muted: #9aa3b2; --border: #2a303c;
+      --up: #ee7a6c; --down: #52c585; --flat: #d6b658; --accent: #7aa2f7; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { margin: 0 0 4px; font-size: 1.6rem; }
+  h2 { margin: 32px 0 12px; font-size: 1.1rem; }
+  .sub { color: var(--muted); margin: 0; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .fuel { font-weight: 600; text-transform: capitalize; color: var(--muted); }
+  .price { font-size: 2rem; font-weight: 700; margin: 4px 0; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .85rem; font-weight: 600; border: 1px solid currentColor; }
+  .up { color: var(--up); } .down { color: var(--down); } .flat { color: var(--flat); }
+  .bar { display: flex; align-items: center; gap: 8px; font-size: .85rem; margin-top: 6px; }
+  .bar span:first-child { width: 90px; color: var(--muted); }
+  .track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .fill { height: 100%; }
+  .fill.up { background: var(--up); } .fill.down { background: var(--down); } .fill.flat { background: var(--flat); }
+  .meta { color: var(--muted); font-size: .85rem; margin-top: 12px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+  .tabs button { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 8px; padding: 6px 14px; cursor: pointer; text-transform: capitalize; }
+  .tabs button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  svg { width: 100%; height: auto; display: block; }
+  .error { color: var(--up); }
+  dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 0; }
+  dt { color: var(--muted); font-size: .85rem; } dd { margin: 0; font-size: 1.3rem; font-weight: 700; }
+  footer { margin-top: 32px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Precio de la gasolina en Guatemala</h1>
+  <p class="sub" id="status">Cargando…</p>
+
+  <h2>Predicción de la semana siguiente</h2>
+  <div class="grid" id="fuel-cards"></div>
+
+  <h2>Histórico semanal (precio MEM)</h2>
+  <div class="card">
+    <div class="tabs" id="tabs"></div>
+    <div id="chart"></div>
+  </div>
+
+  <h2>Qué tan bueno es el modelo</h2>
+  <div class="card"><dl id="metrics"></dl></div>
+
+  <footer>
+    Equipo 01, MLOps, UVG. Datos de la capa oro en Databricks, modelo <span id="model-version"></span>.
+    <a href="http://157.230.171.204:8001/docs" target="_blank" rel="noopener">Documentación de la API</a>
+  </footer>
+</main>
+
+<script>
+const API_BASE = "/api";
+const FUELS = ["super", "regular", "diesel"];
+const HISTORY_WEEKS = 52;
+const DAYS_PER_WEEK = 7;
+const MS_PER_DAY = 86400000;
+const DIRECTION_LABEL = { sube: "Sube", baja: "Baja", se_mantiene: "Se mantiene" };
+const DIRECTION_CLASS = { sube: "up", baja: "down", se_mantiene: "flat" };
+const CHART = { width: 640, height: 220, pad: 36 };
+
+const percent = value => `${(value * 100).toFixed(1)}%`;
+const quetzales = value => `Q${value.toFixed(2)}`;
+
+async function getJson(path) {
+  const response = await fetch(`${API_BASE}${path}`);
+  if (!response.ok) throw new Error(`${path}: ${response.status}`);
+  return response.json();
+}
+
+function priceLevel(current) {
+  if (current.precio_referencia && current.limite_normal) return current;
+  return null;
+}
+
+function probabilityBar(label, value, cssClass) {
+  return `<div class="bar"><span>${label}</span>
+    <div class="track"><div class="fill ${cssClass}" style="width:${value * 100}%"></div></div>
+    <span>${percent(value)}</span></div>`;
+}
+
+function fuelCard(prediction, price) {
+  const cssClass = DIRECTION_CLASS[prediction.prediccion];
+  return `<article class="card">
+    <div class="fuel">${prediction.combustible}</div>
+    <div class="price">${price ? quetzales(price.precio_referencia) : "—"}</div>
+    <span class="badge ${cssClass}">${DIRECTION_LABEL[prediction.prediccion]} · ${percent(prediction.probabilidad)}</span>
+    ${probabilityBar("Sube", prediction.prob_sube, "up")}
+    ${probabilityBar("Baja", prediction.prob_baja, "down")}
+    ${probabilityBar("Se mantiene", prediction.prob_se_mantiene, "flat")}
+    <div class="meta">Semana predicha: ${prediction.semana}${price ? ` · Normal hasta ${quetzales(price.limite_normal)}` : ""}</div>
+  </article>`;
+}
+
+function renderCards(predictions, prices) {
+  const priceByFuel = Object.fromEntries(prices.map(item => [item.combustible, priceLevel(item)]));
+  document.getElementById("fuel-cards").innerHTML = predictions
+    .map(prediction => fuelCard(prediction, priceByFuel[prediction.combustible]))
+    .join("");
+}
+
+function renderMetrics(metrics) {
+  const items = [
+    ["Exactitud del modelo", percent(metrics.modelo_balanced_accuracy)],
+    ["Exactitud línea base", percent(metrics.linea_base_balanced_accuracy)],
+    ["Acierto cuando hay movimiento", percent(metrics.modelo_direccion_con_movimiento)],
+    ["Semanas de prueba", metrics.filas_prueba],
+  ];
+  document.getElementById("metrics").innerHTML = items
+    .map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`)
+    .join("");
+}
+
+function lineChart(rows) {
+  if (!rows.length) return "<p class='sub'>Sin datos.</p>";
+  const { width, height, pad } = CHART;
+  const values = rows.map(row => row.precio_promedio);
+  const min = Math.min(...values), max = Math.max(...values), span = max - min || 1;
+  const x = index => pad + (index / (rows.length - 1 || 1)) * (width - pad * 2);
+  const y = value => height - pad - ((value - min) / span) * (height - pad * 2);
+  const points = rows.map((row, index) => `${x(index)},${y(row.precio_promedio)}`).join(" ");
+  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Histórico de precios">
+    <text x="4" y="${y(max) + 4}" font-size="11" fill="currentColor">${quetzales(max)}</text>
+    <text x="4" y="${y(min) + 4}" font-size="11" fill="currentColor">${quetzales(min)}</text>
+    <polyline points="${points}" fill="none" stroke="var(--accent)" stroke-width="2"/>
+    <text x="${pad}" y="${height - 8}" font-size="11" fill="currentColor">${rows[0].semana}</text>
+    <text x="${width - pad}" y="${height - 8}" font-size="11" text-anchor="end" fill="currentColor">${rows[rows.length - 1].semana}</text>
+  </svg>`;
+}
+
+async function showHistory(fuel) {
+  const since = new Date(Date.now() - HISTORY_WEEKS * DAYS_PER_WEEK * MS_PER_DAY).toISOString().slice(0, 10);
+  const query = `combustible=${fuel}&fuente=mem&desde=${since}&limit=${HISTORY_WEEKS + 1}`;
+  const { datos } = await getJson(`/precios?${query}`);
+  document.getElementById("chart").innerHTML = lineChart(datos);
+  document.querySelectorAll("#tabs button").forEach(button =>
+    button.setAttribute("aria-pressed", String(button.dataset.fuel === fuel)));
+}
+
+function renderTabs() {
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = FUELS.map(fuel => `<button data-fuel="${fuel}">${fuel}</button>`).join("");
+  tabs.addEventListener("click", event => {
+    const fuel = event.target.dataset.fuel;
+    if (fuel) showHistory(fuel).catch(showError);
+  });
+}
+
+function showError(error) {
+  const status = document.getElementById("status");
+  status.className = "error";
+  status.textContent = `No se pudo consultar la API (${error.message}).`;
+}
+
+async function init() {
+  renderTabs();
+  const [health, predictions, prices, metrics] = await Promise.all([
+    getJson("/health"), getJson("/prediccion"), getJson("/precios/actual"), getJson("/modelo/metricas"),
+  ]);
+  document.getElementById("status").textContent = `Datos hasta la semana del ${health.semana_mas_reciente}.`;
+  document.getElementById("model-version").textContent = `v${health.version_modelo}`;
+  renderCards(predictions.datos, prices.datos);
+  renderMetrics(metrics);
+  await showHistory(FUELS[0]);
+}
+
+init().catch(showError);
+</script>
+</body>
+</html>
