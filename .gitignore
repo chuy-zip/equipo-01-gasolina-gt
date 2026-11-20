@@ -237,3 +237,6 @@ id_ed25519*
 
 # Imágenes de revisión de la presentación
 presentacion/png/
+
+# Generador y vistas previas locales del resumen para el jurado
+/presentacion/.resumen_jurado/
