@@ -71,7 +71,7 @@ Un mismo archivo no se edita en los dos lugares a la vez. Antes de empezar a edi
 
 **No desplegar desde Databricks.** Al abrir un notebook de la carpeta Git aparece el aviso "This file is part of a bundle. Switch to associated bundle". La vista del bundle tiene un botón para desplegar. No se usa: el único destino es `prod`, y desplegar desde una rama pondría código sin revisar en el ambiente compartido.
 
-**Tablas compartidas.** No hay esquemas por persona. Las pruebas escriben sobre los esquemas de `gas_price`, por eso cada tabla tiene un solo responsable a la vez, asignado en el plan. Repetir una prueba no duplica datos: bronce salta los archivos con la misma huella y plata se reescribe completa.
+**Tablas compartidas.** No hay esquemas por persona. Las pruebas escriben sobre los esquemas de `equipo_01`, por eso cada tabla tiene un solo responsable a la vez, asignado en el plan. Repetir una carga no duplica datos: bronce omite fotos cuya ruta ya existe y archivos del MEM y la EIA cuya huella no cambió. Plata reescribe las fuentes oficiales y actualiza los precios de fotos con `MERGE`.
 
 ## Workflows de GitHub Actions
 
@@ -80,7 +80,7 @@ Un mismo archivo no se edita en los dos lugares a la vez. Antes de empezar a edi
 | `bundle-plan.yml` | Pull request a `main` | `bundle validate` y `bundle plan -t prod`. Publica el plan como comentario desplegable y lo actualiza en cada push. Ya existe |
 | `bundle-deploy.yml` | Merge a `main`, o a mano | `bundle validate`, `bundle deploy -t prod` y `bundle run gas_price_setup` (el job `equipo-01-setup`), que crea las tablas que falten. Ya existe |
 | `tests.yml` | Pull request a `main` | Tests del paquete `gas_price` y test de "no empeorar" los archivos de `data/` contra la versión de `main`. Ya existe |
-| `run-pipeline.yml` | Merge a `main` que cambia algo en `data/` | Dispara el job del pipeline para cargar los datos nuevos. Propuesto, todavía no existe. Hoy el pipeline se corre a mano |
+| `run-pipeline.yml` | Merge a `main` que cambia algo en `data/` | Propuesto, todavía no existe. El pipeline corre cada martes a las 8:00, hora de Guatemala, o mediante **Run now**; el merge no lo ejecuta |
 | Despliegue de la API | Merge a `main` que toca `api/` | Opcional, da puntos extra. Entra al Droplet por ssh y reinicia el contenedor. Ver la sección del Droplet |
 
 GitHub Actions no transforma datos. Solo valida, despliega y dispara jobs. El procesamiento ocurre en Databricks.

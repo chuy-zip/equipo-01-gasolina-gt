@@ -11,9 +11,9 @@
 
 **Tablas externas en los buckets.** Cada capa vive en su bucket, como pide el enunciado. Las tablas son externas de Unity Catalog: están registradas en `equipo_01` con sus permisos, linaje y comentarios, pero sus archivos quedan en una ruta fija del bucket, por ejemplo `equipo-01/gold/predicciones`. El permiso que lo permite es `CREATE EXTERNAL TABLE`, que el catedrático otorgó el 2026-11-13.
 
-**Lo que se queda en Databricks:** el volumen `archivos`, con las copias del Excel y de la EIA, y el modelo registrado. Ninguno de los dos se lee desde afuera.
+**Lo que se administra en Databricks:** el volumen `archivos`, con las copias del Excel y de la EIA, y el modelo registrado. El volumen no se expone a la API. Para el despliegue se descarga una copia del modelo `champion` y de las tablas Oro necesarias, y se empaqueta en Docker.
 
-**Raw contra bronce.** Raw es la zona de aterrizaje de los archivos originales y nunca se modifica. Bronce guarda esos mismos datos como tablas Delta, sin limpiarlos, más columnas de control: cuándo se cargaron, de qué archivo vienen y su hash. Si una regla de limpieza cambia, plata y oro se reconstruyen desde bronce sin volver a leer todo raw.
+**Raw contra bronce.** Raw es la zona de aterrizaje de las fotos originales y nunca se modifica. Bronce guarda las fotos y las fuentes oficiales como tablas Delta, sin limpiarlas, con la fecha de carga y el archivo de origen. El MEM y la EIA incluyen su hash para identificar versiones; las fotos se identifican por su ruta. Si una regla de limpieza cambia, plata y oro se reconstruyen desde bronce sin volver a leer todo raw.
 
 **Convención del enunciado.** Cada equipo usa un catálogo o esquemas con el prefijo `equipo_XX`, y en cada bucket escribe solo dentro de su prefijo `equipo-XX/`. Para este equipo: catálogo `equipo_01` y prefijo `equipo-01/`. Las external locations y el prefijo son variables del bundle.
 
@@ -112,7 +112,7 @@ Por ejemplo, una tabla de revisión manual de fotos.
 
 ## Tablas del enunciado
 
-Todas las tablas que pide el enunciado ya están definidas en `databricks/sql/tablas.sql`, con sus nombres y columnas mínimas, y el despliegue las crea vacías. El equipo de fotos solo tiene que llenarlas.
+Todas las tablas que pide el enunciado están definidas en `databricks/sql/tablas.sql`, con sus nombres y columnas mínimas. El despliegue crea las que falten; el pipeline las carga. Las tablas de fotos ya tienen datos, como se resume a continuación.
 
 | Tabla | Columnas | Estado |
 |---|---|---|
@@ -149,11 +149,11 @@ Cada versión nueva del Excel se agrega a la tabla, sin borrar las anteriores. P
 
 ## Plata
 
-**`silver.imagenes_metadata`**, opcional: una fila por foto con los metadatos del EXIF. El enunciado no la pide, pero puede servir para sacar la fecha y el lugar de cada foto antes de llenar `silver.precios`.
+**`silver.imagenes_metadata`**, propuesta opcional no implementada: una fila por foto con los metadatos del EXIF. El enunciado no la pide. El pipeline actual extrae la fecha y la ubicación durante la lectura de las fotos; la siguiente tabla conserva el diseño propuesto para una eventual tabla de metadatos.
 
 | Columna | Tipo | Nota |
 |---|---|---|
-| image_id | STRING | Huella SHA256, la misma de bronce |
+| image_id | STRING | Huella SHA256 propuesta para identificar el contenido de la foto |
 | fecha_hora_local | TIMESTAMP | De `DateTimeOriginal`, presente en las 110 fotos |
 | zona_horaria | STRING | De `OffsetTimeOriginal`, por ejemplo `-06:00` |
 | fecha | DATE | Fecha local de la foto |

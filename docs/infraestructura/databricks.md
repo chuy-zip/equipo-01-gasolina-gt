@@ -57,7 +57,7 @@ En serverless no se elige versión de runtime, tipo de nodo ni cantidad de worke
 | Tabla administrada | Tabla cuyos archivos guarda y administra Unity Catalog. Si se borra la tabla, se borran sus datos | Ninguna tabla del pipeline. El modelo registrado sí vive así |
 | Ubicación administrada | Ruta donde un esquema guarda sus tablas administradas. Si el esquema no tiene una, usa la del catálogo | No se usa: requiere `CREATE MANAGED STORAGE`, que no tenemos |
 | Tabla externa | Tabla que apunta a archivos en una ruta elegida a mano. Si se borra la tabla, los archivos quedan | Todas las tablas de bronce, plata y oro, en `equipo-01/<capa>/<tabla>` de cada bucket |
-| Volumen | Objeto de Unity Catalog para guardar archivos que no son tablas, como imágenes o Excel | Un volumen administrado en bronce para la copia del Excel y los checkpoints |
+| Volumen | Objeto de Unity Catalog para guardar archivos que no son tablas, como imágenes o Excel | Un volumen administrado en bronce para las copias del Excel del MEM y de los archivos de la EIA |
 
 **Por qué las tablas van en los buckets.** El diagrama del catedrático pone cada capa en S3, y él creó una external location por capa. Las tablas son externas, en una ruta fija dentro del prefijo `equipo-01/` de cada bucket. Ver la sección "Estado final" al final de este documento.
 
@@ -159,7 +159,7 @@ Con eso:
 
 1. **Todas las tablas son externas,** en el bucket de su capa y dentro del prefijo `equipo-01/`. `CREATE EXTERNAL TABLE` es el permiso que lo permite. `CREATE MANAGED STORAGE` no hace falta.
 2. **Raw sigue siendo de solo lectura.** Las fotos se leen desde ahí.
-3. **El volumen `archivos` y el modelo se quedan en Databricks.** Nadie los lee desde afuera.
+3. **El volumen `archivos` y el registro del modelo se administran en Databricks.** El volumen no se expone a la API; para desplegarla se descarga una copia del modelo registrado y de las tablas Oro necesarias.
 4. **La API no cambia.** El Droplet no tiene acceso a S3, así que sigue usando el modelo y una copia de oro descargados con `scripts/exportar_para_api.py`. Ver [arquitectura.md](../arquitectura/arquitectura.md).
 
 Las pruebas y los permisos de arriba quedan como registro de lo que se intentó.

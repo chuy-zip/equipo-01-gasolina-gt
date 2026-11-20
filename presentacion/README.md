@@ -73,6 +73,6 @@ python presentacion/herramientas/generar_datos.py
 python presentacion/herramientas/exportar_pdf.py
 ```
 
-`generar_datos.py` necesita el paquete instalado (`pip install -e .`) y red: trae el precio semanal de las fotos de la API, porque las fotos solo están en Databricks. Así entrena con las mismas 17 variables que el `champion` y sus métricas coinciden con `/modelo/metricas`. `exportar_pdf.py` solo necesita Chrome, Chromium o Edge. Cada página del PDF es una imagen exacta de la diapositiva, así que se ve igual en cualquier visor. Tarda cerca de un minuto y medio. Con `--png` también guarda cada diapositiva como imagen en `presentacion/png/`, que no se sube al repo.
+`generar_datos.py` necesita el paquete instalado (`pip install -e .`) y red: trae de la API los precios semanales extraídos de las fotos. Así entrena con las mismas 17 variables numéricas y el tipo de combustible que el `champion`, y sus métricas coinciden con `/modelo/metricas`. `exportar_pdf.py` solo necesita Chrome, Chromium o Edge. Cada página del PDF es una imagen exacta de la diapositiva, así que se ve igual en cualquier visor. Tarda cerca de un minuto y medio. Con `--png` también guarda cada diapositiva como imagen en `presentacion/png/`, que no se sube al repo.
 
 Para actualizar el respaldo de la API, volver a guardar las respuestas de `/health`, `/precios/actual`, `/modelo/metricas` y `/prediccion` en `datos/api_respaldo.js`.

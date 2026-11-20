@@ -12,18 +12,18 @@ Según el enunciado oficial, en `docs/contexto/`: un pipeline de punta a punta q
 
 ## Cumplimiento del enunciado
 
-Puntos de la rúbrica y estado documentado al 2026-11-15:
+Puntos de la rúbrica y estado documentado al 2026-11-19. El último despliegue de la API respaldado en el repositorio es del 2026-11-17:
 
 | Criterio | Puntos | Estado |
 |---|---|---|
 | Capa bronce: fotos por external location, carga incremental y auditoría | 10 | Hecho. 110 de 110 fotos en bronce y una segunda carga no agrega nada |
 | Capa plata: extracción de precios, 3 reglas de calidad, cuarentena y exactitud medida a mano | 15 | Hecho y probado en Databricks. En la corrida posterior a la revisión actualizada se compararon 44 precios: 26 correctos (59.1 %). Esa corrida no procesó fotos nuevas. OCR como línea base histórica: 3 de 31 (10 %) |
 | Capa oro: precio semanal, variación, etiqueta de dirección y comentarios | 10 | Hecho. `gold.precio_semanal` tiene filas del MEM y de fotos, según las corridas de desarrollo del 2026-11-14 |
-| Modelo: validación temporal, comparación con la línea base y MLflow | 10 | Hecho. 0.55 contra 0.46 de la línea base |
+| Modelo: validación temporal, comparación con la línea base y MLflow | 10 | Hecho. Versión 4 con MEM, EIA y fotos: exactitud balanceada de 0.564 contra 0.458 de la línea base |
 | Clusters y job: cómputo, job encadenado, programación y alertas | 10 | Hecho, salvo confirmar con el catedrático la equivalencia con serverless |
 | API en el Droplet | 20 | Desplegada en `http://157.230.171.204:8001`. Desde el 2026-11-17 `/health` responde `version_modelo: 4` |
-| Repositorio y README | 10 | Parcial. Faltan el diagrama exportado, la presentación y commits de todos |
-| Informe técnico | 5 | Redactado el 2026-11-16: `informe/informe.md`, versión DOCX y PDF de cinco páginas en `docs/informe.pdf`. Pendiente de revisión del equipo |
+| Repositorio y README | 10 | Documentación, código, presentación y resumen disponibles. Falta la imagen exportada de la arquitectura completa; la participación de todos los integrantes debe verificarse en el historial de commits |
+| Informe técnico | 5 | Revisado el 2026-11-19: `informe/informe.md`, DOCX y dos copias idénticas del PDF de cinco páginas. Describe el despliegue documentado de la versión 4 y conserva las limitaciones |
 | Presentación y demo | 10 | Presentación en `presentacion/`. Anexo con las 8 capturas, incluida `08_api_swagger.png` |
 
 ## Decisiones tomadas
@@ -96,14 +96,15 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 | 3 | `gold.precio_semanal` y `gold.variacion_semanal` | Ricardo | Hecho. Oro ya contiene filas de fotos, según las corridas de desarrollo del 2026-11-14 |
 | 3 | Tablas de fotos del enunciado definidas en `tablas.sql`: `bronze.fotos_precios`, `silver.precios` y `silver.precios_rejected` | Ricardo | Hecho. Las tablas se llenaron en las corridas de desarrollo del 2026-11-14 |
 | 3 | Evidencia de al menos 2 corridas exitosas con fotos de semanas distintas | | Evidencia parcial para el informe: las capturas de Databricks compartidas por Nelson muestran varias corridas exitosas del job y fotos en plata de semanas distintas (2022-12-14 a 2026-11-08, según combustible). Las vistas no vinculan fotos concretas a cada corrida; guardar las capturas en los anexos y describir esta limitación |
+| 3 | Umbral de dirección como parámetro del job | | Pendiente. El valor Q0.10 está fijado en `src/gas_price/features.py` |
 | 4 | Script que descarga el modelo `champion` y la copia de oro: `scripts/exportar_para_api.py` | Ricardo | Hecho y probado contra Databricks el 2026-11-13. Verificó que el modelo descargado predice lo mismo que `gold.predicciones` |
 | 4 | API local con los endpoints del enunciado, con el modelo empaquetado | Rodrigo | Hecho e integrado en `main` por el PR #22. FastAPI en `api/`, con tests. La prueba local documentada usó `champion` y coincidió con `gold.predicciones` |
-| 4 | Generación local de artefactos para la API sin Databricks: `scripts/exportar_local.py` | | Integrada en `main` por el PR #23. Entrena un modelo local con MEM y EIA; no incorpora los precios de fotos. No hay evidencia de que se haya usado para desplegar |
+| 4 | Generación local de artefactos para la API sin Databricks: `scripts/exportar_local.py` | | Integrada en `main` por el PR #23. Entrena un modelo local con MEM y EIA, sin precios de fotos. Una verificación previa de la API registró esa versión local; el despliegue documentado del 2026-11-17 usa el `champion` v4 |
 | 4 | Imagen de Docker subida al Droplet, en el puerto del equipo | | Hecho el 2026-11-17. Se corrió `scripts/exportar_para_api.py` (versión 4, la predicción coincide con `gold.predicciones`), se construyó la imagen para `linux/amd64` y se subió al Droplet. `/health` dice `"version_modelo":"4"` |
 | 4 | Pruebas de usuario final con `curl` o Postman | Rodrigo | Hecho. `tests/consultas_api.sh` |
-| 5 | Diagrama de arquitectura exportado y su fuente editable | | Pendiente |
-| 5 | Informe técnico de máximo 5 páginas | | Redactado en `informe/informe.md`, con DOCX y PDF generados mediante LibreOffice. PDF de entrega: `docs/informe.pdf` (cinco páginas). Pendiente de revisión del equipo |
-| 5 | Presentación, resumen de una página y demo | | Hecho. Presentación y PDF en `presentacion/`, con las 8 capturas del anexo |
+| 5 | Diagrama de arquitectura exportado y su fuente editable | | Fuente editable de la plataforma en `docs/arquitectura/arquitectura.md`; falta su imagen exportada. El diagrama del modelo ya tiene ambos formatos |
+| 5 | Informe técnico de máximo 5 páginas | | Markdown revisado y DOCX sincronizado; PDF exportado con Word y verificado en cinco páginas. Copias idénticas en `informe/informe.pdf` y `docs/informe.pdf` |
+| 5 | Presentación, resumen de una página y demo | | Presentación y PDF en `presentacion/`, con las 8 capturas del anexo y `resumen_jurado.pdf` de una página. La demo en vivo forma parte de la exposición ante el jurado |
 | Extra | CI/CD hacia el Droplet o pruebas automatizadas de la API | | Opcional |
 
 ## Riesgos
@@ -113,7 +114,7 @@ Las fases siguen el calendario del enunciado. Las tareas hechas antes del 2026-1
 3. Free Edition tiene cuotas de uso y un máximo de 5 tareas de job a la vez. Con varios desarrolladores probando al mismo tiempo, el cómputo puede apagarse el resto del día.
 4. Las fotos ya pasan por bronce y plata según las pruebas de desarrollo del 2026-11-14. Las capturas compartidas muestran varias corridas exitosas y el resumen de plata muestra fotos de distintas semanas, pero no relacionan fotos particulares con corridas individuales. La última ejecución reportada procesó 0 fotos nuevas; conservar esta distinción al presentar la evidencia en el informe.
 5. La versión de scikit-learn de la API tiene que coincidir con la de Databricks, o el modelo no carga.
-6. `scripts/exportar_local.py` y `scripts/exportar_para_api.py` escriben en `api/artefactos/`. El primero genera un modelo nuevo sin las fotos; el segundo descarga `champion` y las tablas de oro. El manifiesto local lleva `origen: local`; el de Databricks lleva `workspace` y `run_id`. Los artefactos no se versionan, así que el repo no prueba cuál quedó dentro de la imagen desplegada.
+6. `scripts/exportar_local.py` y `scripts/exportar_para_api.py` escriben en `api/artefactos/`. El primero genera un modelo nuevo sin las fotos; el segundo descarga `champion` y las tablas de oro. El manifiesto local lleva `origen: local`; el de Databricks lleva `workspace` y `run_id`. El despliegue documentado del 2026-11-17 usó el segundo y su respaldo registra la versión 4. Para futuras actualizaciones hay que verificar de nuevo el manifiesto y `/health`, porque los artefactos no se versionan.
 
 ## Bitácora
 

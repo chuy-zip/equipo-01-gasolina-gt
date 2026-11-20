@@ -38,7 +38,7 @@ flowchart LR
     A["Alguien reemplaza el Excel<br/>en una rama"] --> B["Pull request"]
     B --> C["CI: test de no empeorar"]
     C --> D["Merge a main"]
-    D --> E["CI dispara el job"]
+    D -- "datos disponibles" --> E["Job del martes a las 8:00<br/>o ejecución manual con Run now"]
     E --> F["Databricks lee el Excel<br/>desde el repo público"]
     F --> G["Copia el archivo a bronce<br/>y carga la tabla"]
 ```
@@ -46,6 +46,7 @@ flowchart LR
 1. El archivo no se sube a raw porque raw es solo de lectura.
 2. Databricks lee el Excel directo del repo público. GitHub Actions no necesita escribir en los buckets.
 3. La tarea de ingesta calcula el hash del archivo. Si no cambió, no lo vuelve a cargar.
+4. El merge despliega la configuración y crea las tablas que falten, pero no ejecuta el pipeline de datos. La carga ocurre en la programación semanal o al iniciarla con **Run now**.
 
 ### Test de "no empeorar"
 
@@ -174,7 +175,7 @@ No se publican coordenadas exactas en el repo, porque es público y las fotos mu
 5. **El lugar principal tiene fotos todos los años**, con 12 a 22 por año desde 2023. Es la única estación con datos suficientes para comparar su precio contra el promedio nacional a lo largo del tiempo.
 6. **La mayoría de las fotos son de noche**, con luz artificial, pantallas retroiluminadas y reflejos. La técnica que lea el precio tiene que tolerar eso y los distintos dispensadores.
 7. **La orientación varía.** Hay que aplicar la orientación del EXIF antes de cualquier recorte o lectura.
-8. **La huella SHA256 sirve como llave de cada foto en bronce.** No hay contenidos repetidos, así que identifica cada foto sin ambigüedad aunque cambie su nombre o su carpeta.
+8. **La huella SHA256 permitió comprobar la integridad y descartar contenidos repetidos en la exploración.** La ingesta implementada identifica las fotos nuevas por su ruta y usa `path` como llave de Bronce.
 
 **Etiquetas EXIF disponibles:** las fotos tienen 62 etiquetas distintas. Cobertura de las que usa el proyecto:
 

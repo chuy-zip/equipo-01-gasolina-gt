@@ -1,6 +1,6 @@
 # Handoff del proyecto final: predicción del precio de la gasolina
 
-Actualizado: 2026-11-15. Los resultados de Databricks y Docker citados abajo se midieron el 2026-11-14, salvo que se indique otra fecha. Equipo 01, MLOps, UVG.
+Actualizado: 2026-11-19. Equipo 01, MLOps, UVG. El despliegue de referencia es el documentado el 2026-11-17, con el modelo v4. Las pruebas iniciales del 14 y 15 de noviembre se conservan como antecedentes y se identifican en sus secciones.
 
 Este documento da el contexto completo del proyecto para quien siga trabajando en él. No hace falta leerlo entero: cada sección apunta al documento del repo que tiene el detalle. También se puede pasar completo a un agente de código como contexto inicial. La sección 12 tiene instrucciones para ese caso.
 
@@ -12,18 +12,20 @@ Repo: <https://github.com/chuy-zip/equipo-01-gasolina-gt>. Todas las rutas de es
 
 **El enunciado oficial está en `docs/contexto/enunciado_proyecto_final.pdf`. Léanlo primero: define los nombres de las tablas, la rúbrica y los entregables. Si algo de este documento lo contradice, manda el enunciado.**
 
-En resumen: un pipeline de punta a punta en Databricks, con arquitectura medallón, que convierte **fotos de precios** en datos y predice si el precio de cada combustible sube, baja o se mantiene la semana siguiente. La API está implementada y probada en Docker local. El equipo confirmó el 2026-11-15 que ya se desplegó en el Droplet; la respuesta pública y el origen de los artefactos no están documentados en este repo.
+En resumen: un pipeline de punta a punta en Databricks, con arquitectura medallón, que convierte **fotos de precios** en datos y predice si el precio de cada combustible sube, baja o se mantiene la semana siguiente. La API está desplegada en el Droplet con el `champion` v4 y una copia de Oro exportados desde Databricks. El respaldo del 2026-11-17 en `presentacion/datos/api_respaldo.js` registra la versión, las métricas y las predicciones de los tres combustibles.
 
 | Parte | Estado | Puntos en la rúbrica |
 |---|---|---|
 | Fotos a bronce y plata, con extracción de precios y reglas de calidad | Hecho y probado en Databricks. PR #20 y #21 integrados en `main` | 25 |
 | Oro, modelo, MLflow, job programado y alertas | Hecho. Oro ya toma las filas de las fotos | 30 |
-| API en el Droplet | API integrada en `main` y probada en Docker local. Despliegue confirmado por el equipo; falta documentar URL, respuesta pública y origen de los artefactos | 20 |
-| Repo, informe y presentación | Parcial. Informe redactado y exportado a PDF; faltan revisión del equipo, diagrama y presentación | 25 |
+| API en el Droplet | Versión 4 desplegada y documentada en `http://157.230.171.204:8001/docs`. La actualización del modelo y de Oro sigue siendo manual | 20 |
+| Repo, informe y presentación | Informe revisado, DOCX y PDF de cinco páginas; presentación, resumen y capturas disponibles. Falta exportar la imagen de la arquitectura completa y verificar la participación de todos en el historial de commits | 25 |
 
 El resumen completo de cumplimiento está en `docs/plan/plan_implementacion.md`, sección "Cumplimiento del enunciado".
 
-## 2. Estado actual
+## 2. Pruebas iniciales y antecedentes del 14 y 15 de noviembre
+
+Esta sección conserva el estado de esas pruebas. Para el despliegue y los entregables posteriores, consultar las secciones 1 y 10 y el plan de implementación.
 
 **PR integrados en `main` el 2026-11-15, según el historial local:**
 
@@ -87,7 +89,7 @@ Decisiones vigentes:
 
 1. **Cada capa vive en su bucket de S3**, como tablas externas de Unity Catalog dentro del prefijo `equipo-01/`.
 2. **Las fotos se leen con un modelo de visión**, Llama 4 Maverick, que ya sirve el workspace. Es gratis dentro de la cuota de Free Edition y las fotos no salen de Databricks. El OCR queda como línea base. Ver la sección 7.
-3. **La API no lee S3.** El Droplet no tiene acceso. La prueba documentada en Docker local usó el modelo `champion` y una copia de oro descargados con `scripts/exportar_para_api.py`. El equipo confirmó que la imagen ya se desplegó en el Droplet, pero aún no documentó qué exportador generó los artefactos de esa imagen.
+3. **La API no lee S3.** El Droplet no tiene acceso. El despliegue documentado del 2026-11-17 usa el modelo `champion` v4 y una copia de Oro descargados con `scripts/exportar_para_api.py`. La imagen se construye en local y se actualiza a mano en el Droplet.
 
 Detalle: `docs/arquitectura/arquitectura.md` y `docs/datos/esquemas_medallion.md`.
 
@@ -185,13 +187,15 @@ Sin cambios desde el handoff anterior. Detalle en `docs/infraestructura/ci_cd.md
 5. **9 motivos de rechazo**, entre ellos los 3 del enunciado: precio fuera de Q20 a Q55, combustible fuera del catálogo y fecha futura. También rechaza precios a más de 15 % de la referencia del MEM, V-Power, lecturas fallidas y llaves duplicadas.
 6. Solo se procesan fotos nuevas. Una segunda corrida no hace nada.
 
-**Comparación de técnicas, mismas 20 fotos:**
+**Comparación histórica de técnicas, anterior a la corrección de la referencia manual:**
 
 | Técnica | Correctos |
 |---|---|
 | Llama 4 Maverick | Cerca de 70 % |
 | RapidOCR con modelos PP-OCRv5 | 10 % |
 | Gemma 3 12B | Peor que Maverick en la prueba de 10 fotos |
+
+La evaluación posterior de Maverick obtuvo 26 de 44 precios correctos (59.1 %) con la referencia corregida de 20 fotos. RapidOCR no se recalculó con esa referencia, por lo que sus resultados no constituyen una comparación directa con el 59.1 %.
 
 PaddleOCR no corre en serverless. Qwen 3.5 del workspace no acepta imágenes.
 
@@ -206,27 +210,29 @@ Igual que antes, con las tablas de fotos ya llenas:
 | `silver.precios_rejected` | Lo que falló, con el motivo |
 | `gold.precio_semanal` | Ahora con filas de `fuente = fotos` además de `mem` |
 
-El resto de tablas y el modelo no cambiaron. Ver el handoff anterior o `docs/datos/esquemas_medallion.md` y `docs/modelo/modelo.md`.
+El modelo v4 incorpora `foto_disponible` y `foto_brecha`. Utiliza 17 variables numéricas y el tipo de combustible, y obtuvo exactitud balanceada de 0.564 frente a 0.458 de la línea base. La mejora observada frente al modelo sin fotos no es concluyente: el intervalo del bootstrap incluye cero. Las tablas y la evaluación se detallan en `docs/datos/esquemas_medallion.md` y `docs/modelo/modelo.md`.
 
 ## 9. Cómo agregar o cambiar una tarea del pipeline
 
 Sin cambios. Detalle en `docs/datos/esquemas_medallion.md`, sección "Cómo cambiar una tabla".
 
-## 10. Lo que falta
+## 10. Entregables y pendientes
 
 | Tema | Estado | Notas |
 |---|---|---|
-| **Evidencia de corrida completa con el código de `main`** | El equipo ejecutó el job; evidencia no guardada en el repo | Adjuntar historial y resultados de todas las tareas; la última salida de plata reportó 0 fotos nuevas |
-| **Evidencia del despliegue de la API en el Droplet** | Despliegue confirmado por el equipo; evidencia pendiente | Registrar URL, respuesta pública e imagen usada. Pasos de verificación en `api/README.md` |
+| **Evidencia de corrida completa con el código de `main`** | Capturas disponibles | `presentacion/capturas/01_job_historial.png` y `02_job_grafo.png` muestran el historial y las tareas. La última salida de plata reportó 0 fotos nuevas |
+| **Evidencia del despliegue de la API en el Droplet** | Despliegue v4 documentado el 2026-11-17 | Respuestas en `presentacion/datos/api_respaldo.js` y captura `08_api_swagger.png`. Exportación desde Databricks y construcción de la imagen registradas en el plan |
 | **Exactitud de la extracción contra revisión manual** | Medida | 26 de 44 precios correctos (59.1 %). La ejecución leyó los resultados existentes y no procesó fotos nuevas |
 | **Evidencia de corridas y cobertura temporal de fotos** | Evidencia visual parcial compartida por Nelson | La vista del job muestra varias corridas exitosas; el resumen de `silver.precios` muestra fotos desde 2022-12-14 hasta 2026-11-08 (el máximo depende del combustible). Juntas sirven para describir que el pipeline se ejecutó y que plata contiene fotos de distintas semanas. No identifican cuáles fotos se procesaron en cada corrida; incluir ambas capturas en el informe y declarar esa limitación |
 | **Ubicación de las fotos nuevas** | Pendiente de confirmar | Solo hay que cambiar el parámetro `carpeta_fotos` |
-| **Informe técnico** | Redactado; pendiente de revisión del equipo | Fuente en `informe/informe.md`, DOCX en `informe/informe.docx` y PDF de cinco páginas en `docs/informe.pdf`. Incluye extracción, variables, evaluación, cómputo y lecciones aprendidas |
-| **Diagrama exportado y presentación** | Por hacer | Pueden utilizar la comparación de técnicas y las métricas del informe |
+| **Informe técnico** | Revisado y sincronizado | Fuente en `informe/informe.md`, DOCX y PDF de cinco páginas en `informe/`; copia idéntica del PDF en `docs/informe.pdf` |
+| **Diagrama completo de la plataforma** | Falta la imagen exportada | Hay una fuente editable en `docs/arquitectura/arquitectura.md`. El diagrama del modelo ya está exportado, pero corresponde a otro alcance |
+| **Presentación y resumen** | Disponibles | Presentación web, `presentacion_jurado.pdf`, `resumen_jurado.pdf` de una página y capturas en `presentacion/`. La demo en vivo se realiza durante la exposición |
+| **Umbral de dirección como parámetro** | Pendiente | Q0.10 está fijado en `src/gas_price/features.py`; todavía no se recibe como parámetro del job |
 
 **Despliegue y actualización de la API en el Droplet.** Lo acordado con el catedrático:
 
-El PR #23 agregó `scripts/exportar_local.py` para generar el modelo y las tablas desde `data/` cuando no se usa Databricks. Ese script no incluye los precios de fotos en la copia de oro y asigna `version_modelo: local`. La prueba local registrada antes del PR #23 usó el `champion` de Databricks. El equipo confirmó el despliegue, pero aún no consta qué origen tienen los artefactos de la imagen instalada. El archivo `api/artefactos/manifiesto.json`, generado al exportar y excluido de Git, permite distinguirlos: el local lleva `origen: local` y `version_modelo: local`; el de Databricks lleva el nombre registrado del modelo, la versión, `workspace` y `run_id`. `/health` muestra la versión, pero no el campo `origen`.
+El PR #23 agregó `scripts/exportar_local.py` para generar el modelo y las tablas desde `data/` cuando no se usa Databricks. Ese script no incluye los precios de fotos en la copia de Oro y asigna `version_modelo: local`. Una verificación previa de la API identificó esa versión local; el despliegue del 2026-11-17 la sustituyó por el `champion` v4 y las tablas exportadas desde Databricks. El archivo `api/artefactos/manifiesto.json`, generado al exportar y excluido de Git, permite distinguir los orígenes: el local lleva `origen: local` y `version_modelo: local`; el de Databricks lleva el nombre registrado del modelo, la versión, `workspace` y `run_id`. `/health` muestra la versión, pero no el campo `origen`. En cada actualización hay que comprobar que la imagen use el modelo y los datos de la exportación de Databricks.
 
 1. Exportar: `python scripts/exportar_para_api.py --perfil DEFAULT`. Verifica que el modelo descargado prediga lo mismo que Databricks.
 2. Construir en local: `cd api` y `docker build -t equipo-01-gasolina-api:latest .`

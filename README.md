@@ -2,7 +2,7 @@
 
 Proyecto final de MLOps, Equipo 01: predicción del precio de la gasolina en Guatemala.
 
-Un pipeline de punta a punta en Databricks convierte fotos de precios y datos oficiales en tablas Delta con la arquitectura medallón. Con eso predice si el precio de la gasolina súper, regular y el diésel subirá, bajará o se mantendrá la semana siguiente. La API empaquetada con el modelo se probó en Docker local y, según confirmó el equipo el 2026-11-15, ya se desplegó en el Droplet de DigitalOcean.
+Un pipeline de punta a punta en Databricks convierte fotos de precios y datos oficiales en tablas Delta con la arquitectura medallón. Con eso predice si el precio de la gasolina súper, regular y el diésel subirá, bajará o se mantendrá la semana siguiente. La API corre en Docker en el Droplet de DigitalOcean. El despliegue documentado del 2026-11-17 utiliza el modelo `champion` v4 y una copia de Oro exportados desde Databricks; sus respuestas están conservadas en el respaldo de la presentación.
 
 El enunciado oficial está en [docs/contexto/](docs/contexto/). Toda la documentación está en [docs/](docs/README.md), y el punto de partida es el [plan de implementación](docs/plan/plan_implementacion.md).
 
@@ -53,7 +53,7 @@ flowchart LR
 | `pipelines/01_bronze.py`, `02_silver.py`, `03_gold.py` | `databricks/notebooks/`, con prefijos 1x para bronce, 2x para plata, 3x a 5x para oro | Un notebook por fuente y por paso. Cada tarea se puede probar y volver a correr por separado |
 | `pipelines/job.json` | `resources/pipeline.yml` | El job se define como código con un bundle de Databricks y lo despliega el CI. Ver [ci_cd.md](docs/infraestructura/ci_cd.md) |
 | `api/` | `api/` | FastAPI en Docker con el modelo y la copia de oro adentro. Ver [api/README.md](api/README.md), que también justifica Docker |
-| `docs/arquitectura.png` y su fuente editable | Diagrama del modelo en [docs/modelo/](docs/modelo/arquitectura_modelo.png), con su fuente `.mmd`. El de toda la arquitectura está por hacer | |
+| `docs/arquitectura.png` y su fuente editable | Vista editable de la plataforma en [arquitectura.md](docs/arquitectura/arquitectura.md); falta su imagen exportada. El [diagrama del modelo](docs/modelo/arquitectura_modelo.png) ya tiene imagen y fuente `.mmd` | La plataforma completa y el modelo tienen alcances distintos |
 | `docs/informe.pdf` | [Informe técnico](docs/informe.pdf) | Fuente Markdown, DOCX y regeneración en [informe/](informe/README.md) |
 | `presentacion/` | [Presentación web y PDF](presentacion/README.md) | Diapositivas animadas con datos reales y la API en vivo. El PDF se genera desde la misma fuente |
 

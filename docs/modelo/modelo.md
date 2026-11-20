@@ -7,7 +7,7 @@ El caso de uso tiene dos preguntas distintas. Cada una se resuelve con el métod
 ![Arquitectura del modelo](arquitectura_modelo.png)
 
 1. **Fuentes:** el precio oficial del MEM, el precio internacional de la EIA y los precios de las fotos, todos desde plata.
-2. **Variables:** `30_gold` las junta en `gold.features_modelo`, una fila por semana y combustible. Son 17 variables: el combustible, 10 del MEM, 4 de la EIA y 2 de las fotos. La etiqueta es la dirección del precio la semana siguiente.
+2. **Variables:** `30_gold` las junta en `gold.features_modelo`, una fila por semana y combustible. Son 17 variables numéricas: 11 del MEM, 4 que incorporan la EIA y 2 de las fotos, más el tipo de combustible como variable categórica. La etiqueta es la dirección del precio la semana siguiente.
 3. **Modelo:** `40_entrenamiento` prepara las variables, entrena una regresión logística de 3 clases y la evalúa con las últimas 104 semanas contra la línea base del enunciado.
 4. **Registro:** el experimento queda en MLflow y el modelo final en Unity Catalog con el alias `champion`.
 5. **Predicción:** `50_predicciones` aplica el `champion` a la semana más reciente. La API lleva el mismo modelo.
@@ -43,9 +43,9 @@ Por eso "esperar" significa **esperar al próximo cambio de referencia**, que ll
 | Martes 10 | Lunes 16 | Dirección del cambio del lunes 16, a 6 días |
 | Domingo 15 | Lunes 16 | Dirección del cambio del lunes 16, a 1 día |
 
-La API también devuelve cuántos días faltan para el próximo cambio. Así el usuario decide si puede esperar con el combustible que tiene.
+La API también devuelve la fecha del próximo cambio esperado. Así el usuario decide si puede esperar con el combustible que tiene.
 
-Antes de entrenar hay que confirmar con los datos qué día de la semana se toma como cambio. Si hay semanas con dos cambios o sin cambio, la semana se cuenta igual: la etiqueta compara el precio al inicio de la semana siguiente contra el precio de hoy.
+La etiqueta compara el precio al cierre de la semana siguiente con el de la semana observada. Si hay semanas con dos cambios o sin cambio, se aplica la misma comparación entre cierres.
 
 **Semanas.** Van de martes a lunes, como los precios de referencia del MEM, y se identifican por su martes de inicio, como en el ejemplo de la API del enunciado. Las variables de una semana usan los datos de su cierre, el lunes. Solo se usan semanas completas: si el último dato del Excel no es lunes, esos días no forman una semana nueva. La semana completa más reciente queda sin etiqueta, porque su semana siguiente es la que el modelo tiene que predecir.
 
@@ -53,8 +53,8 @@ Antes de entrenar hay que confirmar con los datos qué día de la semana se toma
 
 1. **Fuente:** `gold.features_modelo`. Junta las tres fuentes del pipeline: el Excel del MEM, el precio internacional de la EIA y los precios leídos de las fotos en `silver.precios`.
 2. **Granularidad:** una fila por semana y combustible.
-3. **Etiqueta:** dirección del cambio entre esta semana y la siguiente. Un cambio menor a Q0.10 cuenta como "se mantiene". El umbral se revisa con los datos.
-4. **Variables candidatas:** cambios de las 1 a 4 semanas anteriores, tendencia de 4 y 8 semanas, cambio del tipo de cambio, régimen fiscal y mes.
+3. **Etiqueta:** dirección del cambio entre esta semana y la siguiente. Un cambio de magnitud menor a Q0.10 cuenta como `se_mantiene`. El umbral está fijado en el código; recibirlo como parámetro del job sigue pendiente.
+4. **Variables numéricas del MEM:** cambios de las 1 a 4 semanas anteriores, tendencia de 4 y 8 semanas, cambio del tipo de cambio, mes y último cambio de cada uno de los tres combustibles. El régimen fiscal se conserva en Oro, pero no forma parte de las variables de entrada del modelo.
 5. **Variables del precio internacional,** de la EIA y convertidas a quetzales con el tipo de cambio:
    1. Cambio del precio internacional en las 3 semanas anteriores.
    2. Brecha: precio local menos internacional, comparada con su promedio de 8 semanas. Si el precio local quedó muy arriba del internacional, lo esperable es que baje.
@@ -78,7 +78,7 @@ Para saber si la mejora es real o ruido se hicieron dos pruebas de Monte Carlo:
 1. **Bootstrap por semanas,** 2,000 remuestreos: mejora de +0.016, con intervalo de 95 % de -0.023 a +0.054. En 81 % de los remuestreos el modelo con fotos es mejor.
 2. **Prueba de permutación,** 200 corridas: se barajan las variables de fotos entre semanas y se reentrena. Solo 2 % de las corridas igualan la mejora, así que p = 0.02.
 
-Conclusión: las fotos aportan información real, pero con tan pocas semanas la mejora es pequeña y su intervalo incluye el cero.
+La mejora observada es de +0.016. La permutación sugiere información predictiva bajo ese procedimiento, pero el intervalo del bootstrap incluye cero y no permite afirmar una mejora concluyente. Se necesitan más semanas fotografiadas para ampliar la evaluación.
 
 ## Cómo se evalúa
 
@@ -93,7 +93,7 @@ Conclusión: las fotos aportan información real, pero con tan pocas semanas la 
 python scripts/evaluar_modelo.py
 ```
 
-Resultado con los datos al 2026-11-12, prueba desde el 11 de noviembre de 2024:
+Resultado histórico de la prueba local con MEM y EIA al 2026-11-12, con prueba desde el 11 de noviembre de 2024. Corresponde a una configuración anterior a la versión 4 y al ajuste de la identificación semanal al martes:
 
 | Métrica | Modelo | Repetir la semana pasada |
 |---|---|---|
@@ -147,6 +147,6 @@ La lógica está en `src/gas_price/modelo.py`, en `semana_a_predecir`, `predecir
 
 ## El modelo en la API
 
-Acordado con el catedrático el 2026-11-13: la API carga el modelo `champion` descargado de Databricks y lo empaqueta en su imagen de Docker. Para predecir usa la semana más reciente de una copia de `gold.features_modelo`, con las columnas de `features.VARIABLES`. La salida debe coincidir con la fila de esa semana en `gold.predicciones`.
+Acordado con el catedrático el 2026-11-13: la API carga el modelo `champion` descargado de Databricks y lo empaqueta en su imagen de Docker. Para predecir usa la semana más reciente de una copia de `gold.features_modelo`, con las columnas de `features.VARIABLES`. La salida debe coincidir con la fila de esa semana en `gold.predicciones`. El despliegue documentado del 2026-11-17 usa la versión 4; el respaldo en `presentacion/datos/api_respaldo.js` registra esa versión, sus métricas y la coincidencia de las predicciones de los tres combustibles con Databricks.
 
 El modelo está guardado con cloudpickle. Para cargarlo hace falta la misma versión de scikit-learn con que se entrenó. El modelo descargado de MLflow trae un `requirements.txt` con esas versiones.
